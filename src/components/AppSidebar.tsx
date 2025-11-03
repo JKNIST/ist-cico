@@ -23,7 +23,7 @@ const menuItems = [
   { title: "Administration", url: "/administration", icon: UserCog },
   { title: "Måltidsplanering", url: "/maltidsplanering", icon: ClipboardList },
   { title: "Formulär", url: "/formular", icon: FileEdit, external: true },
-  { title: "Pedagogiskt arbete", url: "/pedagogiskt-arbete", icon: FolderOpen },
+  { title: "Pedagogiskt arbete", url: "/pedagogiskt-arbete", icon: FolderOpen, external: true, opensNewTab: true },
   { title: "Blogg", url: "/blogg", icon: Rss },
   { title: "Chatt", url: "/chatt", icon: MessageSquare },
   { title: "Samtalsbokningar", url: "/samtalsbokningar", icon: CalendarDays },
@@ -60,31 +60,55 @@ export function AppSidebar() {
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <NavLink
-                      to={item.url}
-                      className={({ isActive }) =>
-                        `flex items-center gap-3 ${
-                          isActive
-                            ? "bg-sidebar-accent text-sidebar-foreground font-medium"
-                            : "text-sidebar-foreground hover:bg-sidebar-accent"
-                        } transition-colors`
-                      }
-                    >
-                      <item.icon className="h-4 w-4 flex-shrink-0" />
-                      {!isCollapsed && (
-                        <>
-                          <span className="flex-1">{item.title}</span>
-                          {item.badge && (
-                            <span className="bg-white text-primary px-2 py-0.5 rounded text-xs font-medium">
-                              {item.badge}
-                            </span>
-                          )}
-                          {item.external && (
-                            <ExternalLink className="h-3 w-3 flex-shrink-0" />
-                          )}
-                        </>
-                      )}
-                    </NavLink>
+                    {item.opensNewTab ? (
+                      <a 
+                        href={item.url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-3 text-sidebar-foreground hover:bg-sidebar-accent transition-colors"
+                      >
+                        <item.icon className="h-4 w-4 flex-shrink-0" />
+                        {!isCollapsed && (
+                          <>
+                            <span className="flex-1">{item.title}</span>
+                            {item.badge && (
+                              <span className="bg-white text-primary px-2 py-0.5 rounded text-xs font-medium">
+                                {item.badge}
+                              </span>
+                            )}
+                            {item.external && (
+                              <ExternalLink className="h-3 w-3 flex-shrink-0" />
+                            )}
+                          </>
+                        )}
+                      </a>
+                    ) : (
+                      <NavLink
+                        to={item.url}
+                        className={({ isActive }) =>
+                          `flex items-center gap-3 ${
+                            isActive
+                              ? "bg-sidebar-accent text-sidebar-foreground font-medium"
+                              : "text-sidebar-foreground hover:bg-sidebar-accent"
+                          } transition-colors`
+                        }
+                      >
+                        <item.icon className="h-4 w-4 flex-shrink-0" />
+                        {!isCollapsed && (
+                          <>
+                            <span className="flex-1">{item.title}</span>
+                            {item.badge && (
+                              <span className="bg-white text-primary px-2 py-0.5 rounded text-xs font-medium">
+                                {item.badge}
+                              </span>
+                            )}
+                            {item.external && (
+                              <ExternalLink className="h-3 w-3 flex-shrink-0" />
+                            )}
+                          </>
+                        )}
+                      </NavLink>
+                    )}
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
