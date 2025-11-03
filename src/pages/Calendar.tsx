@@ -225,31 +225,6 @@ export default function Calendar() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b px-6 py-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <h1 className="text-xl font-semibold text-gray-900">Kalender</h1>
-          </div>
-          <div className="flex items-center gap-4">
-            <button className="text-sm text-gray-600 hover:text-gray-900">
-              Select Language
-            </button>
-            <button className="text-sm text-gray-600 hover:text-gray-900">
-              Blåbär, Lingon, Odon, Vill
-            </button>
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-[#2a9d8f] text-white flex items-center justify-center text-sm font-medium">
-                BO
-              </div>
-              <button className="w-8 h-8 rounded-full bg-[#2a9d8f] text-white flex items-center justify-center">
-                ?
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Calendar Controls */}
       <div className="bg-white border-b px-6 py-3">
         <div className="flex items-center justify-between">
