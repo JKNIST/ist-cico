@@ -15,8 +15,6 @@ import {
 const menuItems = [
   { title: "Start page", url: "/", icon: Home, internal: true },
   { title: "Administration", url: "/administration", icon: UserCog, external: true },
-  { title: "Blogg", url: "/blogg", icon: Rss, external: true },
-  { title: "Kontaktuppgifter", url: "/kontaktuppgifter", icon: Phone, external: true },
   { title: "Pedagogisk dokumentation", url: "/pedagogiskt-arbete/dokumentation", icon: FileText, external: true, opensNewTab: true },
 ];
 
