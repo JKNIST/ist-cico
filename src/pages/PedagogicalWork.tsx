@@ -72,21 +72,21 @@ const mockGroups: GroupData[] = [
 
 function GoalProgressGrid({ goals }: { goals: GoalProgress[] }) {
   return (
-    <div className="space-y-4 mt-4">
-      <p className="text-sm text-muted-foreground">
+    <div className="space-y-4 mt-6">
+      <p className="text-xs text-white/80">
         Summering av mål för skolåret 2025-08-01 - 2026-07-31
       </p>
       {goals.map((goal, idx) => (
         <div key={idx} className="space-y-2">
-          <p className="text-sm font-medium">{goal.category}</p>
+          <p className="text-xs font-normal text-white/90">{goal.category}</p>
           <div className="space-y-1">
             {goal.grid.map((row, rowIdx) => (
               <div key={rowIdx} className="flex gap-1">
                 {row.map((filled, colIdx) => (
                   <div
                     key={colIdx}
-                    className={`w-6 h-6 border rounded ${
-                      filled ? "bg-green-400 border-green-500" : "bg-white border-gray-300"
+                    className={`w-5 h-5 border ${
+                      filled ? "bg-[#7fb069] border-[#7fb069]" : "bg-white/20 border-white/30"
                     }`}
                   />
                 ))}
@@ -101,20 +101,20 @@ function GoalProgressGrid({ goals }: { goals: GoalProgress[] }) {
 
 export default function PedagogicalWork() {
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-secondary text-white shadow-md">
+      <header className="bg-[#4a6682] text-white shadow-sm">
         <div className="container mx-auto px-6 py-3 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="sm" className="text-white hover:bg-secondary/80">
+            <Button variant="ghost" size="sm" className="text-white hover:bg-white/10">
               <Menu className="h-5 w-5" />
             </Button>
-            <h1 className="text-lg font-semibold">Pedagogisk dokumentation</h1>
+            <h1 className="text-base font-medium">Pedagogisk dokumentation</h1>
           </div>
 
           <div className="flex items-center gap-4">
             <Select defaultValue="skogans">
-              <SelectTrigger className="w-48 bg-secondary-foreground/10 text-white border-white/20">
+              <SelectTrigger className="w-48 bg-white/10 text-white border-white/20 h-9">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -122,7 +122,7 @@ export default function PedagogicalWork() {
                 <SelectItem value="other">Other</SelectItem>
               </SelectContent>
             </Select>
-            <Button variant="ghost" size="sm" className="text-white hover:bg-secondary/80">
+            <Button variant="ghost" size="sm" className="text-white hover:bg-white/10">
               <HelpCircle className="h-5 w-5" />
             </Button>
           </div>
@@ -131,17 +131,17 @@ export default function PedagogicalWork() {
 
       {/* Version indicator */}
       <div className="container mx-auto px-6 py-2">
-        <p className="text-sm text-muted-foreground text-right">1.36-1</p>
+        <p className="text-xs text-gray-500 text-right">1.36-1</p>
       </div>
 
       {/* Content */}
       <div className="container mx-auto px-6 py-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {mockGroups.map((group, idx) => (
-            <Card key={idx} className="p-6 bg-secondary text-white">
+            <Card key={idx} className="p-6 bg-[#5b7a9b] border-0 shadow-sm">
               <div className="space-y-2">
-                <h2 className="text-xl font-bold">{group.name}</h2>
-                <p className="text-sm opacity-90">{group.childCount} child</p>
+                <h2 className="text-xl font-semibold text-white">{group.name}</h2>
+                <p className="text-sm text-white/90">{group.childCount} child</p>
               </div>
 
               <GoalProgressGrid goals={group.goals} />
