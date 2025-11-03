@@ -7,6 +7,8 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { CalendarIcon, Clock, X, Users } from "lucide-react";
 import { format } from "date-fns";
 import { sv } from "date-fns/locale";
@@ -31,6 +33,10 @@ export function AddEventDialog({ open, onOpenChange }: AddEventDialogProps) {
   const [startTime, setStartTime] = useState("14:30");
   const [endTime, setEndTime] = useState("15:00");
   const [isRecurring, setIsRecurring] = useState(false);
+  const [recurrenceFrequency, setRecurrenceFrequency] = useState("");
+  const [recurrenceInterval, setRecurrenceInterval] = useState("1");
+  const [hasRecurrenceEndDate, setHasRecurrenceEndDate] = useState(false);
+  const [recurrenceEndDate, setRecurrenceEndDate] = useState<Date>();
   const [showDepartmentDropdown, setShowDepartmentDropdown] = useState(false);
 
   const toggleDepartment = (dept: string) => {
@@ -251,9 +257,80 @@ export function AddEventDialog({ open, onOpenChange }: AddEventDialogProps) {
           </div>
 
           {/* Recurring Event */}
-          <div className="flex items-center gap-3">
-            <Switch checked={isRecurring} onCheckedChange={setIsRecurring} />
-            <Label>Är händelsen återkommande?</Label>
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <Switch checked={isRecurring} onCheckedChange={setIsRecurring} />
+              <Label>Är händelsen återkommande?</Label>
+            </div>
+
+            {/* Recurring Event Options */}
+            {isRecurring && (
+              <div className="space-y-4 pl-11">
+                {/* Upprepa */}
+                <div className="space-y-2">
+                  <Label className="text-sm">Upprepa</Label>
+                  <Select value={recurrenceFrequency} onValueChange={setRecurrenceFrequency}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Välj frekvens" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="daily">Dagligen</SelectItem>
+                      <SelectItem value="weekly">Veckovis</SelectItem>
+                      <SelectItem value="monthly">Månadsvis</SelectItem>
+                      <SelectItem value="yearly">Årligen</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Varje */}
+                <div className="space-y-2">
+                  <Label className="text-sm">Varje</Label>
+                  <Input
+                    type="number"
+                    min="1"
+                    value={recurrenceInterval}
+                    onChange={(e) => setRecurrenceInterval(e.target.value)}
+                    className="w-32"
+                  />
+                </div>
+
+                {/* Till */}
+                <div className="space-y-2">
+                  <Label className="text-sm">Till</Label>
+                  <div className="flex items-center gap-2">
+                    <Checkbox
+                      checked={hasRecurrenceEndDate}
+                      onCheckedChange={(checked) => setHasRecurrenceEndDate(checked as boolean)}
+                    />
+                    <Label className="font-normal cursor-pointer">
+                      Slutdatum för återkommande händelse
+                    </Label>
+                  </div>
+                  {hasRecurrenceEndDate && (
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="w-full justify-start text-left font-normal mt-2"
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {recurrenceEndDate ? format(recurrenceEndDate, "yyyy-MM-dd", { locale: sv }) : "Välj datum"}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={recurrenceEndDate}
+                          onSelect={(date) => date && setRecurrenceEndDate(date)}
+                          initialFocus
+                          className="pointer-events-auto"
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
