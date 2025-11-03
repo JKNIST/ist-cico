@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -64,6 +64,54 @@ export function AddEventDialog({ open, onOpenChange, mode = "add", eventData, ed
   const [recurrenceEndDate, setRecurrenceEndDate] = useState<Date | undefined>(eventData?.recurrenceRule?.endDate);
   const [selectedWeekDays, setSelectedWeekDays] = useState<string[]>(eventData?.recurrenceRule?.selectedDays || []);
   const [showDepartmentDropdown, setShowDepartmentDropdown] = useState(false);
+
+  // Sync form state when dialog opens or eventData changes
+  useEffect(() => {
+    if (open && eventData) {
+      setTitle(eventData.title || "");
+      setDescription(eventData.description || "");
+      setShareWithGuardians(eventData.shareWithGuardians !== undefined ? eventData.shareWithGuardians : true);
+      setSelectedDepartments(eventData.departments || ["Blåbär", "Lingon", "Odon", "Vildhallon", "Gråsparven", "laser kittens", "örg"]);
+      setParticipants(eventData.participants || "35");
+      setAllDay(eventData.isAllDay || false);
+      
+      // Set dates based on eventData.date (which is already adjusted by Calendar.tsx based on editScope)
+      if (eventData.date) {
+        setStartDate(eventData.date);
+        setEndDate(eventData.date);
+      }
+      
+      setStartTime(eventData.startTime || "14:30");
+      setEndTime(eventData.endTime || "15:00");
+      
+      // Set isRecurring to false for single instance edits
+      setIsRecurring(editScope === "single" ? false : (eventData.isRecurring || false));
+      
+      setRecurrenceFrequency(eventData.recurrenceRule?.frequency || "");
+      setRecurrenceInterval(String(eventData.recurrenceRule?.interval || 1));
+      setHasRecurrenceEndDate(!!eventData.recurrenceRule?.endDate);
+      setRecurrenceEndDate(eventData.recurrenceRule?.endDate);
+      setSelectedWeekDays(eventData.recurrenceRule?.selectedDays || []);
+    } else if (open && !eventData) {
+      // Reset to defaults for new event
+      setTitle("");
+      setDescription("");
+      setShareWithGuardians(true);
+      setSelectedDepartments(["Blåbär", "Lingon", "Odon", "Vildhallon", "Gråsparven", "laser kittens", "örg"]);
+      setParticipants("35");
+      setAllDay(false);
+      setStartDate(new Date(2025, 10, 3));
+      setEndDate(new Date(2025, 10, 3));
+      setStartTime("14:30");
+      setEndTime("15:00");
+      setIsRecurring(false);
+      setRecurrenceFrequency("");
+      setRecurrenceInterval("1");
+      setHasRecurrenceEndDate(false);
+      setRecurrenceEndDate(undefined);
+      setSelectedWeekDays([]);
+    }
+  }, [open, eventData, editScope]);
 
   const toggleDepartment = (dept: string) => {
     setSelectedDepartments(prev =>
