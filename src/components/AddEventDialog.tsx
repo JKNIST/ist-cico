@@ -17,26 +17,52 @@ import { cn } from "@/lib/utils";
 interface AddEventDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  mode?: "add" | "edit";
+  eventData?: {
+    id?: string;
+    title?: string;
+    description?: string;
+    date?: Date;
+    startTime?: string;
+    endTime?: string;
+    isAllDay?: boolean;
+    shareWithGuardians?: boolean;
+    departments?: string[];
+    participants?: string;
+    isRecurring?: boolean;
+    recurrenceRule?: {
+      frequency: string;
+      interval: number;
+      endDate?: Date;
+      selectedDays?: string[];
+    };
+    createdBy?: string;
+    createdAt?: Date;
+    updatedBy?: string;
+    updatedAt?: Date;
+  };
+  editScope?: "single" | "future" | "all";
 }
 
 const departments = ["Blåbär", "Lingon", "Odon", "Vildhallon", "Gråsparven", "laser kittens", "örg"];
 
-export function AddEventDialog({ open, onOpenChange }: AddEventDialogProps) {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [shareWithGuardians, setShareWithGuardians] = useState(true);
-  const [selectedDepartments, setSelectedDepartments] = useState<string[]>(["Blåbär", "Lingon", "Odon", "Vildhallon", "Gråsparven", "laser kittens", "örg"]);
-  const [participants, setParticipants] = useState("35");
-  const [allDay, setAllDay] = useState(false);
-  const [startDate, setStartDate] = useState<Date>(new Date(2025, 10, 3));
-  const [endDate, setEndDate] = useState<Date>(new Date(2025, 10, 3));
-  const [startTime, setStartTime] = useState("14:30");
-  const [endTime, setEndTime] = useState("15:00");
-  const [isRecurring, setIsRecurring] = useState(false);
-  const [recurrenceFrequency, setRecurrenceFrequency] = useState("");
-  const [recurrenceInterval, setRecurrenceInterval] = useState("1");
-  const [hasRecurrenceEndDate, setHasRecurrenceEndDate] = useState(false);
-  const [recurrenceEndDate, setRecurrenceEndDate] = useState<Date>();
+export function AddEventDialog({ open, onOpenChange, mode = "add", eventData, editScope }: AddEventDialogProps) {
+  const [title, setTitle] = useState(eventData?.title || "");
+  const [description, setDescription] = useState(eventData?.description || "");
+  const [shareWithGuardians, setShareWithGuardians] = useState(eventData?.shareWithGuardians !== undefined ? eventData.shareWithGuardians : true);
+  const [selectedDepartments, setSelectedDepartments] = useState<string[]>(eventData?.departments || ["Blåbär", "Lingon", "Odon", "Vildhallon", "Gråsparven", "laser kittens", "örg"]);
+  const [participants, setParticipants] = useState(eventData?.participants || "35");
+  const [allDay, setAllDay] = useState(eventData?.isAllDay || false);
+  const [startDate, setStartDate] = useState<Date>(eventData?.date || new Date(2025, 10, 3));
+  const [endDate, setEndDate] = useState<Date>(eventData?.date || new Date(2025, 10, 3));
+  const [startTime, setStartTime] = useState(eventData?.startTime || "14:30");
+  const [endTime, setEndTime] = useState(eventData?.endTime || "15:00");
+  const [isRecurring, setIsRecurring] = useState(editScope === "single" ? false : (eventData?.isRecurring || false));
+  const [recurrenceFrequency, setRecurrenceFrequency] = useState(eventData?.recurrenceRule?.frequency || "");
+  const [recurrenceInterval, setRecurrenceInterval] = useState(String(eventData?.recurrenceRule?.interval || 1));
+  const [hasRecurrenceEndDate, setHasRecurrenceEndDate] = useState(!!eventData?.recurrenceRule?.endDate);
+  const [recurrenceEndDate, setRecurrenceEndDate] = useState<Date | undefined>(eventData?.recurrenceRule?.endDate);
+  const [selectedWeekDays, setSelectedWeekDays] = useState<string[]>(eventData?.recurrenceRule?.selectedDays || []);
   const [showDepartmentDropdown, setShowDepartmentDropdown] = useState(false);
 
   const toggleDepartment = (dept: string) => {
@@ -49,9 +75,17 @@ export function AddEventDialog({ open, onOpenChange }: AddEventDialogProps) {
     setSelectedDepartments(prev => prev.filter(d => d !== dept));
   };
 
+  const toggleWeekDay = (day: string) => {
+    setSelectedWeekDays(prev => 
+      prev.includes(day) ? prev.filter(d => d !== day) : [...prev, day]
+    );
+  };
+
   const handleSave = () => {
     // Handle save logic here
     console.log({
+      mode,
+      editScope,
       title,
       description,
       shareWithGuardians,
@@ -62,7 +96,11 @@ export function AddEventDialog({ open, onOpenChange }: AddEventDialogProps) {
       endDate,
       startTime,
       endTime,
-      isRecurring
+      isRecurring,
+      recurrenceFrequency,
+      recurrenceInterval,
+      selectedWeekDays,
+      recurrenceEndDate
     });
     onOpenChange(false);
   };
@@ -71,7 +109,9 @@ export function AddEventDialog({ open, onOpenChange }: AddEventDialogProps) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-xl font-semibold">Lägg till händelse</DialogTitle>
+          <DialogTitle className="text-xl font-semibold">
+            {mode === "edit" ? "Redigera händelse" : "Lägg till händelse"}
+          </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6 py-4">
@@ -294,6 +334,36 @@ export function AddEventDialog({ open, onOpenChange }: AddEventDialogProps) {
                   />
                 </div>
 
+                {/* Week Days Selection for Weekly */}
+                {recurrenceFrequency === "weekly" && (
+                  <div className="space-y-2">
+                    <Label className="text-sm">Dagar</Label>
+                    <div className="flex gap-2">
+                      {[
+                        { value: "mon", label: "M" },
+                        { value: "tue", label: "T" },
+                        { value: "wed", label: "O" },
+                        { value: "thu", label: "T" },
+                        { value: "fri", label: "F" },
+                      ].map((day) => (
+                        <Button
+                          key={day.value}
+                          type="button"
+                          variant={selectedWeekDays.includes(day.value) ? "default" : "outline"}
+                          className={`w-10 h-10 p-0 ${
+                            selectedWeekDays.includes(day.value) 
+                              ? "bg-[#2a9d8f] hover:bg-[#238276]" 
+                              : ""
+                          }`}
+                          onClick={() => toggleWeekDay(day.value)}
+                        >
+                          {day.label}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 {/* Till */}
                 <div className="space-y-2">
                   <Label className="text-sm">Till</Label>
@@ -332,6 +402,16 @@ export function AddEventDialog({ open, onOpenChange }: AddEventDialogProps) {
               </div>
             )}
           </div>
+
+          {/* Metadata for Edit Mode */}
+          {mode === "edit" && eventData?.createdBy && eventData?.createdAt && (
+            <div className="pt-4 border-t space-y-1 text-xs text-muted-foreground">
+              <p>Skapad av: {eventData.createdBy} vid {format(eventData.createdAt, "yyyy-MM-dd HH:mm", { locale: sv })}</p>
+              {eventData.updatedBy && eventData.updatedAt && (
+                <p>Uppdaterad av: {eventData.updatedBy} vid {format(eventData.updatedAt, "yyyy-MM-dd HH:mm", { locale: sv })}</p>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Actions */}
