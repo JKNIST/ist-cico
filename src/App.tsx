@@ -8,6 +8,7 @@ import { AppSidebar } from "@/components/AppSidebar";
 import Overview from "./pages/Overview";
 import PedagogicalWork from "./pages/PedagogicalWork";
 import PedagogicalWorkLanding from "./pages/PedagogicalWorkLanding";
+import Calendar from "./pages/Calendar";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -36,7 +37,7 @@ const App = () => (
           <Route path="/placeringar" element={<AppLayout><div className="p-6">Placeringar</div></AppLayout>} />
           <Route path="/utskrifter" element={<AppLayout><div className="p-6">Utskrifter</div></AppLayout>} />
           <Route path="/analys" element={<AppLayout><div className="p-6">Analys</div></AppLayout>} />
-          <Route path="/kalender" element={<AppLayout><div className="p-6">Kalender</div></AppLayout>} />
+          <Route path="/kalender" element={<Calendar />} />
           <Route path="/administration" element={<AppLayout><div className="p-6">Administration</div></AppLayout>} />
           <Route path="/maltidsplanering" element={<AppLayout><div className="p-6">Måltidsplanering</div></AppLayout>} />
           <Route path="/formular" element={<AppLayout><div className="p-6">Formulär</div></AppLayout>} />
