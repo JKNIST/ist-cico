@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, addMonths, subMonths, startOfWeek, endOfWeek, isToday } from "date-fns";
 import { sv } from "date-fns/locale";
+import { AddEventDialog } from "@/components/AddEventDialog";
 
 interface CalendarEvent {
   id: string;
@@ -23,6 +24,7 @@ const mockEvents: CalendarEvent[] = [
 export default function Calendar() {
   const [currentDate, setCurrentDate] = useState(new Date(2025, 10, 3)); // November 2025
   const [viewMode, setViewMode] = useState<"day" | "week" | "month">("month");
+  const [isAddEventOpen, setIsAddEventOpen] = useState(false);
 
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);
@@ -172,11 +174,17 @@ export default function Calendar() {
 
         {/* Add Event Button */}
         <div className="mt-6 flex justify-end">
-          <Button className="bg-[#2a9d8f] hover:bg-[#238276] text-white">
+          <Button 
+            onClick={() => setIsAddEventOpen(true)}
+            className="bg-[#2a9d8f] hover:bg-[#238276] text-white"
+          >
             LÄGG TILL HÄNDELSE
           </Button>
         </div>
       </div>
+
+      {/* Add Event Dialog */}
+      <AddEventDialog open={isAddEventOpen} onOpenChange={setIsAddEventOpen} />
     </div>
   );
 }
