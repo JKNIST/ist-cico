@@ -7,6 +7,7 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import Overview from "./pages/Overview";
 import PedagogicalWork from "./pages/PedagogicalWork";
+import PedagogicalWorkLanding from "./pages/PedagogicalWorkLanding";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,7 +29,8 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<AppLayout><Overview /></AppLayout>} />
-          <Route path="/pedagogiskt-arbete" element={<PedagogicalWork />} />
+          <Route path="/pedagogiskt-arbete" element={<PedagogicalWorkLanding />} />
+          <Route path="/pedagogiskt-arbete/dokumentation" element={<PedagogicalWork />} />
           <Route path="/aktuellt" element={<AppLayout><div className="p-6">Aktuellt</div></AppLayout>} />
           <Route path="/schema" element={<AppLayout><div className="p-6">Schema</div></AppLayout>} />
           <Route path="/placeringar" element={<AppLayout><div className="p-6">Placeringar</div></AppLayout>} />
