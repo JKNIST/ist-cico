@@ -299,8 +299,14 @@ export function AddEventDialog({ open, onOpenChange, mode = "add", eventData, ed
           {/* Recurring Event */}
           <div className="space-y-4">
             <div className="flex items-center gap-3">
-              <Switch checked={isRecurring} onCheckedChange={setIsRecurring} />
-              <Label>Är händelsen återkommande?</Label>
+              <Switch 
+                checked={isRecurring} 
+                onCheckedChange={setIsRecurring}
+                disabled={editScope === "single"}
+              />
+              <Label className={editScope === "single" ? "text-muted-foreground" : ""}>
+                Är händelsen återkommande?
+              </Label>
             </div>
 
             {/* Recurring Event Options */}
