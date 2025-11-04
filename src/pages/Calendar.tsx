@@ -357,6 +357,9 @@ export default function Calendar() {
             <Button variant="ghost" size="sm" onClick={goToNextMonth}>
               <ChevronRight className="h-4 w-4" />
             </Button>
+            <h2 className="text-lg font-semibold text-gray-900 ml-2">
+              {format(currentDate, "MMMM yyyy", { locale: sv })}
+            </h2>
           </div>
 
           <div className="flex items-center gap-2">
