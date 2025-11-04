@@ -7,30 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { TemporarySchemaPeriodDialog } from "@/components/TemporarySchemaPeriodDialog";
 import { ClosurePeriodDialog } from "@/components/ClosurePeriodDialog";
-
-interface TemporarySchemaPeriod {
-  id: string;
-  title: string;
-  createdBy: string;
-  startDate: Date;
-  endDate: Date;
-  departments: string[];
-  activateDate: Date;
-  deadline: Date;
-  submitted: number;
-  remaining: number;
-  limitedCapacityDays: Date[];
-}
-
-interface ClosurePeriod {
-  id: string;
-  title: string;
-  startDate: Date;
-  endDate: Date;
-  departments: string[];
-  publishDate: Date;
-  isArchived: boolean;
-}
+import { TemporarySchemaPeriod, ClosurePeriod } from "@/types/administration";
 
 const mockPeriods: TemporarySchemaPeriod[] = [
   {

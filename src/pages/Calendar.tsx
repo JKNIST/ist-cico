@@ -6,6 +6,10 @@ import { sv } from "date-fns/locale";
 import { AddEventDialog } from "@/components/AddEventDialog";
 import { ViewEventDialog } from "@/components/ViewEventDialog";
 import { RecurringActionDialog } from "@/components/RecurringActionDialog";
+import { TemporarySchemaPeriodDialog } from "@/components/TemporarySchemaPeriodDialog";
+import { ClosurePeriodDialog } from "@/components/ClosurePeriodDialog";
+import { AdministrativeEvent, TemporarySchemaPeriod, ClosurePeriod } from "@/types/administration";
+import { cn } from "@/lib/utils";
 
 interface CalendarEvent {
   id: string;
@@ -131,6 +135,84 @@ const generateRecurringInstances = (events: CalendarEvent[]): CalendarEvent[] =>
 
 const allEvents = generateRecurringInstances(mockEvents);
 
+// Mock administrative data - will be shared with Administration.tsx later
+const mockTemporaryPeriods: TemporarySchemaPeriod[] = [
+  {
+    id: "1",
+    title: "Jul & Nyår 25/26",
+    createdBy: "Beatrice Olofson",
+    startDate: new Date(2025, 11, 22),
+    endDate: new Date(2026, 0, 4),
+    departments: ["Gräsparven", "laser kittens", "örg"],
+    activateDate: new Date(2025, 10, 15),
+    deadline: new Date(2025, 11, 1),
+    submitted: 0,
+    remaining: 29,
+    limitedCapacityDays: [
+      new Date(2025, 11, 24),
+      new Date(2025, 11, 25),
+      new Date(2025, 11, 31),
+    ],
+  },
+];
+
+const mockClosurePeriods: ClosurePeriod[] = [
+  {
+    id: "1",
+    title: "Planeringsdag",
+    startDate: new Date(2025, 11, 18),
+    endDate: new Date(2025, 11, 18),
+    departments: ["örg", "Gräsparven", "laser kittens"],
+    publishDate: new Date(2025, 10, 4),
+    isArchived: false,
+  },
+];
+
+// Generate administrative events from periods
+const generateAdministrativeEvents = (
+  temporaryPeriods: TemporarySchemaPeriod[],
+  closurePeriods: ClosurePeriod[]
+): AdministrativeEvent[] => {
+  const events: AdministrativeEvent[] = [];
+  
+  // Add limited capacity days
+  temporaryPeriods.forEach(period => {
+    period.limitedCapacityDays.forEach(day => {
+      events.push({
+        type: 'limited-capacity',
+        date: day,
+        title: 'Begränsad kapacitet',
+        sourceId: period.id,
+        color: '#f59e0b',
+        priority: 1
+      });
+    });
+  });
+  
+  // Add closure periods
+  closurePeriods.forEach(period => {
+    const days = eachDayOfInterval({
+      start: period.startDate,
+      end: period.endDate
+    });
+    
+    days.forEach(day => {
+      events.push({
+        type: 'closure',
+        date: day,
+        title: period.title,
+        sourceId: period.id,
+        color: '#ef4444',
+        priority: 2
+      });
+    });
+  });
+  
+  return events;
+};
+
+const administrativeEvents = generateAdministrativeEvents(mockTemporaryPeriods, mockClosurePeriods);
+
 export default function Calendar() {
   const [currentDate, setCurrentDate] = useState(new Date(2025, 10, 3)); // November 2025
   const [viewMode, setViewMode] = useState<"day" | "week" | "month">("month");
@@ -141,6 +223,14 @@ export default function Calendar() {
   const [recurringActionType, setRecurringActionType] = useState<"delete" | "edit">("edit");
   const [editEventData, setEditEventData] = useState<CalendarEvent | null>(null);
   const [editScope, setEditScope] = useState<"single" | "future" | "all">("single");
+  
+  // Administrative periods state
+  const [temporaryPeriods] = useState<TemporarySchemaPeriod[]>(mockTemporaryPeriods);
+  const [closurePeriods] = useState<ClosurePeriod[]>(mockClosurePeriods);
+  const [isTemporaryPeriodDialogOpen, setIsTemporaryPeriodDialogOpen] = useState(false);
+  const [isClosurePeriodDialogOpen, setIsClosurePeriodDialogOpen] = useState(false);
+  const [selectedTemporaryPeriod, setSelectedTemporaryPeriod] = useState<TemporarySchemaPeriod | null>(null);
+  const [selectedClosurePeriod, setSelectedClosurePeriod] = useState<ClosurePeriod | null>(null);
 
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);
@@ -155,12 +245,36 @@ export default function Calendar() {
   const goToToday = () => setCurrentDate(new Date());
 
   const getEventsForDay = (day: Date) => {
-    return allEvents.filter(event => isSameDay(event.date, day));
+    const regularEvents = allEvents.filter(event => isSameDay(event.date, day));
+    const adminEvents = administrativeEvents.filter(event => isSameDay(event.date, day));
+    
+    // Combine and sort - administrative events first
+    return [...adminEvents, ...regularEvents].sort((a, b) => 
+      ('priority' in b ? b.priority : 0) - ('priority' in a ? a.priority : 0)
+    );
   };
 
-  const handleEventClick = (event: CalendarEvent) => {
-    setSelectedEvent(event);
-    setIsViewEventOpen(true);
+  const handleEventClick = (event: CalendarEvent | AdministrativeEvent) => {
+    if ('type' in event) {
+      // It's an administrative event
+      if (event.type === 'limited-capacity') {
+        const period = temporaryPeriods.find(p => p.id === event.sourceId);
+        if (period) {
+          setSelectedTemporaryPeriod(period);
+          setIsTemporaryPeriodDialogOpen(true);
+        }
+      } else if (event.type === 'closure') {
+        const period = closurePeriods.find(p => p.id === event.sourceId);
+        if (period) {
+          setSelectedClosurePeriod(period);
+          setIsClosurePeriodDialogOpen(true);
+        }
+      }
+    } else {
+      // Regular event
+      setSelectedEvent(event);
+      setIsViewEventOpen(true);
+    }
   };
 
   const handleDeleteEvent = () => {
@@ -312,16 +426,27 @@ export default function Calendar() {
                     )}
                   </div>
                   <div className="space-y-1">
-                    {events.map((event) => (
-                      <div
-                        key={event.id}
-                        className="text-xs p-1 rounded text-white truncate cursor-pointer hover:opacity-90 transition-opacity"
-                        style={{ backgroundColor: event.color }}
-                        onClick={() => handleEventClick(event)}
-                      >
-                        {event.title}
-                      </div>
-                    ))}
+                    {events.map((event) => {
+                      const isAdminEvent = 'type' in event;
+                      const adminEvent = isAdminEvent ? event as AdministrativeEvent : null;
+                      
+                      return (
+                        <div
+                          key={'id' in event ? event.id : `${adminEvent?.type}-${adminEvent?.sourceId}-${format(event.date, 'yyyy-MM-dd')}`}
+                          className={cn(
+                            "text-xs p-1 rounded text-white truncate cursor-pointer hover:opacity-90 transition-opacity",
+                            adminEvent?.type === 'limited-capacity' && "border border-dashed border-white/60",
+                            adminEvent?.type === 'closure' && "font-semibold"
+                          )}
+                          style={{ backgroundColor: event.color }}
+                          onClick={() => handleEventClick(event)}
+                        >
+                          {adminEvent?.type === 'limited-capacity' && '⚠️ '}
+                          {adminEvent?.type === 'closure' && '🚫 '}
+                          {event.title}
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               );
@@ -364,6 +489,22 @@ export default function Calendar() {
         onOpenChange={setIsRecurringActionOpen}
         actionType={recurringActionType}
         onConfirm={handleRecurringActionConfirm}
+      />
+
+      {/* Temporary Schema Period Dialog */}
+      <TemporarySchemaPeriodDialog
+        open={isTemporaryPeriodDialogOpen}
+        onOpenChange={setIsTemporaryPeriodDialogOpen}
+        period={selectedTemporaryPeriod}
+        onSave={() => setIsTemporaryPeriodDialogOpen(false)}
+      />
+
+      {/* Closure Period Dialog */}
+      <ClosurePeriodDialog
+        open={isClosurePeriodDialogOpen}
+        onOpenChange={setIsClosurePeriodDialogOpen}
+        period={selectedClosurePeriod}
+        onSave={() => setIsClosurePeriodDialogOpen(false)}
       />
     </div>
   );
