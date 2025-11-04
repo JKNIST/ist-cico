@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, AlertTriangle, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, addMonths, subMonths, startOfWeek, endOfWeek, isToday, addDays, isBefore, isAfter } from "date-fns";
 import { sv } from "date-fns/locale";
@@ -434,16 +434,20 @@ export default function Calendar() {
                         <div
                           key={'id' in event ? event.id : `${adminEvent?.type}-${adminEvent?.sourceId}-${format(event.date, 'yyyy-MM-dd')}`}
                           className={cn(
-                            "text-xs p-1 rounded text-white truncate cursor-pointer hover:opacity-90 transition-opacity",
-                            adminEvent?.type === 'limited-capacity' && "border border-dashed border-white/60",
-                            adminEvent?.type === 'closure' && "font-semibold"
+                            "text-xs p-1.5 rounded text-white cursor-pointer hover:opacity-90 transition-opacity flex items-center gap-1.5",
+                            adminEvent?.type === 'limited-capacity' && "border-l-4 border-l-amber-600",
+                            adminEvent?.type === 'closure' && "font-semibold border-l-4 border-l-red-700"
                           )}
                           style={{ backgroundColor: event.color }}
                           onClick={() => handleEventClick(event)}
                         >
-                          {adminEvent?.type === 'limited-capacity' && '⚠️ '}
-                          {adminEvent?.type === 'closure' && '🚫 '}
-                          {event.title}
+                          {adminEvent?.type === 'limited-capacity' && (
+                            <AlertTriangle className="h-3 w-3 flex-shrink-0" />
+                          )}
+                          {adminEvent?.type === 'closure' && (
+                            <XCircle className="h-3 w-3 flex-shrink-0" />
+                          )}
+                          <span className="truncate flex-1">{event.title}</span>
                         </div>
                       );
                     })}
