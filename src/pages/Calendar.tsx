@@ -442,13 +442,13 @@ export default function Calendar() {
                           onClick={() => handleEventClick(event)}
                         >
                           {adminEvent?.type === 'limited-capacity' && (
-                            <div className="bg-white/20 rounded-sm p-0.5 flex items-center justify-center">
-                              <AlertTriangle className="h-3 w-3 flex-shrink-0" />
+                            <div className="bg-white rounded-sm p-0.5 flex items-center justify-center">
+                              <AlertTriangle className="h-3 w-3 flex-shrink-0 text-amber-600" />
                             </div>
                           )}
                           {adminEvent?.type === 'closure' && (
-                            <div className="bg-white/20 rounded-sm p-0.5 flex items-center justify-center">
-                              <XCircle className="h-3 w-3 flex-shrink-0" />
+                            <div className="bg-white rounded-sm p-0.5 flex items-center justify-center">
+                              <XCircle className="h-3 w-3 flex-shrink-0 text-red-600" />
                             </div>
                           )}
                           <span className="truncate flex-1">{event.title}</span>
