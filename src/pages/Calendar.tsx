@@ -434,7 +434,7 @@ export default function Calendar() {
                         <div
                           key={'id' in event ? event.id : `${adminEvent?.type}-${adminEvent?.sourceId}-${format(event.date, 'yyyy-MM-dd')}`}
                           className={cn(
-                            "text-xs p-1.5 rounded text-white cursor-pointer hover:opacity-90 transition-opacity flex items-center gap-1.5",
+                            "text-xs p-1.5 rounded text-white cursor-pointer hover:opacity-90 transition-opacity flex items-center gap-2",
                             adminEvent?.type === 'limited-capacity' && "border-l-4 border-l-amber-600",
                             adminEvent?.type === 'closure' && "font-semibold border-l-4 border-l-red-700"
                           )}
@@ -442,10 +442,14 @@ export default function Calendar() {
                           onClick={() => handleEventClick(event)}
                         >
                           {adminEvent?.type === 'limited-capacity' && (
-                            <AlertTriangle className="h-3 w-3 flex-shrink-0" />
+                            <div className="bg-white rounded p-0.5 flex items-center justify-center">
+                              <AlertTriangle className="h-4 w-4 flex-shrink-0 text-amber-600" />
+                            </div>
                           )}
                           {adminEvent?.type === 'closure' && (
-                            <XCircle className="h-3 w-3 flex-shrink-0" />
+                            <div className="bg-white rounded p-0.5 flex items-center justify-center">
+                              <XCircle className="h-4 w-4 flex-shrink-0 text-red-600" />
+                            </div>
                           )}
                           <span className="truncate flex-1">{event.title}</span>
                         </div>
