@@ -58,7 +58,7 @@ export function TemporarySchemaPeriodDialog({
   const [activateDate, setActivateDate] = useState<Date>();
   const [deadline, setDeadline] = useState<Date>();
   const [limitedCapacityDays, setLimitedCapacityDays] = useState<Date[]>([]);
-  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [currentMonth, setCurrentMonth] = useState(period?.startDate || new Date());
 
   useEffect(() => {
     if (period) {
@@ -69,6 +69,7 @@ export function TemporarySchemaPeriodDialog({
       setActivateDate(period.activateDate);
       setDeadline(period.deadline);
       setLimitedCapacityDays(period.limitedCapacityDays);
+      setCurrentMonth(period.startDate); // Show calendar for the period's start month
     } else {
       setTitle("");
       setSelectedDepartments([]);
@@ -77,6 +78,7 @@ export function TemporarySchemaPeriodDialog({
       setActivateDate(undefined);
       setDeadline(undefined);
       setLimitedCapacityDays([]);
+      setCurrentMonth(new Date()); // Reset to current month for new periods
     }
   }, [period, open]);
 
