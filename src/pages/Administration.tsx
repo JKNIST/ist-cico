@@ -1,9 +1,12 @@
 import { useState } from "react";
-import { Calendar, Plus, Pencil, Trash2, ChevronDown } from "lucide-react";
+import { Calendar, Plus, Pencil, Trash2, ChevronDown, ChevronUp } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { TemporarySchemaPeriodDialog } from "@/components/TemporarySchemaPeriodDialog";
+import { ClosurePeriodDialog } from "@/components/ClosurePeriodDialog";
 
 interface TemporarySchemaPeriod {
   id: string;
@@ -19,6 +22,16 @@ interface TemporarySchemaPeriod {
   limitedCapacityDays: Date[];
 }
 
+interface ClosurePeriod {
+  id: string;
+  title: string;
+  startDate: Date;
+  endDate: Date;
+  departments: string[];
+  publishDate: Date;
+  isArchived: boolean;
+}
+
 const mockPeriods: TemporarySchemaPeriod[] = [
   {
     id: "1",
@@ -31,7 +44,23 @@ const mockPeriods: TemporarySchemaPeriod[] = [
     deadline: new Date(2025, 11, 1),
     submitted: 0,
     remaining: 29,
-    limitedCapacityDays: [],
+    limitedCapacityDays: [
+      new Date(2025, 11, 24),
+      new Date(2025, 11, 25),
+      new Date(2025, 11, 31),
+    ],
+  },
+];
+
+const mockClosurePeriods: ClosurePeriod[] = [
+  {
+    id: "1",
+    title: "Planeringsdag",
+    startDate: new Date(2025, 11, 18),
+    endDate: new Date(2025, 11, 18),
+    departments: ["örg", "Gräsparven", "laser kittens"],
+    publishDate: new Date(2025, 10, 4),
+    isArchived: false,
   },
 ];
 
@@ -39,6 +68,12 @@ export default function Administration() {
   const [periods, setPeriods] = useState<TemporarySchemaPeriod[]>(mockPeriods);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingPeriod, setEditingPeriod] = useState<TemporarySchemaPeriod | null>(null);
+
+  const [closurePeriods, setClosurePeriods] = useState<ClosurePeriod[]>(mockClosurePeriods);
+  const [closureDialogOpen, setClosureDialogOpen] = useState(false);
+  const [editingClosurePeriod, setEditingClosurePeriod] = useState<ClosurePeriod | null>(null);
+  const [activePeriodsOpen, setActivePeriodsOpen] = useState(true);
+  const [archivedPeriodsOpen, setArchivedPeriodsOpen] = useState(false);
 
   const handleCreateNew = () => {
     setEditingPeriod(null);
@@ -61,6 +96,29 @@ export default function Administration() {
       setPeriods([...periods, { ...period, id: Date.now().toString() }]);
     }
     setDialogOpen(false);
+  };
+
+  const handleCreateNewClosure = () => {
+    setEditingClosurePeriod(null);
+    setClosureDialogOpen(true);
+  };
+
+  const handleEditClosure = (period: ClosurePeriod) => {
+    setEditingClosurePeriod(period);
+    setClosureDialogOpen(true);
+  };
+
+  const handleDeleteClosure = (id: string) => {
+    setClosurePeriods(closurePeriods.filter((p) => p.id !== id));
+  };
+
+  const handleSaveClosure = (period: ClosurePeriod) => {
+    if (editingClosurePeriod) {
+      setClosurePeriods(closurePeriods.map((p) => (p.id === period.id ? period : p)));
+    } else {
+      setClosurePeriods([...closurePeriods, { ...period, id: Date.now().toString() }]);
+    }
+    setClosureDialogOpen(false);
   };
 
   const formatDate = (date: Date) => {
@@ -173,9 +231,109 @@ export default function Administration() {
             </div>
           </TabsContent>
 
-          <TabsContent value="closures">
-            <div className="text-center py-12 text-muted-foreground">
-              Stängningsperioder kommer snart
+          <TabsContent value="closures" className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Calendar className="h-5 w-5 text-primary" />
+                <h2 className="text-lg font-semibold">Stängningsperioder</h2>
+              </div>
+              <Button onClick={handleCreateNewClosure} className="bg-primary hover:bg-primary/90 gap-2">
+                <Plus className="h-4 w-4" />
+                Skapa stängningsperiod
+              </Button>
+            </div>
+
+            <div className="space-y-4">
+              <Collapsible open={activePeriodsOpen} onOpenChange={setActivePeriodsOpen}>
+                <Card className="bg-card">
+                  <CollapsibleTrigger className="w-full">
+                    <div className="flex items-center justify-between p-4">
+                      <div className="flex items-center gap-2">
+                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                        <span className="font-medium">Stängningsperioder</span>
+                        <Badge variant="secondary" className="ml-2">
+                          {closurePeriods.filter((p) => !p.isArchived).length}
+                        </Badge>
+                      </div>
+                      {activePeriodsOpen ? (
+                        <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                      ) : (
+                        <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                      )}
+                    </div>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <div className="border-t">
+                      {closurePeriods
+                        .filter((p) => !p.isArchived)
+                        .map((period) => (
+                          <div key={period.id} className="p-6 space-y-3">
+                            <h3 className="font-semibold">{period.title}</h3>
+                            <p className="text-sm">
+                              {formatDate(period.startDate)}
+                              {period.endDate.getTime() !== period.startDate.getTime() &&
+                                ` - ${formatDate(period.endDate)}`}
+                            </p>
+                            <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-1 text-sm text-muted-foreground border border-input rounded px-3 py-1">
+                                {period.departments.join(", ")}
+                                <ChevronDown className="h-3 w-3 ml-1" />
+                              </div>
+                            </div>
+                            <p className="text-sm text-muted-foreground">
+                              Publicering: {formatDate(period.publishDate)}
+                            </p>
+                            <div className="flex items-center gap-2 pt-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleDeleteClosure(period.id)}
+                                className="gap-2"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                                Ta bort
+                              </Button>
+                              <Button
+                                size="sm"
+                                onClick={() => handleEditClosure(period)}
+                                className="bg-primary hover:bg-primary/90 gap-2"
+                              >
+                                <Pencil className="h-4 w-4" />
+                                Redigera
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                    </div>
+                  </CollapsibleContent>
+                </Card>
+              </Collapsible>
+
+              <Collapsible open={archivedPeriodsOpen} onOpenChange={setArchivedPeriodsOpen}>
+                <Card className="bg-card">
+                  <CollapsibleTrigger className="w-full">
+                    <div className="flex items-center justify-between p-4">
+                      <div className="flex items-center gap-2">
+                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                        <span className="font-medium">Tidigare stängningsperioder</span>
+                        <Badge variant="secondary" className="ml-2">
+                          {closurePeriods.filter((p) => p.isArchived).length}
+                        </Badge>
+                      </div>
+                      {archivedPeriodsOpen ? (
+                        <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                      ) : (
+                        <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                      )}
+                    </div>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <div className="border-t p-6">
+                      <p className="text-sm text-muted-foreground">Inga tidigare stängningsperioder</p>
+                    </div>
+                  </CollapsibleContent>
+                </Card>
+              </Collapsible>
             </div>
           </TabsContent>
 
@@ -197,6 +355,13 @@ export default function Administration() {
           onOpenChange={setDialogOpen}
           period={editingPeriod}
           onSave={handleSave}
+        />
+
+        <ClosurePeriodDialog
+          open={closureDialogOpen}
+          onOpenChange={setClosureDialogOpen}
+          period={editingClosurePeriod}
+          onSave={handleSaveClosure}
         />
       </div>
     </div>
