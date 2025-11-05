@@ -12,9 +12,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { CalendarIcon, Clock, X, Users } from "lucide-react";
 import { format } from "date-fns";
-import { sv } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { CalendarEvent, EventCategory } from "@/types/administration";
+import { useTranslation } from "react-i18next";
+import { useLocale } from "@/hooks/useLocale";
 
 interface AddEventDialogProps {
   open: boolean;
@@ -27,6 +28,8 @@ interface AddEventDialogProps {
 const departments = ["Blåbär", "Lingon", "Odon", "Vildhallon", "Gråsparven", "laser kittens", "örg"];
 
 export function AddEventDialog({ open, onOpenChange, mode = "add", eventData, editScope }: AddEventDialogProps) {
+  const { t } = useTranslation();
+  const locale = useLocale();
   const [category, setCategory] = useState<EventCategory>(eventData?.category || EventCategory.EXTERNAL);
   const [title, setTitle] = useState(eventData?.title || "");
   const [description, setDescription] = useState(eventData?.description || "");
@@ -142,22 +145,22 @@ export function AddEventDialog({ open, onOpenChange, mode = "add", eventData, ed
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold">
-            {mode === "edit" ? "Redigera händelse" : "Lägg till händelse"}
+            {mode === "edit" ? t('eventDialog.editEvent') : t('eventDialog.addEvent')}
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6 py-4">
           {/* Category Selection */}
           <div className="space-y-3">
-            <Label className="text-sm font-semibold">Kategori</Label>
+            <Label className="text-sm font-semibold">{t('eventDialog.category')}</Label>
             <RadioGroup value={category} onValueChange={(value) => setCategory(value as EventCategory)}>
               <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-50 transition-colors">
                 <RadioGroupItem value={EventCategory.EXTERNAL} id="external" />
                 <Label htmlFor="external" className="flex items-center gap-2 cursor-pointer flex-1">
                   <div className="w-3 h-3 rounded bg-green-500 flex-shrink-0" />
                   <div>
-                    <div className="font-medium">Extern aktivitet</div>
-                    <div className="text-xs text-muted-foreground">Delas med vårdnadshavare</div>
+                    <div className="font-medium">{t('eventDialog.externalActivity')}</div>
+                    <div className="text-xs text-muted-foreground">{t('eventDialog.sharedWithGuardians')}</div>
                   </div>
                 </Label>
               </div>
@@ -166,8 +169,8 @@ export function AddEventDialog({ open, onOpenChange, mode = "add", eventData, ed
                 <Label htmlFor="internal" className="flex items-center gap-2 cursor-pointer flex-1">
                   <div className="w-3 h-3 rounded bg-blue-500 flex-shrink-0" />
                   <div>
-                    <div className="font-medium">Intern aktivitet</div>
-                    <div className="text-xs text-muted-foreground">Endast för personal</div>
+                    <div className="font-medium">{t('eventDialog.internalActivity')}</div>
+                    <div className="text-xs text-muted-foreground">{t('eventDialog.staffOnly')}</div>
                   </div>
                 </Label>
               </div>
@@ -177,7 +180,7 @@ export function AddEventDialog({ open, onOpenChange, mode = "add", eventData, ed
           {/* Title */}
           <div className="space-y-2">
             <Input
-              placeholder="Titel"
+              placeholder={t('eventDialog.title')}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               className="w-full"
@@ -187,7 +190,7 @@ export function AddEventDialog({ open, onOpenChange, mode = "add", eventData, ed
           {/* Description */}
           <div className="space-y-2">
             <Textarea
-              placeholder="Beskrivning"
+              placeholder={t('eventDialog.description')}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               className="w-full min-h-[100px]"
@@ -285,7 +288,7 @@ export function AddEventDialog({ open, onOpenChange, mode = "add", eventData, ed
                     className="w-full justify-start text-left font-normal"
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {format(startDate, "yyyy-MM-dd", { locale: sv })}
+                    {format(startDate, "yyyy-MM-dd", { locale })}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
@@ -310,7 +313,7 @@ export function AddEventDialog({ open, onOpenChange, mode = "add", eventData, ed
                     className="w-full justify-start text-left font-normal"
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {format(endDate, "yyyy-MM-dd", { locale: sv })}
+                    {format(endDate, "yyyy-MM-dd", { locale })}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
@@ -392,7 +395,7 @@ export function AddEventDialog({ open, onOpenChange, mode = "add", eventData, ed
 
                 {/* Varje */}
                 <div className="space-y-2">
-                  <Label className="text-sm">Varje</Label>
+                  <Label className="text-sm">{t('eventDialog.every')}</Label>
                   <Input
                     type="number"
                     min="1"
@@ -405,14 +408,14 @@ export function AddEventDialog({ open, onOpenChange, mode = "add", eventData, ed
                 {/* Week Days Selection for Weekly */}
                 {recurrenceFrequency === "weekly" && (
                   <div className="space-y-2">
-                    <Label className="text-sm">Dagar</Label>
+                    <Label className="text-sm">{t('eventDialog.days')}</Label>
                     <div className="flex gap-2">
                       {[
-                        { value: "mon", label: "M" },
-                        { value: "tue", label: "T" },
-                        { value: "wed", label: "O" },
-                        { value: "thu", label: "T" },
-                        { value: "fri", label: "F" },
+                        { value: "mon", label: t('eventDialog.shortWeekdays.mon') },
+                        { value: "tue", label: t('eventDialog.shortWeekdays.tue') },
+                        { value: "wed", label: t('eventDialog.shortWeekdays.wed') },
+                        { value: "thu", label: t('eventDialog.shortWeekdays.thu') },
+                        { value: "fri", label: t('eventDialog.shortWeekdays.fri') },
                       ].map((day) => (
                         <Button
                           key={day.value}
@@ -452,7 +455,7 @@ export function AddEventDialog({ open, onOpenChange, mode = "add", eventData, ed
                           className="w-full justify-start text-left font-normal mt-2"
                         >
                           <CalendarIcon className="mr-2 h-4 w-4" />
-                          {recurrenceEndDate ? format(recurrenceEndDate, "yyyy-MM-dd", { locale: sv }) : "Välj datum"}
+                          {recurrenceEndDate ? format(recurrenceEndDate, "yyyy-MM-dd", { locale }) : t('eventDialog.onDate')}
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
@@ -474,9 +477,9 @@ export function AddEventDialog({ open, onOpenChange, mode = "add", eventData, ed
           {/* Metadata for Edit Mode */}
           {mode === "edit" && eventData?.createdBy && eventData?.createdAt && (
             <div className="pt-4 border-t space-y-1 text-xs text-muted-foreground">
-              <p>Skapad av: {eventData.createdBy} vid {format(eventData.createdAt, "yyyy-MM-dd HH:mm", { locale: sv })}</p>
+              <p>{t('eventDialog.createdBy')}: {eventData.createdBy} {t('eventDialog.at')} {format(eventData.createdAt, "yyyy-MM-dd HH:mm", { locale })}</p>
               {eventData.updatedAt && (
-                <p>Senast uppdaterad: {format(eventData.updatedAt, "yyyy-MM-dd HH:mm", { locale: sv })}</p>
+                <p>{t('eventDialog.lastUpdated')}: {format(eventData.updatedAt, "yyyy-MM-dd HH:mm", { locale })}</p>
               )}
             </div>
           )}
@@ -489,13 +492,13 @@ export function AddEventDialog({ open, onOpenChange, mode = "add", eventData, ed
             onClick={() => onOpenChange(false)}
             className="text-[#2a9d8f] hover:bg-[#2a9d8f]/10"
           >
-            AVBRYT
+            {t('eventDialog.cancel')}
           </Button>
           <Button
             onClick={handleSave}
             className="bg-[#2a9d8f] hover:bg-[#238276] text-white"
           >
-            SPARA
+            {t('eventDialog.save')}
           </Button>
         </div>
       </DialogContent>

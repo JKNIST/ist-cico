@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import { useTranslation } from "react-i18next";
 
 interface RecurringActionDialogProps {
   open: boolean;
@@ -12,6 +13,7 @@ interface RecurringActionDialogProps {
 }
 
 export function RecurringActionDialog({ open, onOpenChange, actionType, onConfirm }: RecurringActionDialogProps) {
+  const { t } = useTranslation();
   const [selectedScope, setSelectedScope] = useState<"single" | "future" | "all">("single");
 
   const handleConfirm = () => {
@@ -19,8 +21,8 @@ export function RecurringActionDialog({ open, onOpenChange, actionType, onConfir
     onOpenChange(false);
   };
 
-  const title = actionType === "delete" ? "Ta bort val" : "Redigera val";
-  const actionLabel = actionType === "delete" ? "TA BORT" : "FORTSÄTT";
+  const title = actionType === "delete" ? t('recurringDialog.title').replace('Redigera', 'Ta bort') : t('recurringDialog.title');
+  const actionLabel = actionType === "delete" ? t('eventDialog.delete') : t('eventDialog.save');
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -30,23 +32,24 @@ export function RecurringActionDialog({ open, onOpenChange, actionType, onConfir
         </DialogHeader>
 
         <div className="space-y-4 py-4">
+          <p className="text-sm text-muted-foreground">{t('recurringDialog.description')}</p>
           <RadioGroup value={selectedScope} onValueChange={(value) => setSelectedScope(value as "single" | "future" | "all")}>
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="single" id="single" />
               <Label htmlFor="single" className="font-normal cursor-pointer">
-                Bara denna händelsen
+                {t('recurringDialog.thisInstance')}
               </Label>
             </div>
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="future" id="future" />
               <Label htmlFor="future" className="font-normal cursor-pointer">
-                Denna och framtida händelser
+                {t('recurringDialog.allInstances')}
               </Label>
             </div>
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="all" id="all" />
               <Label htmlFor="all" className="font-normal cursor-pointer">
-                Alla händelser i serien
+                {t('recurringDialog.allInstances')}
               </Label>
             </div>
           </RadioGroup>
@@ -54,7 +57,7 @@ export function RecurringActionDialog({ open, onOpenChange, actionType, onConfir
 
         <div className="flex justify-end gap-3">
           <Button variant="ghost" onClick={() => onOpenChange(false)}>
-            AVBRYT
+            {t('eventDialog.cancel')}
           </Button>
           <Button 
             className={actionType === "delete" ? "bg-destructive hover:bg-destructive/90" : "bg-[#2a9d8f] hover:bg-[#238276]"}

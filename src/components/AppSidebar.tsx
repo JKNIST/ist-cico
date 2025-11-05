@@ -1,5 +1,6 @@
 import { Eye, FileText, Calendar, Grid3x3, BarChart3, CalendarDays, UserCog, FileEdit, Rss, MessageSquare, ClipboardList, FolderOpen, Info, ExternalLink } from "lucide-react";
 import { NavLink } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   Sidebar,
   SidebarContent,
@@ -12,29 +13,30 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 
-const menuItems = [
-  { title: "Överblick", url: "/", icon: Eye },
-  { title: "Aktuellt", url: "/aktuellt", icon: FileText, badge: 6 },
-  { title: "Schema", url: "/schema", icon: Calendar },
-  { title: "Placeringar", url: "/placeringar", icon: Grid3x3 },
-  { title: "Utskrifter", url: "/utskrifter", icon: FileText },
-  { title: "Analys", url: "/analys", icon: BarChart3, external: true },
-  { title: "Kalender", url: "/kalender", icon: CalendarDays },
-  { title: "Administration", url: "/administration", icon: UserCog },
-  { title: "Måltidsplanering", url: "/maltidsplanering", icon: ClipboardList },
-  { title: "Formulär", url: "/formular", icon: FileEdit, external: true },
-  { title: "Pedagogiskt arbete", url: "/pedagogiskt-arbete", icon: FolderOpen, external: true, opensNewTab: true },
-  { title: "Blogg", url: "/blogg", icon: Rss },
-  { title: "Chatt", url: "/chatt", icon: MessageSquare },
-  { title: "Samtalsbokningar", url: "/samtalsbokningar", icon: CalendarDays },
-  { title: "Document manager", url: "/document-manager", icon: FolderOpen },
-  { title: "Om Lämna & hämta", url: "/om", icon: Info },
-  { title: "Förbättringsförslag", url: "/forbattringsforslag", icon: MessageSquare, external: true },
-];
-
 export function AppSidebar() {
+  const { t } = useTranslation();
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
+
+  const menuItems = [
+    { title: t('sidebar.overview'), url: "/", icon: Eye },
+    { title: t('sidebar.current'), url: "/aktuellt", icon: FileText, badge: 6 },
+    { title: t('sidebar.schedule'), url: "/schema", icon: Calendar },
+    { title: t('sidebar.placements'), url: "/placeringar", icon: Grid3x3 },
+    { title: t('sidebar.prints'), url: "/utskrifter", icon: FileText },
+    { title: t('sidebar.analysis'), url: "/analys", icon: BarChart3, external: true },
+    { title: t('sidebar.calendar'), url: "/kalender", icon: CalendarDays },
+    { title: t('sidebar.administration'), url: "/administration", icon: UserCog },
+    { title: t('sidebar.mealPlanning'), url: "/maltidsplanering", icon: ClipboardList },
+    { title: t('sidebar.forms'), url: "/formular", icon: FileEdit, external: true },
+    { title: t('sidebar.pedagogicalWork'), url: "/pedagogiskt-arbete", icon: FolderOpen, external: true, opensNewTab: true },
+    { title: t('sidebar.blog'), url: "/blogg", icon: Rss },
+    { title: t('sidebar.chat'), url: "/chatt", icon: MessageSquare },
+    { title: t('sidebar.appointments'), url: "/samtalsbokningar", icon: CalendarDays },
+    { title: t('sidebar.documentManager'), url: "/document-manager", icon: FolderOpen },
+    { title: t('sidebar.about'), url: "/om", icon: Info },
+    { title: t('sidebar.improvements'), url: "/forbattringsforslag", icon: MessageSquare, external: true },
+  ];
 
   return (
     <Sidebar className="border-r border-sidebar-border">

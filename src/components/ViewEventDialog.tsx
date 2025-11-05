@@ -2,9 +2,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
-import { sv } from "date-fns/locale";
 import { CalendarIcon, Clock, Users } from "lucide-react";
 import { CalendarEvent } from "@/types/administration";
+import { useTranslation } from "react-i18next";
+import { useLocale } from "@/hooks/useLocale";
 
 interface ViewEventDialogProps {
   open: boolean;
@@ -15,30 +16,43 @@ interface ViewEventDialogProps {
 }
 
 export function ViewEventDialog({ open, onOpenChange, event, onDelete, onEdit }: ViewEventDialogProps) {
+  const { t } = useTranslation();
+  const locale = useLocale();
+  
   if (!event) return null;
 
   const getRecurrenceSummary = () => {
     if (!event.recurrenceRule) return null;
     
     const { frequency, interval, endDate, selectedDays } = event.recurrenceRule;
-    let text = "Inträffar ";
+    let text = t('eventDialog.occursEvery') + " ";
     
     if (frequency === "weekly" && selectedDays && selectedDays.length > 0) {
       const dayNames: { [key: string]: string } = {
-        mon: "måndag", tue: "tisdag", wed: "onsdag", 
-        thu: "torsdag", fri: "fredag", sat: "lördag", sun: "söndag"
+        mon: t('eventDialog.weekdays.monday'),
+        tue: t('eventDialog.weekdays.tuesday'),
+        wed: t('eventDialog.weekdays.wednesday'),
+        thu: t('eventDialog.weekdays.thursday'),
+        fri: t('eventDialog.weekdays.friday'),
+        sat: t('eventDialog.weekdays.saturday'),
+        sun: t('eventDialog.weekdays.sunday')
       };
       const days = selectedDays.map(d => dayNames[d]).join(", ");
-      text += `varje ${days}`;
+      text = t('eventDialog.occursEvery') + " " + days;
     } else {
       const frequencyNames: { [key: string]: string } = {
-        daily: "dag", weekly: "vecka", monthly: "månad", yearly: "år"
+        daily: t('eventDialog.day'),
+        weekly: t('eventDialog.week'),
+        monthly: t('eventDialog.month'),
+        yearly: t('eventDialog.year')
       };
-      text += interval > 1 ? `var ${interval} ${frequencyNames[frequency]}` : `varje ${frequencyNames[frequency]}`;
+      text = interval > 1 
+        ? `${t('eventDialog.occursEveryNumber')} ${interval} ${frequencyNames[frequency]}` 
+        : `${t('eventDialog.occursEvery')} ${frequencyNames[frequency]}`;
     }
     
     if (endDate) {
-      text += ` till ${format(endDate, "EEEE, dd-MM-yyyy", { locale: sv })}`;
+      text += ` ${t('eventDialog.until')} ${format(endDate, "EEEE, dd-MM-yyyy", { locale })}`;
     }
     
     return text;
@@ -62,14 +76,14 @@ export function ViewEventDialog({ open, onOpenChange, event, onDelete, onEdit }:
           {/* Share with Guardians */}
           {event.isSharedWithGuardians && (
             <div className="flex items-center gap-2">
-              <Badge variant="secondary">Delas med vårdnadshavare</Badge>
+              <Badge variant="secondary">{t('eventDialog.sharedWithGuardians')}</Badge>
             </div>
           )}
 
           {/* Departments */}
           {event.departments && event.departments.length > 0 && (
             <div className="space-y-2">
-              <p className="text-sm font-medium">Avdelningar:</p>
+              <p className="text-sm font-medium">{t('eventDialog.departments')}:</p>
               <div className="flex flex-wrap gap-2">
                 {event.departments.map((dept, idx) => (
                   <Badge key={idx} variant="outline">{dept}</Badge>
@@ -82,7 +96,7 @@ export function ViewEventDialog({ open, onOpenChange, event, onDelete, onEdit }:
           {event.participants && (
             <div className="flex items-center gap-2 text-sm">
               <Users className="h-4 w-4 text-muted-foreground" />
-              <span>{event.participants} deltagare</span>
+              <span>{event.participants} {t('eventDialog.participants')}</span>
             </div>
           )}
 
@@ -90,7 +104,7 @@ export function ViewEventDialog({ open, onOpenChange, event, onDelete, onEdit }:
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-sm">
               <CalendarIcon className="h-4 w-4 text-muted-foreground" />
-              <span>{format(event.date, "EEEE, d MMMM yyyy", { locale: sv })}</span>
+              <span>{format(event.date, "EEEE, d MMMM yyyy", { locale })}</span>
             </div>
             {!event.allDay && event.startTime && event.endTime && (
               <div className="flex items-center gap-2 text-sm">
@@ -101,7 +115,7 @@ export function ViewEventDialog({ open, onOpenChange, event, onDelete, onEdit }:
             {event.allDay && (
               <div className="flex items-center gap-2 text-sm">
                 <Clock className="h-4 w-4 text-muted-foreground" />
-                <span>Heldag</span>
+                <span>{t('eventDialog.allDay')}</span>
               </div>
             )}
           </div>
@@ -116,10 +130,10 @@ export function ViewEventDialog({ open, onOpenChange, event, onDelete, onEdit }:
           {/* Metadata */}
           <div className="pt-4 border-t space-y-1 text-xs text-muted-foreground">
             {event.createdBy && event.createdAt && (
-              <p>Skapad av: {event.createdBy} vid {format(event.createdAt, "yyyy-MM-dd HH:mm", { locale: sv })}</p>
+              <p>{t('eventDialog.createdBy')}: {event.createdBy} {t('eventDialog.at')} {format(event.createdAt, "yyyy-MM-dd HH:mm", { locale })}</p>
             )}
             {event.updatedAt && (
-              <p>Senast uppdaterad: {format(event.updatedAt, "yyyy-MM-dd HH:mm", { locale: sv })}</p>
+              <p>{t('eventDialog.lastUpdated')}: {format(event.updatedAt, "yyyy-MM-dd HH:mm", { locale })}</p>
             )}
           </div>
         </div>
@@ -127,13 +141,13 @@ export function ViewEventDialog({ open, onOpenChange, event, onDelete, onEdit }:
         {/* Action Buttons */}
         <div className="flex justify-end gap-3 pt-4 border-t">
           <Button variant="ghost" onClick={() => onOpenChange(false)}>
-            AVBRYT
+            {t('eventDialog.cancel')}
           </Button>
           <Button variant="destructive" onClick={onDelete}>
-            TA BORT
+            {t('eventDialog.delete')}
           </Button>
           <Button className="bg-[#2a9d8f] hover:bg-[#238276]" onClick={onEdit}>
-            REDIGERA
+            {t('eventDialog.edit')}
           </Button>
         </div>
       </DialogContent>
