@@ -42,6 +42,15 @@ All colors MUST be HSL.
     --warning: 45 100% 51%;
     --info: 200 60% 50%;
 
+    --calendar-closure: 0 70% 92%;
+    --calendar-closure-foreground: 0 65% 45%;
+    --calendar-warning: 38 90% 88%;
+    --calendar-warning-foreground: 38 70% 40%;
+    --calendar-external: 140 50% 88%;
+    --calendar-external-foreground: 140 55% 35%;
+    --calendar-internal: 210 65% 88%;
+    --calendar-internal-foreground: 210 70% 40%;
+
     --sidebar-background: 185 50% 35%;
     --sidebar-foreground: 0 0% 100%;
     --sidebar-primary: 185 45% 42%;
@@ -72,6 +81,14 @@ All colors MUST be HSL.
     --border: 0 0% 20%;
     --input: 0 0% 20%;
     --ring: 185 45% 42%;
+    --calendar-closure: 0 70% 25%;
+    --calendar-closure-foreground: 0 70% 85%;
+    --calendar-warning: 38 90% 30%;
+    --calendar-warning-foreground: 38 90% 85%;
+    --calendar-external: 140 50% 25%;
+    --calendar-external-foreground: 140 50% 85%;
+    --calendar-internal: 210 65% 25%;
+    --calendar-internal-foreground: 210 65% 85%;
     --sidebar-background: 185 50% 35%;
     --sidebar-foreground: 0 0% 100%;
     --sidebar-primary: 185 45% 42%;
