@@ -10,17 +10,17 @@ interface FilterChipProps {
 }
 
 const colorClasses = {
-  red: 'border-red-500 text-red-700 bg-red-50 hover:bg-red-100',
-  amber: 'border-amber-500 text-amber-700 bg-amber-50 hover:bg-amber-100',
-  green: 'border-green-500 text-green-700 bg-green-50 hover:bg-green-100',
-  blue: 'border-blue-500 text-blue-700 bg-blue-50 hover:bg-blue-100',
+  red: 'border-calendar-closure bg-calendar-closure/30 text-calendar-closure-foreground hover:bg-calendar-closure/50',
+  amber: 'border-calendar-warning bg-calendar-warning/30 text-calendar-warning-foreground hover:bg-calendar-warning/50',
+  green: 'border-calendar-external bg-calendar-external/30 text-calendar-external-foreground hover:bg-calendar-external/50',
+  blue: 'border-calendar-internal bg-calendar-internal/30 text-calendar-internal-foreground hover:bg-calendar-internal/50',
 };
 
 const activeColorClasses = {
-  red: 'border-red-500 bg-red-500 text-white hover:bg-red-600',
-  amber: 'border-amber-500 bg-amber-500 text-white hover:bg-amber-600',
-  green: 'border-green-500 bg-green-500 text-white hover:bg-green-600',
-  blue: 'border-blue-500 bg-blue-500 text-white hover:bg-blue-600',
+  red: 'border-calendar-closure bg-calendar-closure text-calendar-closure-foreground hover:bg-calendar-closure/90',
+  amber: 'border-calendar-warning bg-calendar-warning text-calendar-warning-foreground hover:bg-calendar-warning/90',
+  green: 'border-calendar-external bg-calendar-external text-calendar-external-foreground hover:bg-calendar-external/90',
+  blue: 'border-calendar-internal bg-calendar-internal text-calendar-internal-foreground hover:bg-calendar-internal/90',
 };
 
 export function FilterChip({ icon, label, color, active, onClick }: FilterChipProps) {
