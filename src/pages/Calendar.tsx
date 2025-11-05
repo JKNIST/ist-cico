@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { ChevronLeft, ChevronRight, AlertTriangle, XCircle } from "lucide-react";
+import { ChevronLeft, ChevronRight, AlertTriangle, XCircle, Share2, Lock, Repeat } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, addMonths, subMonths, startOfWeek, endOfWeek, isToday, addDays, isBefore, isAfter } from "date-fns";
 import { sv } from "date-fns/locale";
 import { AddEventDialog } from "@/components/AddEventDialog";
@@ -8,89 +9,93 @@ import { ViewEventDialog } from "@/components/ViewEventDialog";
 import { RecurringActionDialog } from "@/components/RecurringActionDialog";
 import { TemporarySchemaPeriodDialog } from "@/components/TemporarySchemaPeriodDialog";
 import { ClosurePeriodDialog } from "@/components/ClosurePeriodDialog";
-import { AdministrativeEvent, TemporarySchemaPeriod, ClosurePeriod } from "@/types/administration";
+import { FilterChip } from "@/components/FilterChip";
+import { ColorLegend } from "@/components/ColorLegend";
+import { AdministrativeEvent, TemporarySchemaPeriod, ClosurePeriod, CalendarEvent, EventCategory, EventType } from "@/types/administration";
+import { getCategoryColor } from "@/lib/calendarUtils";
 import { cn } from "@/lib/utils";
-
-interface CalendarEvent {
-  id: string;
-  title: string;
-  date: Date;
-  color: string;
-  description?: string;
-  startTime?: string;
-  endTime?: string;
-  isAllDay?: boolean;
-  shareWithGuardians?: boolean;
-  departments?: string[];
-  participants?: string;
-  isRecurring?: boolean;
-  recurrenceRule?: {
-    frequency: string;
-    interval: number;
-    endDate?: Date;
-    seriesId: string;
-    selectedDays?: string[];
-  };
-  instanceDate?: Date;
-  originalStartDate?: Date;
-  createdBy?: string;
-  createdAt?: Date;
-  updatedBy?: string;
-  updatedAt?: Date;
-}
 
 const mockEvents: CalendarEvent[] = [
   { 
     id: "1", 
-    title: "Gemtämande (ved ending må vara e...)", 
-    date: new Date(2025, 10, 4), 
-    color: "#2a9d8f",
+    title: "Utflykt till museet", 
+    date: new Date(2025, 10, 4),
+    category: EventCategory.EXTERNAL,
+    type: EventType.EXCURSION,
     description: "Gemensam träff för alla avdelningar",
     startTime: "09:00",
     endTime: "11:00",
-    shareWithGuardians: true,
+    allDay: false,
+    isSharedWithGuardians: true,
+    isRecurring: false,
     departments: ["Blåbär", "Lingon", "Odon"],
     participants: "45",
+    source: 'manual',
     createdBy: "Anna Andersson",
     createdAt: new Date(2025, 9, 15, 10, 30),
-    updatedBy: "Anna Andersson",
     updatedAt: new Date(2025, 9, 20, 14, 15),
   },
   { 
     id: "2", 
     title: "Biblioteksbesök", 
-    date: new Date(2025, 10, 6), 
-    color: "#2a9d8f",
+    date: new Date(2025, 10, 6),
+    category: EventCategory.EXTERNAL,
+    type: EventType.EXCURSION,
     description: "Besök på stadsbiblioteket",
     startTime: "10:00",
     endTime: "11:30",
+    allDay: false,
+    isSharedWithGuardians: true,
+    isRecurring: false,
     departments: ["Blåbär"],
     participants: "15",
+    source: 'manual',
     createdBy: "Erik Eriksson",
     createdAt: new Date(2025, 9, 10, 9, 0),
   },
   {
     id: "recurring-1",
-    title: "Morgonsamling",
+    title: "Personalmöte",
     date: new Date(2025, 10, 4),
-    color: "#e76f51",
-    description: "Daglig morgonsamling med alla barn",
+    category: EventCategory.INTERNAL,
+    type: EventType.STAFF_MEETING,
+    description: "Veckomöte för all personal",
     startTime: "08:30",
     endTime: "09:00",
-    isAllDay: false,
-    shareWithGuardians: false,
-    departments: ["Blåbär", "Lingon", "Odon", "Vill"],
-    participants: "60",
+    allDay: false,
+    isSharedWithGuardians: false,
     isRecurring: true,
     recurrenceRule: {
-      frequency: "daily",
+      frequency: "weekly",
       interval: 1,
       endDate: new Date(2025, 10, 30),
       seriesId: "recurring-series-1",
+      selectedDays: ["mon"],
     },
+    departments: ["Blåbär", "Lingon", "Odon", "Vildhallon"],
+    participants: "60",
     originalStartDate: new Date(2025, 10, 4),
+    source: 'manual',
     createdBy: "Maria Larsson",
     createdAt: new Date(2025, 9, 1, 8, 0),
+  },
+  {
+    id: "3",
+    title: "Luciafirande",
+    date: new Date(2025, 11, 13),
+    category: EventCategory.EXTERNAL,
+    type: EventType.CELEBRATION,
+    description: "Luciafirande med föräldrar",
+    startTime: "14:00",
+    endTime: "16:00",
+    allDay: false,
+    isSharedWithGuardians: true,
+    isRecurring: false,
+    departments: ["Blåbär", "Lingon", "Odon", "Vildhallon"],
+    participants: "80",
+    source: 'manual',
+    createdBy: "Anna Andersson",
+    createdAt: new Date(2025, 10, 1, 10, 0),
   },
 ];
 
@@ -224,6 +229,9 @@ export default function Calendar() {
   const [editEventData, setEditEventData] = useState<CalendarEvent | null>(null);
   const [editScope, setEditScope] = useState<"single" | "future" | "all">("single");
   
+  // Filter state
+  const [activeFilters, setActiveFilters] = useState<Set<string>>(new Set());
+  
   // Administrative periods state
   const [temporaryPeriods] = useState<TemporarySchemaPeriod[]>(mockTemporaryPeriods);
   const [closurePeriods] = useState<ClosurePeriod[]>(mockClosurePeriods);
@@ -244,8 +252,36 @@ export default function Calendar() {
   const goToNextMonth = () => setCurrentDate(addMonths(currentDate, 1));
   const goToToday = () => setCurrentDate(new Date());
 
+  const toggleFilter = (filter: string) => {
+    const newFilters = new Set(activeFilters);
+    if (newFilters.has(filter)) {
+      newFilters.delete(filter);
+    } else {
+      newFilters.add(filter);
+    }
+    setActiveFilters(newFilters);
+  };
+
+  const filterEvents = (events: CalendarEvent[]): CalendarEvent[] => {
+    if (activeFilters.size === 0) return events;
+    
+    return events.filter(event => {
+      // Category filters
+      if (activeFilters.has('closure') && event.category === EventCategory.CLOSURE) return true;
+      if (activeFilters.has('warning') && event.category === EventCategory.WARNING) return true;
+      if (activeFilters.has('external') && event.category === EventCategory.EXTERNAL) return true;
+      if (activeFilters.has('internal') && event.category === EventCategory.INTERNAL) return true;
+      
+      // Metadata filters
+      if (activeFilters.has('recurring') && event.isRecurring) return true;
+      
+      return false;
+    });
+  };
+
   const getEventsForDay = (day: Date) => {
-    const regularEvents = allEvents.filter(event => isSameDay(event.date, day));
+    const filteredEvents = filterEvents(allEvents);
+    const regularEvents = filteredEvents.filter(event => isSameDay(event.date, day));
     const adminEvents = administrativeEvents.filter(event => isSameDay(event.date, day));
     
     // Combine and sort - administrative events first
@@ -255,16 +291,17 @@ export default function Calendar() {
   };
 
   const handleEventClick = (event: CalendarEvent | AdministrativeEvent) => {
-    if ('type' in event) {
+    if ('type' in event && 'sourceId' in event) {
       // It's an administrative event
-      if (event.type === 'limited-capacity') {
-        const period = temporaryPeriods.find(p => p.id === event.sourceId);
+      const adminEvent = event as AdministrativeEvent;
+      if (adminEvent.type === 'limited-capacity') {
+        const period = temporaryPeriods.find(p => p.id === adminEvent.sourceId);
         if (period) {
           setSelectedTemporaryPeriod(period);
           setIsTemporaryPeriodDialogOpen(true);
         }
-      } else if (event.type === 'closure') {
-        const period = closurePeriods.find(p => p.id === event.sourceId);
+      } else if (adminEvent.type === 'closure') {
+        const period = closurePeriods.find(p => p.id === adminEvent.sourceId);
         if (period) {
           setSelectedClosurePeriod(period);
           setIsClosurePeriodDialogOpen(true);
@@ -272,7 +309,7 @@ export default function Calendar() {
       }
     } else {
       // Regular event
-      setSelectedEvent(event);
+      setSelectedEvent(event as CalendarEvent);
       setIsViewEventOpen(true);
     }
   };
@@ -357,6 +394,9 @@ export default function Calendar() {
             <Button variant="ghost" size="sm" onClick={goToNextMonth}>
               <ChevronRight className="h-4 w-4" />
             </Button>
+            <h2 className="text-lg font-semibold text-gray-900 ml-2">
+              {format(currentDate, "MMMM yyyy", { locale: sv })}
+            </h2>
           </div>
 
           <div className="flex items-center gap-2">
@@ -388,8 +428,13 @@ export default function Calendar() {
         </div>
       </div>
 
+
       {/* Calendar Grid */}
       <div className="px-6 py-4">
+        <div className="flex justify-end mb-4">
+          <ColorLegend />
+        </div>
+        
         <div className="bg-white rounded-lg border overflow-hidden">
           {/* Week days header */}
           <div className="grid grid-cols-7 border-b bg-gray-50">
@@ -427,31 +472,49 @@ export default function Calendar() {
                   </div>
                   <div className="space-y-1">
                     {events.map((event) => {
-                      const isAdminEvent = 'type' in event;
+                      const isAdminEvent = 'type' in event && 'sourceId' in event;
                       const adminEvent = isAdminEvent ? event as AdministrativeEvent : null;
+                      const calEvent = !isAdminEvent ? event as CalendarEvent : null;
                       
                       return (
                         <div
-                          key={'id' in event ? event.id : `${adminEvent?.type}-${adminEvent?.sourceId}-${format(event.date, 'yyyy-MM-dd')}`}
+                          key={calEvent ? calEvent.id : `${adminEvent?.type}-${adminEvent?.sourceId}-${format(event.date, 'yyyy-MM-dd')}`}
                           className={cn(
                             "text-xs p-1.5 rounded text-white cursor-pointer hover:opacity-90 transition-opacity flex items-center gap-1.5",
                             adminEvent?.type === 'limited-capacity' && "border-l-4 border-l-amber-600",
                             adminEvent?.type === 'closure' && "font-semibold border-l-4 border-l-red-700"
                           )}
-                          style={{ backgroundColor: event.color }}
+                          style={{ 
+                            backgroundColor: adminEvent ? adminEvent.color : getCategoryColor(calEvent!.category) 
+                          }}
                           onClick={() => handleEventClick(event)}
                         >
                           {adminEvent?.type === 'limited-capacity' && (
-                            <div className="bg-white/20 rounded-sm p-0.5 flex items-center justify-center">
-                              <AlertTriangle className="h-3 w-3 flex-shrink-0" />
-                            </div>
+                            <AlertTriangle className="h-3.5 w-3.5 flex-shrink-0" />
                           )}
                           {adminEvent?.type === 'closure' && (
-                            <div className="bg-white/20 rounded-sm p-0.5 flex items-center justify-center">
-                              <XCircle className="h-3 w-3 flex-shrink-0" />
-                            </div>
+                            <XCircle className="h-3.5 w-3.5 flex-shrink-0" />
                           )}
                           <span className="truncate flex-1">{event.title}</span>
+                          
+                          {/* Metadata badges for regular events */}
+                          {calEvent && (
+                            <div className="flex gap-0.5 flex-shrink-0">
+                              {calEvent.isRecurring && (
+                                <Repeat className="h-3 w-3 opacity-80" />
+                              )}
+                              {calEvent.isSharedWithGuardians ? (
+                                <Share2 className="h-3 w-3 opacity-80" />
+                              ) : (
+                                <Lock className="h-3 w-3 opacity-80" />
+                              )}
+                            </div>
+                          )}
+                          
+                          {/* Share2 badge for admin events (always shared) */}
+                          {adminEvent && (
+                            <Share2 className="h-3 w-3 opacity-80 flex-shrink-0" />
+                          )}
                         </div>
                       );
                     })}
