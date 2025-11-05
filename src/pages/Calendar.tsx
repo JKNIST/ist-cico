@@ -12,7 +12,7 @@ import { ClosurePeriodDialog } from "@/components/ClosurePeriodDialog";
 import { FilterChip } from "@/components/FilterChip";
 import { ColorLegend } from "@/components/ColorLegend";
 import { AdministrativeEvent, TemporarySchemaPeriod, ClosurePeriod, CalendarEvent, EventCategory, EventType } from "@/types/administration";
-import { getCategoryColor } from "@/lib/calendarUtils";
+import { getCategoryColor, getCategoryBgClass } from "@/lib/calendarUtils";
 import { cn } from "@/lib/utils";
 
 const mockEvents: CalendarEvent[] = [
@@ -480,13 +480,11 @@ export default function Calendar() {
                         <div
                           key={calEvent ? calEvent.id : `${adminEvent?.type}-${adminEvent?.sourceId}-${format(event.date, 'yyyy-MM-dd')}`}
                           className={cn(
-                            "text-xs p-1.5 rounded text-white cursor-pointer hover:opacity-90 transition-opacity flex items-center gap-1.5",
-                            adminEvent?.type === 'limited-capacity' && "border-l-4 border-l-amber-600",
-                            adminEvent?.type === 'closure' && "font-semibold border-l-4 border-l-red-700"
+                            "text-xs p-1.5 rounded cursor-pointer hover:opacity-90 transition-opacity flex items-center gap-1.5",
+                            calEvent && getCategoryBgClass(calEvent.category),
+                            adminEvent?.type === 'limited-capacity' && "bg-calendar-warning text-calendar-warning-foreground border-l-4 border-l-amber-600",
+                            adminEvent?.type === 'closure' && "bg-calendar-closure text-calendar-closure-foreground font-semibold border-l-4 border-l-red-700"
                           )}
-                          style={{ 
-                            backgroundColor: adminEvent ? adminEvent.color : getCategoryColor(calEvent!.category) 
-                          }}
                           onClick={() => handleEventClick(event)}
                         >
                           {adminEvent?.type === 'limited-capacity' && (

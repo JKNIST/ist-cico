@@ -42,14 +42,14 @@ All colors MUST be HSL.
     --warning: 45 100% 51%;
     --info: 200 60% 50%;
 
-    --calendar-closure: 0 100% 93%;
-    --calendar-closure-foreground: 0 0% 20%;
-    --calendar-warning: 35 100% 85%;
-    --calendar-warning-foreground: 0 0% 20%;
-    --calendar-external: 140 60% 88%;
-    --calendar-external-foreground: 0 0% 20%;
-    --calendar-internal: 210 100% 92%;
-    --calendar-internal-foreground: 0 0% 20%;
+    --calendar-closure: 0 100% 96%;
+    --calendar-closure-foreground: 0 0% 10%;
+    --calendar-warning: 35 100% 90%;
+    --calendar-warning-foreground: 0 0% 10%;
+    --calendar-external: 140 50% 92%;
+    --calendar-external-foreground: 0 0% 10%;
+    --calendar-internal: 210 100% 94%;
+    --calendar-internal-foreground: 0 0% 10%;
 
     --sidebar-background: 185 50% 35%;
     --sidebar-foreground: 0 0% 100%;
@@ -90,13 +90,13 @@ All colors MUST be HSL.
     --sidebar-border: 185 50% 30%;
     --sidebar-ring: 185 45% 42%;
 
-    --calendar-closure: 0 100% 88%;
+    --calendar-closure: 0 100% 92%;
     --calendar-closure-foreground: 0 0% 10%;
-    --calendar-warning: 35 100% 80%;
+    --calendar-warning: 35 100% 85%;
     --calendar-warning-foreground: 0 0% 10%;
-    --calendar-external: 140 60% 85%;
+    --calendar-external: 140 50% 88%;
     --calendar-external-foreground: 0 0% 10%;
-    --calendar-internal: 210 100% 88%;
+    --calendar-internal: 210 100% 90%;
     --calendar-internal-foreground: 0 0% 10%;
   }
 }

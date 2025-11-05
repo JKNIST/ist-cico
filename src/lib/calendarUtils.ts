@@ -2,10 +2,10 @@ import { EventCategory } from "@/types/administration";
 
 export const getCategoryColor = (category: EventCategory): string => {
   const colors = {
-    [EventCategory.CLOSURE]: 'hsl(var(--calendar-closure-foreground))',
-    [EventCategory.WARNING]: 'hsl(var(--calendar-warning-foreground))',
-    [EventCategory.EXTERNAL]: 'hsl(var(--calendar-external-foreground))',
-    [EventCategory.INTERNAL]: 'hsl(var(--calendar-internal-foreground))',
+    [EventCategory.CLOSURE]: 'hsl(var(--calendar-closure))',
+    [EventCategory.WARNING]: 'hsl(var(--calendar-warning))',
+    [EventCategory.EXTERNAL]: 'hsl(var(--calendar-external))',
+    [EventCategory.INTERNAL]: 'hsl(var(--calendar-internal))',
   };
   return colors[category];
 };
