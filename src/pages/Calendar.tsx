@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ChevronLeft, ChevronRight, AlertTriangle, XCircle, Share2, Lock, Repeat } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, addMonths, subMonths, startOfWeek, endOfWeek, isToday, addDays, isBefore, isAfter } from "date-fns";
 import { sv } from "date-fns/locale";
 import { AddEventDialog } from "@/components/AddEventDialog";
@@ -218,6 +219,17 @@ const generateAdministrativeEvents = (
 
 const administrativeEvents = generateAdministrativeEvents(mockTemporaryPeriods, mockClosurePeriods);
 
+// Helper function to get category label in Swedish
+const getCategoryLabel = (category: EventCategory): string => {
+  const labels = {
+    [EventCategory.CLOSURE]: 'Stängning',
+    [EventCategory.WARNING]: 'Varning/Viktigt',
+    [EventCategory.EXTERNAL]: 'Extern aktivitet',
+    [EventCategory.INTERNAL]: 'Intern aktivitet',
+  };
+  return labels[category];
+};
+
 export default function Calendar() {
   const [currentDate, setCurrentDate] = useState(new Date(2025, 10, 3)); // November 2025
   const [viewMode, setViewMode] = useState<"day" | "week" | "month">("month");
@@ -375,8 +387,9 @@ export default function Calendar() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Calendar Controls */}
+    <TooltipProvider>
+      <div className="min-h-screen bg-gray-50">
+        {/* Calendar Controls */}
       <div className="bg-white border-b px-6 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -477,43 +490,123 @@ export default function Calendar() {
                       const calEvent = !isAdminEvent ? event as CalendarEvent : null;
                       
                       return (
-                        <div
-                          key={calEvent ? calEvent.id : `${adminEvent?.type}-${adminEvent?.sourceId}-${format(event.date, 'yyyy-MM-dd')}`}
-                          className={cn(
-                            "text-xs p-1.5 rounded cursor-pointer hover:opacity-90 transition-opacity flex items-center gap-1.5",
-                            calEvent && getCategoryBgClass(calEvent.category),
-                            adminEvent?.type === 'limited-capacity' && "bg-calendar-warning text-calendar-warning-foreground border-l-4 border-l-amber-600",
-                            adminEvent?.type === 'closure' && "bg-calendar-closure text-calendar-closure-foreground font-semibold border-l-4 border-l-red-700"
-                          )}
-                          onClick={() => handleEventClick(event)}
-                        >
-                          {adminEvent?.type === 'limited-capacity' && (
-                            <AlertTriangle className="h-3.5 w-3.5 flex-shrink-0" />
-                          )}
-                          {adminEvent?.type === 'closure' && (
-                            <XCircle className="h-3.5 w-3.5 flex-shrink-0" />
-                          )}
-                          <span className="truncate flex-1">{event.title}</span>
-                          
-                          {/* Metadata badges for regular events */}
-                          {calEvent && (
-                            <div className="flex gap-0.5 flex-shrink-0">
-                              {calEvent.isRecurring && (
-                                <Repeat className="h-3 w-3 opacity-80" />
+                        <Tooltip key={calEvent ? calEvent.id : `${adminEvent?.type}-${adminEvent?.sourceId}-${format(event.date, 'yyyy-MM-dd')}`}>
+                          <TooltipTrigger asChild>
+                            <div
+                              className={cn(
+                                "text-xs p-1.5 rounded cursor-pointer hover:opacity-90 transition-opacity flex items-center gap-1.5",
+                                calEvent && getCategoryBgClass(calEvent.category),
+                                adminEvent?.type === 'limited-capacity' && "bg-calendar-warning text-calendar-warning-foreground border-l-4 border-l-amber-600",
+                                adminEvent?.type === 'closure' && "bg-calendar-closure text-calendar-closure-foreground font-semibold border-l-4 border-l-red-700"
                               )}
-                              {calEvent.isSharedWithGuardians ? (
-                                <Share2 className="h-3 w-3 opacity-80" />
-                              ) : (
-                                <Lock className="h-3 w-3 opacity-80" />
+                              onClick={() => handleEventClick(event)}
+                            >
+                              {adminEvent?.type === 'limited-capacity' && (
+                                <AlertTriangle className="h-3.5 w-3.5 flex-shrink-0" />
+                              )}
+                              {adminEvent?.type === 'closure' && (
+                                <XCircle className="h-3.5 w-3.5 flex-shrink-0" />
+                              )}
+                              <span className="truncate flex-1">{event.title}</span>
+                              
+                              {/* Metadata badges for regular events */}
+                              {calEvent && (
+                                <div className="flex gap-0.5 flex-shrink-0">
+                                  {calEvent.isRecurring && (
+                                    <Repeat className="h-3 w-3 opacity-80" />
+                                  )}
+                                  {calEvent.isSharedWithGuardians ? (
+                                    <Share2 className="h-3 w-3 opacity-80" />
+                                  ) : (
+                                    <Lock className="h-3 w-3 opacity-80" />
+                                  )}
+                                </div>
+                              )}
+                              
+                              {/* Share2 badge for admin events (always shared) */}
+                              {adminEvent && (
+                                <Share2 className="h-3 w-3 opacity-80 flex-shrink-0" />
                               )}
                             </div>
-                          )}
-                          
-                          {/* Share2 badge for admin events (always shared) */}
-                          {adminEvent && (
-                            <Share2 className="h-3 w-3 opacity-80 flex-shrink-0" />
-                          )}
-                        </div>
+                          </TooltipTrigger>
+                          <TooltipContent side="top" className="max-w-xs">
+                            <div className="space-y-1.5">
+                              <div className="font-semibold">{event.title}</div>
+                              
+                              {calEvent && (
+                                <>
+                                  {calEvent.description && (
+                                    <div className="text-sm">{calEvent.description}</div>
+                                  )}
+                                  
+                                  {(calEvent.startTime || calEvent.endTime) && (
+                                    <div className="text-sm">
+                                      {calEvent.startTime && calEvent.endTime 
+                                        ? `${calEvent.startTime} - ${calEvent.endTime}`
+                                        : calEvent.startTime || calEvent.endTime}
+                                    </div>
+                                  )}
+                                  
+                                  <div className="text-sm pt-1 border-t space-y-0.5">
+                                    <div className="flex items-center gap-1.5">
+                                      {calEvent.isSharedWithGuardians ? (
+                                        <>
+                                          <Share2 className="h-3 w-3" />
+                                          <span>Delat med vårdnadshavare</span>
+                                        </>
+                                      ) : (
+                                        <>
+                                          <Lock className="h-3 w-3" />
+                                          <span>Intern (ej delad)</span>
+                                        </>
+                                      )}
+                                    </div>
+                                    
+                                    {calEvent.isRecurring && (
+                                      <div className="flex items-center gap-1.5">
+                                        <Repeat className="h-3 w-3" />
+                                        <span>Återkommande händelse</span>
+                                      </div>
+                                    )}
+                                    
+                                    <div className="flex items-center gap-1.5">
+                                      <div 
+                                        className="h-3 w-3 rounded" 
+                                        style={{ backgroundColor: getCategoryColor(calEvent.category) }}
+                                      />
+                                      <span>{getCategoryLabel(calEvent.category)}</span>
+                                    </div>
+                                  </div>
+                                </>
+                              )}
+                              
+                              {adminEvent && (
+                                <>
+                                  <div className="text-sm pt-1 border-t space-y-0.5">
+                                    <div className="flex items-center gap-1.5">
+                                      {adminEvent.type === 'limited-capacity' ? (
+                                        <>
+                                          <AlertTriangle className="h-3 w-3" />
+                                          <span>Begränsad kapacitet</span>
+                                        </>
+                                      ) : (
+                                        <>
+                                          <XCircle className="h-3 w-3" />
+                                          <span>Stängningsperiod</span>
+                                        </>
+                                      )}
+                                    </div>
+                                    
+                                    <div className="flex items-center gap-1.5">
+                                      <Share2 className="h-3 w-3" />
+                                      <span>Delat med vårdnadshavare</span>
+                                    </div>
+                                  </div>
+                                </>
+                              )}
+                            </div>
+                          </TooltipContent>
+                        </Tooltip>
                       );
                     })}
                   </div>
@@ -575,6 +668,7 @@ export default function Calendar() {
         period={selectedClosurePeriod}
         onSave={() => setIsClosurePeriodDialogOpen(false)}
       />
-    </div>
+      </div>
+    </TooltipProvider>
   );
 }
