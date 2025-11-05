@@ -97,4 +97,6 @@ export interface AdministrativeEvent {
   sourceId: string;
   color: string;
   priority: number;
+  activateDate?: Date;  // För limited-capacity
+  publishDate?: Date;   // För closure
 }

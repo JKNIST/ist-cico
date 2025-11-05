@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronLeft, ChevronRight, AlertTriangle, XCircle, Share2, Lock, Repeat } from "lucide-react";
+import { ChevronLeft, ChevronRight, AlertTriangle, XCircle, Share2, Lock, Repeat, Calendar as CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -190,7 +190,8 @@ const generateAdministrativeEvents = (
         title: 'Begränsad kapacitet',
         sourceId: period.id,
         color: '#f59e0b',
-        priority: 1
+        priority: 1,
+        activateDate: period.activateDate
       });
     });
   });
@@ -209,7 +210,8 @@ const generateAdministrativeEvents = (
         title: period.title,
         sourceId: period.id,
         color: '#ef4444',
-        priority: 2
+        priority: 2,
+        publishDate: period.publishDate
       });
     });
   });
@@ -228,6 +230,22 @@ const getCategoryLabel = (category: EventCategory): string => {
     [EventCategory.INTERNAL]: 'Intern aktivitet',
   };
   return labels[category];
+};
+
+// Helper function to check if administrative event is published
+const isPublished = (adminEvent: AdministrativeEvent): boolean => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  if (adminEvent.type === 'limited-capacity' && adminEvent.activateDate) {
+    return !isBefore(today, adminEvent.activateDate);
+  }
+  
+  if (adminEvent.type === 'closure' && adminEvent.publishDate) {
+    return !isBefore(today, adminEvent.publishDate);
+  }
+  
+  return true; // Default till publicerad om datum saknas
 };
 
 export default function Calendar() {
@@ -523,8 +541,8 @@ export default function Calendar() {
                                 </div>
                               )}
                               
-                              {/* Share2 badge for admin events (always shared) */}
-                              {adminEvent && (
+                              {/* Share2 badge for admin events (only if published) */}
+                              {adminEvent && isPublished(adminEvent) && (
                                 <Share2 className="h-3 w-3 opacity-80 flex-shrink-0" />
                               )}
                             </div>
@@ -583,24 +601,47 @@ export default function Calendar() {
                               {adminEvent && (
                                 <>
                                   <div className="text-sm pt-1 border-t space-y-0.5">
-                                    <div className="flex items-center gap-1.5">
-                                      {adminEvent.type === 'limited-capacity' ? (
-                                        <>
+                                    {adminEvent.type === 'limited-capacity' && (
+                                      <>
+                                        <div className="flex items-center gap-1.5">
                                           <AlertTriangle className="h-3 w-3" />
                                           <span>Begränsad kapacitet</span>
-                                        </>
-                                      ) : (
-                                        <>
+                                        </div>
+                                        
+                                        {isPublished(adminEvent) ? (
+                                          <div className="flex items-center gap-1.5">
+                                            <Share2 className="h-3 w-3" />
+                                            <span>Delat med vårdnadshavare</span>
+                                          </div>
+                                        ) : adminEvent.activateDate && (
+                                          <div className="flex items-center gap-1.5 text-muted-foreground">
+                                            <CalendarIcon className="h-3 w-3" />
+                                            <span>Kommer att aktiveras {format(adminEvent.activateDate, 'PPP', { locale: sv })}</span>
+                                          </div>
+                                        )}
+                                      </>
+                                    )}
+                                    
+                                    {adminEvent.type === 'closure' && (
+                                      <>
+                                        <div className="flex items-center gap-1.5">
                                           <XCircle className="h-3 w-3" />
                                           <span>Stängningsperiod</span>
-                                        </>
-                                      )}
-                                    </div>
-                                    
-                                    <div className="flex items-center gap-1.5">
-                                      <Share2 className="h-3 w-3" />
-                                      <span>Delat med vårdnadshavare</span>
-                                    </div>
+                                        </div>
+                                        
+                                        {isPublished(adminEvent) ? (
+                                          <div className="flex items-center gap-1.5">
+                                            <Share2 className="h-3 w-3" />
+                                            <span>Delat med vårdnadshavare</span>
+                                          </div>
+                                        ) : adminEvent.publishDate && (
+                                          <div className="flex items-center gap-1.5 text-muted-foreground">
+                                            <CalendarIcon className="h-3 w-3" />
+                                            <span>Publiceras {format(adminEvent.publishDate, 'PPP', { locale: sv })}</span>
+                                          </div>
+                                        )}
+                                      </>
+                                    )}
                                   </div>
                                 </>
                               )}
