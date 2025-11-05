@@ -4,12 +4,33 @@ import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { sv } from "date-fns/locale";
 import { CalendarIcon, Clock, Users } from "lucide-react";
-import { CalendarEvent } from "@/types/administration";
 
 interface ViewEventDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  event: CalendarEvent | null;
+  event: {
+    id: string;
+    title: string;
+    description?: string;
+    date: Date;
+    startTime?: string;
+    endTime?: string;
+    isAllDay?: boolean;
+    shareWithGuardians?: boolean;
+    departments?: string[];
+    participants?: string;
+    isRecurring?: boolean;
+    recurrenceRule?: {
+      frequency: string;
+      interval: number;
+      endDate?: Date;
+      selectedDays?: string[];
+    };
+    createdBy?: string;
+    createdAt?: Date;
+    updatedBy?: string;
+    updatedAt?: Date;
+  } | null;
   onDelete: () => void;
   onEdit: () => void;
 }
@@ -60,7 +81,7 @@ export function ViewEventDialog({ open, onOpenChange, event, onDelete, onEdit }:
           )}
 
           {/* Share with Guardians */}
-          {event.isSharedWithGuardians && (
+          {event.shareWithGuardians && (
             <div className="flex items-center gap-2">
               <Badge variant="secondary">Delas med vårdnadshavare</Badge>
             </div>
@@ -92,13 +113,13 @@ export function ViewEventDialog({ open, onOpenChange, event, onDelete, onEdit }:
               <CalendarIcon className="h-4 w-4 text-muted-foreground" />
               <span>{format(event.date, "EEEE, d MMMM yyyy", { locale: sv })}</span>
             </div>
-            {!event.allDay && event.startTime && event.endTime && (
+            {!event.isAllDay && event.startTime && event.endTime && (
               <div className="flex items-center gap-2 text-sm">
                 <Clock className="h-4 w-4 text-muted-foreground" />
                 <span>{event.startTime} - {event.endTime}</span>
               </div>
             )}
-            {event.allDay && (
+            {event.isAllDay && (
               <div className="flex items-center gap-2 text-sm">
                 <Clock className="h-4 w-4 text-muted-foreground" />
                 <span>Heldag</span>
@@ -118,8 +139,8 @@ export function ViewEventDialog({ open, onOpenChange, event, onDelete, onEdit }:
             {event.createdBy && event.createdAt && (
               <p>Skapad av: {event.createdBy} vid {format(event.createdAt, "yyyy-MM-dd HH:mm", { locale: sv })}</p>
             )}
-            {event.updatedAt && (
-              <p>Senast uppdaterad: {format(event.updatedAt, "yyyy-MM-dd HH:mm", { locale: sv })}</p>
+            {event.updatedBy && event.updatedAt && (
+              <p>Uppdaterad av: {event.updatedBy} vid {format(event.updatedAt, "yyyy-MM-dd HH:mm", { locale: sv })}</p>
             )}
           </div>
         </div>

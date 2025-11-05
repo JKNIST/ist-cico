@@ -9,32 +9,52 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { CalendarIcon, Clock, X, Users } from "lucide-react";
 import { format } from "date-fns";
 import { sv } from "date-fns/locale";
 import { cn } from "@/lib/utils";
-import { CalendarEvent, EventCategory } from "@/types/administration";
 
 interface AddEventDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   mode?: "add" | "edit";
-  eventData?: CalendarEvent;
+  eventData?: {
+    id?: string;
+    title?: string;
+    description?: string;
+    date?: Date;
+    startTime?: string;
+    endTime?: string;
+    isAllDay?: boolean;
+    shareWithGuardians?: boolean;
+    departments?: string[];
+    participants?: string;
+    isRecurring?: boolean;
+    recurrenceRule?: {
+      frequency: string;
+      interval: number;
+      endDate?: Date;
+      selectedDays?: string[];
+    };
+    createdBy?: string;
+    createdAt?: Date;
+    updatedBy?: string;
+    updatedAt?: Date;
+  };
   editScope?: "single" | "future" | "all";
 }
 
 const departments = ["Blåbär", "Lingon", "Odon", "Vildhallon", "Gråsparven", "laser kittens", "örg"];
 
 export function AddEventDialog({ open, onOpenChange, mode = "add", eventData, editScope }: AddEventDialogProps) {
-  const [category, setCategory] = useState<EventCategory>(eventData?.category || EventCategory.EXTERNAL);
   const [title, setTitle] = useState(eventData?.title || "");
   const [description, setDescription] = useState(eventData?.description || "");
+  const [shareWithGuardians, setShareWithGuardians] = useState(eventData?.shareWithGuardians !== undefined ? eventData.shareWithGuardians : true);
   const [selectedDepartments, setSelectedDepartments] = useState<string[]>(eventData?.departments || ["Blåbär", "Lingon", "Odon", "Vildhallon", "Gråsparven", "laser kittens", "örg"]);
   const [participants, setParticipants] = useState(eventData?.participants || "35");
-  const [allDay, setAllDay] = useState(eventData?.allDay || false);
+  const [allDay, setAllDay] = useState(eventData?.isAllDay || false);
   const [startDate, setStartDate] = useState<Date>(eventData?.date || new Date(2025, 10, 3));
-  const [endDate, setEndDate] = useState<Date>(eventData?.endDate || eventData?.date || new Date(2025, 10, 3));
+  const [endDate, setEndDate] = useState<Date>(eventData?.date || new Date(2025, 10, 3));
   const [startTime, setStartTime] = useState(eventData?.startTime || "14:30");
   const [endTime, setEndTime] = useState(eventData?.endTime || "15:00");
   const [isRecurring, setIsRecurring] = useState(editScope === "single" ? false : (eventData?.isRecurring || false));
@@ -45,23 +65,20 @@ export function AddEventDialog({ open, onOpenChange, mode = "add", eventData, ed
   const [selectedWeekDays, setSelectedWeekDays] = useState<string[]>(eventData?.recurrenceRule?.selectedDays || []);
   const [showDepartmentDropdown, setShowDepartmentDropdown] = useState(false);
 
-  // Automatically set isSharedWithGuardians based on category
-  const isSharedWithGuardians = category === EventCategory.EXTERNAL || category === EventCategory.CLOSURE || category === EventCategory.WARNING;
-
   // Sync form state when dialog opens or eventData changes
   useEffect(() => {
     if (open && eventData) {
-      setCategory(eventData.category || EventCategory.EXTERNAL);
       setTitle(eventData.title || "");
       setDescription(eventData.description || "");
+      setShareWithGuardians(eventData.shareWithGuardians !== undefined ? eventData.shareWithGuardians : true);
       setSelectedDepartments(eventData.departments || ["Blåbär", "Lingon", "Odon", "Vildhallon", "Gråsparven", "laser kittens", "örg"]);
       setParticipants(eventData.participants || "35");
-      setAllDay(eventData.allDay || false);
+      setAllDay(eventData.isAllDay || false);
       
       // Set dates based on eventData.date (which is already adjusted by Calendar.tsx based on editScope)
       if (eventData.date) {
         setStartDate(eventData.date);
-        setEndDate(eventData.endDate || eventData.date);
+        setEndDate(eventData.date);
       }
       
       setStartTime(eventData.startTime || "14:30");
@@ -77,9 +94,9 @@ export function AddEventDialog({ open, onOpenChange, mode = "add", eventData, ed
       setSelectedWeekDays(eventData.recurrenceRule?.selectedDays || []);
     } else if (open && !eventData) {
       // Reset to defaults for new event
-      setCategory(EventCategory.EXTERNAL);
       setTitle("");
       setDescription("");
+      setShareWithGuardians(true);
       setSelectedDepartments(["Blåbär", "Lingon", "Odon", "Vildhallon", "Gråsparven", "laser kittens", "örg"]);
       setParticipants("35");
       setAllDay(false);
@@ -117,10 +134,9 @@ export function AddEventDialog({ open, onOpenChange, mode = "add", eventData, ed
     console.log({
       mode,
       editScope,
-      category,
       title,
       description,
-      isSharedWithGuardians,
+      shareWithGuardians,
       selectedDepartments,
       participants,
       allDay,
@@ -147,33 +163,6 @@ export function AddEventDialog({ open, onOpenChange, mode = "add", eventData, ed
         </DialogHeader>
 
         <div className="space-y-6 py-4">
-          {/* Category Selection */}
-          <div className="space-y-3">
-            <Label className="text-sm font-semibold">Kategori</Label>
-            <RadioGroup value={category} onValueChange={(value) => setCategory(value as EventCategory)}>
-              <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-50 transition-colors">
-                <RadioGroupItem value={EventCategory.EXTERNAL} id="external" />
-                <Label htmlFor="external" className="flex items-center gap-2 cursor-pointer flex-1">
-                  <div className="w-3 h-3 rounded bg-green-500 flex-shrink-0" />
-                  <div>
-                    <div className="font-medium">Extern aktivitet</div>
-                    <div className="text-xs text-muted-foreground">Delas med vårdnadshavare</div>
-                  </div>
-                </Label>
-              </div>
-              <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-50 transition-colors">
-                <RadioGroupItem value={EventCategory.INTERNAL} id="internal" />
-                <Label htmlFor="internal" className="flex items-center gap-2 cursor-pointer flex-1">
-                  <div className="w-3 h-3 rounded bg-blue-500 flex-shrink-0" />
-                  <div>
-                    <div className="font-medium">Intern aktivitet</div>
-                    <div className="text-xs text-muted-foreground">Endast för personal</div>
-                  </div>
-                </Label>
-              </div>
-            </RadioGroup>
-          </div>
-
           {/* Title */}
           <div className="space-y-2">
             <Input
@@ -194,20 +183,17 @@ export function AddEventDialog({ open, onOpenChange, mode = "add", eventData, ed
             />
           </div>
 
-          {/* Info about sharing (read-only based on category) */}
-          <div className="bg-gray-50 border rounded-lg p-3">
-            <p className="text-sm text-gray-700">
-              {isSharedWithGuardians ? (
-                <span className="flex items-center gap-2">
-                  <span className="text-green-600 font-medium">✓</span>
-                  Denna aktivitet kommer att delas med vårdnadshavare
-                </span>
-              ) : (
-                <span className="flex items-center gap-2">
-                  <span className="text-blue-600 font-medium">🔒</span>
-                  Denna aktivitet är endast synlig för personal
-                </span>
-              )}
+          {/* Share with Guardians */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-3">
+              <Switch
+                checked={shareWithGuardians}
+                onCheckedChange={setShareWithGuardians}
+              />
+              <Label className="font-semibold">Dela med vårdnadshavare</Label>
+            </div>
+            <p className="text-sm text-gray-600 ml-11">
+              När denna händelse är aktiverad kommer den vara synlig för vårdnadshavare du måste välja barn
             </p>
           </div>
 
@@ -475,8 +461,8 @@ export function AddEventDialog({ open, onOpenChange, mode = "add", eventData, ed
           {mode === "edit" && eventData?.createdBy && eventData?.createdAt && (
             <div className="pt-4 border-t space-y-1 text-xs text-muted-foreground">
               <p>Skapad av: {eventData.createdBy} vid {format(eventData.createdAt, "yyyy-MM-dd HH:mm", { locale: sv })}</p>
-              {eventData.updatedAt && (
-                <p>Senast uppdaterad: {format(eventData.updatedAt, "yyyy-MM-dd HH:mm", { locale: sv })}</p>
+              {eventData.updatedBy && eventData.updatedAt && (
+                <p>Uppdaterad av: {eventData.updatedBy} vid {format(eventData.updatedAt, "yyyy-MM-dd HH:mm", { locale: sv })}</p>
               )}
             </div>
           )}

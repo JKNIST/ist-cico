@@ -57,16 +57,6 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
-        calendar: {
-          closure: "hsl(var(--calendar-closure))",
-          "closure-foreground": "hsl(var(--calendar-closure-foreground))",
-          warning: "hsl(var(--calendar-warning))",
-          "warning-foreground": "hsl(var(--calendar-warning-foreground))",
-          external: "hsl(var(--calendar-external))",
-          "external-foreground": "hsl(var(--calendar-external-foreground))",
-          internal: "hsl(var(--calendar-internal))",
-          "internal-foreground": "hsl(var(--calendar-internal-foreground))",
-        },
       },
       borderRadius: {
         lg: "var(--radius)",
