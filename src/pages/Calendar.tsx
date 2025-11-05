@@ -428,60 +428,6 @@ export default function Calendar() {
         </div>
       </div>
 
-      {/* Filter Toolbar */}
-      <div className="px-6 py-4 bg-gray-50 border-b">
-        <div className="flex flex-wrap gap-2 items-center">
-          <FilterChip 
-            icon={<XCircle className="h-3 w-3" />} 
-            label="Stängningar" 
-            color="red"
-            active={activeFilters.has('closure')}
-            onClick={() => toggleFilter('closure')}
-          />
-          <FilterChip 
-            icon={<AlertTriangle className="h-3 w-3" />} 
-            label="Varningar" 
-            color="amber"
-            active={activeFilters.has('warning')}
-            onClick={() => toggleFilter('warning')}
-          />
-          <FilterChip 
-            label="Externa" 
-            color="green"
-            active={activeFilters.has('external')}
-            onClick={() => toggleFilter('external')}
-          />
-          <FilterChip 
-            label="Interna" 
-            color="blue"
-            active={activeFilters.has('internal')}
-            onClick={() => toggleFilter('internal')}
-          />
-          
-          <Separator orientation="vertical" className="h-6" />
-          
-          <FilterChip 
-            icon={<Repeat className="h-3 w-3" />} 
-            label="Återkommande" 
-            active={activeFilters.has('recurring')}
-            onClick={() => toggleFilter('recurring')}
-          />
-          
-          {activeFilters.size > 0 && (
-            <>
-              <Separator orientation="vertical" className="h-6" />
-              <Button 
-                variant="ghost" 
-                size="sm"
-                onClick={() => setActiveFilters(new Set())}
-                className="text-gray-600 hover:text-gray-900"
-              >
-                Rensa filter
-              </Button>
-            </>
-          )}
-        </div>
-      </div>
 
       {/* Calendar Grid */}
       <div className="px-6 py-4">
