@@ -170,5 +170,52 @@
     "thisInstance": "Endast denna instans",
     "allInstances": "Alla framtida instanser",
     "cancel": "Avbryt"
+  },
+  "blog": {
+    "title": "Blogg",
+    "newPost": "NYTT INLÄGG",
+    "filter": "FILTRERA",
+    "categories": {
+      "alla": "ALLA",
+      "importantdates": "VIKTIGA DATUM",
+      "regularupdates": "REGELBUNDNA UPPDATERINGAR",
+      "information": "INFORMATION"
+    },
+    "status": {
+      "published": "Publicerad",
+      "scheduled": "Schemalagd",
+      "unread": "Oläst"
+    },
+    "filters": {
+      "showUnpublished": "Visa opublicerade inlägg",
+      "showInternalOnly": "Visa endast interna inlägg",
+      "activeFilters": "Aktiva filter"
+    },
+    "readers": {
+      "seenBy": "Sett av",
+      "external": "Externa mottagare",
+      "internal": "Interna mottagare",
+      "noneYet": "Ingen har sett ännu"
+    },
+    "form": {
+      "title": "Skapa nytt blogginlägg",
+      "titlePlaceholder": "Titel *",
+      "category": "Kategori *",
+      "selectCategory": "Välj kategori",
+      "markImportant": "Markera som viktigt",
+      "recipients": "Välj mottagare",
+      "externalRecipients": "Externa mottagare (elevers vårdnadshavare)",
+      "internalRecipients": "Interna mottagare (personal)",
+      "classesGroups": "Klasser/Grupper",
+      "students": "Elever/Barn",
+      "staff": "Personal",
+      "publicationDate": "Publiceringsdatum",
+      "publicationTime": "Publiceringstid",
+      "autoDelete": "Ställ in datum för att radera inlägget",
+      "policyNote": "Observera att detta blogginlägg kommer att raderas automatiskt i enlighet med kommunens policy.",
+      "cancel": "AVBRYT",
+      "publish": "PUBLICERA"
+    }
   }
+}
 }

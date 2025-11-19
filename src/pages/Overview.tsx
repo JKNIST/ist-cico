@@ -13,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { InformationWidget } from "@/components/dashboard/InformationWidget";
 
 const mockChildren = [
   { name: "Zero Aarne", initials: "ZA", department: "Spindeln", status: "absent" as const, time: "06:35", timeLabel: "Ej hämtas:" },

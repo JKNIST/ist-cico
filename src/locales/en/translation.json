@@ -170,5 +170,52 @@
     "thisInstance": "Only this instance",
     "allInstances": "All future instances",
     "cancel": "Cancel"
+  },
+  "blog": {
+    "title": "Blog",
+    "newPost": "NEW POST",
+    "filter": "FILTER",
+    "categories": {
+      "alla": "ALL",
+      "importantdates": "IMPORTANT DATES",
+      "regularupdates": "REGULAR UPDATES",
+      "information": "INFORMATION"
+    },
+    "status": {
+      "published": "Published",
+      "scheduled": "Scheduled",
+      "unread": "Unread"
+    },
+    "filters": {
+      "showUnpublished": "Show unpublished posts",
+      "showInternalOnly": "Show internal posts only",
+      "activeFilters": "Active filters"
+    },
+    "readers": {
+      "seenBy": "Seen by",
+      "external": "External recipients",
+      "internal": "Internal recipients",
+      "noneYet": "No one has seen yet"
+    },
+    "form": {
+      "title": "Create new blog post",
+      "titlePlaceholder": "Title *",
+      "category": "Category *",
+      "selectCategory": "Select category",
+      "markImportant": "Mark as important",
+      "recipients": "Select recipients",
+      "externalRecipients": "External recipients (parents/guardians)",
+      "internalRecipients": "Internal recipients (staff)",
+      "classesGroups": "Classes/Groups",
+      "students": "Students/Children",
+      "staff": "Staff",
+      "publicationDate": "Publication date",
+      "publicationTime": "Publication time",
+      "autoDelete": "Set date to delete post",
+      "policyNote": "Note that this blog post will be automatically deleted in accordance with municipal policy.",
+      "cancel": "CANCEL",
+      "publish": "PUBLISH"
+    }
   }
+}
 }
