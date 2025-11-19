@@ -123,3 +123,6 @@ export const mockDepartments: Department[] = [
     children: mockChildren.filter(c => c.department === "Vildhallon"),
   },
 ];
+
+// Flattened array av alla grupper för enkel access
+export const mockGroups: ChildGroup[] = mockDepartments.flatMap(dept => dept.groups);

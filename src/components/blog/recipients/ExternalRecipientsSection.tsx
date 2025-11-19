@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { X } from "lucide-react";
+import { GroupsSelection } from "./GroupsSelection";
 
 export function ExternalRecipientsSection() {
   const { t } = useTranslation();
@@ -57,6 +58,9 @@ export function ExternalRecipientsSection() {
           ))}
         </div>
       </div>
+
+      {/* Grupper - baserat på valda avdelningar */}
+      <GroupsSelection selectedDepartments={departments} />
 
       {/* Elever/Barn */}
       <div className="space-y-2">
