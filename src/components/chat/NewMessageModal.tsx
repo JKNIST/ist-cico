@@ -24,7 +24,7 @@ const mockGuardians: Recipient[] = [
   { id: '2', name: 'Agnes Engqvist', subtitle: 'Vårdnadshavare', class: 'Storängskolan - 4A', type: "guardian" },
   { id: '3', name: 'Agneta Nilsson', subtitle: 'Vårdnadshavare - Agga, Annica', class: 'Norreka 6-9 - 9/IDH', type: "guardian" },
   { id: '4', name: 'Anna Larsson', subtitle: 'Vårdnadshavare - Anders, Camilla, Marie', class: 'Landsrogymnasiet 1 - IMA22/EN', type: "guardian" },
-  { id: '5', name: 'Anton Pettersson', subtitle: 'Vårdnadshavare', class: '+2 klasser/grupper', type: "guardian" },
+  { id: '5', name: 'Anton Pettersson', subtitle: 'Vårdnadshavare', class: '+2 avdelningar', type: "guardian" },
 ];
 
 export function NewMessageModal({ isOpen, onClose, onSend, currentTab }: NewMessageModalProps) {

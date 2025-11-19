@@ -7,15 +7,15 @@ import { X } from "lucide-react";
 
 export function ExternalRecipientsSection() {
   const { t } = useTranslation();
-  const [classes, setClasses] = useState<string[]>(["Spindeln", "Fjärilen"]);
+  const [departments, setDepartments] = useState<string[]>(["Spindeln", "Fjärilen"]);
   const [students, setStudents] = useState<string[]>([]);
-  const [classInput, setClassInput] = useState("");
+  const [departmentInput, setDepartmentInput] = useState("");
   const [studentInput, setStudentInput] = useState("");
 
-  const handleAddClass = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && classInput.trim()) {
-      setClasses([...classes, classInput.trim()]);
-      setClassInput("");
+  const handleAddDepartment = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && departmentInput.trim()) {
+      setDepartments([...departments, departmentInput.trim()]);
+      setDepartmentInput("");
     }
   };
 
@@ -26,8 +26,8 @@ export function ExternalRecipientsSection() {
     }
   };
 
-  const removeClass = (index: number) => {
-    setClasses(classes.filter((_, i) => i !== index));
+  const removeDepartment = (index: number) => {
+    setDepartments(departments.filter((_, i) => i !== index));
   };
 
   const removeStudent = (index: number) => {
@@ -36,22 +36,22 @@ export function ExternalRecipientsSection() {
 
   return (
     <div className="space-y-4 pl-6 pt-3 border-l-2">
-      {/* Klasser/Grupper */}
+      {/* Avdelningar */}
       <div className="space-y-2">
         <Label>{t("blog.form.classesGroups")}</Label>
         <Input
           placeholder="Tryck Enter för att lägga till..."
-          value={classInput}
-          onChange={(e) => setClassInput(e.target.value)}
-          onKeyDown={handleAddClass}
+          value={departmentInput}
+          onChange={(e) => setDepartmentInput(e.target.value)}
+          onKeyDown={handleAddDepartment}
         />
         <div className="flex flex-wrap gap-2">
-          {classes.map((cls, index) => (
+          {departments.map((dept, index) => (
             <Badge key={index} variant="secondary" className="gap-1">
-              {cls}
+              {dept}
               <X
                 className="h-3 w-3 cursor-pointer"
-                onClick={() => removeClass(index)}
+                onClick={() => removeDepartment(index)}
               />
             </Badge>
           ))}
