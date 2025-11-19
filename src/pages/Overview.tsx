@@ -1,18 +1,11 @@
 import { useState } from "react";
-import { ChevronLeft, Search, ChevronDown } from "lucide-react";
+import { Search } from "lucide-react";
 import { ChildCard } from "@/components/ChildCard";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { useDepartmentFilter } from "@/contexts/DepartmentFilterContext";
 
 const mockChildren = [
   { name: "Zero Aarne", initials: "ZA", department: "Spindeln", status: "absent" as const, time: "06:35", timeLabel: "Ej hämtas:" },
@@ -34,46 +27,16 @@ const mockChildren = [
 
 export default function Overview() {
   const [searchQuery, setSearchQuery] = useState("");
+  const { selectedDepartments } = useDepartmentFilter();
+
+  const filteredChildren = mockChildren.filter((child) => {
+    const matchesSearch = child.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesDepartment = selectedDepartments.length === 0 || selectedDepartments.includes(child.department);
+    return matchesSearch && matchesDepartment;
+  });
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b bg-white sticky top-0 z-10">
-        <div className="flex items-center justify-between px-6 py-3">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="sm">
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <h1 className="text-xl font-semibold">Överblick</h1>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <Select defaultValue="svenska">
-              <SelectTrigger className="w-32">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="svenska">Svenska</SelectItem>
-                <SelectItem value="english">English</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Select defaultValue="apelsln">
-              <SelectTrigger className="w-48">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="apelsln">Apelsln, Baggen, Fjärilsle</SelectItem>
-                <SelectItem value="other">Other</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Button variant="ghost" size="sm" className="text-primary">
-              BERTIL
-            </Button>
-          </div>
-        </div>
-      </header>
 
       {/* Tabs */}
       <Tabs defaultValue="dagoversikt" className="w-full">
@@ -131,13 +94,9 @@ export default function Overview() {
 
           {/* Children Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
-            {mockChildren
-              .filter((child) =>
-                child.name.toLowerCase().includes(searchQuery.toLowerCase())
-              )
-              .map((child, index) => (
-                <ChildCard key={index} {...child} />
-              ))}
+            {filteredChildren.map((child, index) => (
+              <ChildCard key={index} {...child} />
+            ))}
           </div>
         </TabsContent>
 
