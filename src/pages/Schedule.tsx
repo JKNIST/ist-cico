@@ -5,6 +5,7 @@ import { format, addDays, startOfWeek, getWeek } from "date-fns";
 import { sv, enUS, nb } from "date-fns/locale";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
+import { useDepartmentFilter } from "@/contexts/DepartmentFilterContext";
 
 interface ChildSchedule {
   id: string;
@@ -83,7 +84,12 @@ const mockChildrenSchedules: ChildSchedule[] = [
 
 export default function Schedule() {
   const { i18n } = useTranslation();
+  const { selectedDepartments } = useDepartmentFilter();
   const [currentDate, setCurrentDate] = useState(new Date(2025, 10, 17)); // Nov 17, 2025
+
+  const filteredChildren = mockChildrenSchedules.filter((child) => {
+    return selectedDepartments.length === 0 || selectedDepartments.includes(child.department);
+  });
 
   const getDateLocale = () => {
     switch (i18n.language) {
@@ -109,7 +115,7 @@ export default function Schedule() {
   };
 
   const getChildrenPresentCount = (dayIndex: number) => {
-    return mockChildrenSchedules.filter(
+    return filteredChildren.filter(
       (child) => child.schedules[dayIndex.toString()]
     ).length;
   };
@@ -189,7 +195,7 @@ export default function Schedule() {
                   </tr>
                 </thead>
                 <tbody>
-                  {mockChildrenSchedules.map((child) => (
+                  {filteredChildren.map((child) => (
                     <tr key={child.id} className="border-b hover:bg-muted/30">
                       <td className="p-4">
                         <div className="flex items-center gap-2">
