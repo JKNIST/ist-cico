@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Calendar, Plus, Pencil, Trash2, ChevronDown, ChevronUp, Users } from "lucide-react";
+import { Calendar, Plus, Pencil, Trash2, ChevronDown, ChevronUp } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -8,7 +8,6 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { TemporarySchemaPeriodDialog } from "@/components/TemporarySchemaPeriodDialog";
 import { ClosurePeriodDialog } from "@/components/ClosurePeriodDialog";
 import { GroupsManagement } from "@/components/administration/GroupsManagement";
-import { StaffingRatioSettings } from "@/components/administration/StaffingRatioSettings";
 import { TemporarySchemaPeriod, ClosurePeriod } from "@/types/administration";
 
 const mockPeriods: TemporarySchemaPeriod[] = [
@@ -119,14 +118,14 @@ export default function Administration() {
             <TabsTrigger value="closures" className="text-xs uppercase font-medium">
               Stängningsperioder
             </TabsTrigger>
-            <TabsTrigger value="staff" className="text-xs uppercase font-medium">
-              Personal
+            <TabsTrigger value="noSchedule" className="text-xs uppercase font-medium">
+              Saknar schema
+            </TabsTrigger>
+            <TabsTrigger value="places" className="text-xs uppercase font-medium">
+              Platser
             </TabsTrigger>
             <TabsTrigger value="groups" className="text-xs uppercase font-medium">
               Grupper
-            </TabsTrigger>
-            <TabsTrigger value="archived" className="text-xs uppercase font-medium">
-              Arkiv
             </TabsTrigger>
           </TabsList>
 
@@ -316,16 +315,6 @@ export default function Administration() {
                   </CollapsibleContent>
                 </Card>
               </Collapsible>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="staff">
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 mb-6">
-                <Users className="h-5 w-5 text-primary" />
-                <h2 className="text-lg font-semibold">Personalinställningar</h2>
-              </div>
-              <StaffingRatioSettings />
             </div>
           </TabsContent>
 
