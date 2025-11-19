@@ -54,7 +54,10 @@
       "closure": "Stengningsperiode",
       "willBeActivated": "Vil bli aktivert",
       "willBePublished": "Vil bli publisert"
-    }
+    },
+    "moreEvents": "+{count} mer",
+    "hiddenEvents": "{count} skjulte hendelser",
+    "allDay": "Hele dagen"
   },
   "eventDialog": {
     "addEvent": "Legg til hendelse",

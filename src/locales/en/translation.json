@@ -54,7 +54,10 @@
       "closure": "Closure period",
       "willBeActivated": "Will be activated",
       "willBePublished": "Will be published"
-    }
+    },
+    "moreEvents": "+{count} more",
+    "hiddenEvents": "{count} hidden events",
+    "allDay": "All day"
   },
   "eventDialog": {
     "addEvent": "Add Event",

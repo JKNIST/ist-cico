@@ -54,7 +54,10 @@
       "closure": "Stängningsperiod",
       "willBeActivated": "Kommer att aktiveras",
       "willBePublished": "Publiceras"
-    }
+    },
+    "moreEvents": "+{count} mer",
+    "hiddenEvents": "{count} dolda händelser",
+    "allDay": "Heldag"
   },
   "eventDialog": {
     "addEvent": "Lägg till händelse",
