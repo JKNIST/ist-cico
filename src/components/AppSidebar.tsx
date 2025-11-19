@@ -3,6 +3,10 @@ import { NavLink } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useState, useEffect } from "react";
 import {
+  getUnreadInternalBlogCountFromStorage,
+  updateUnreadInternalBlogCount,
+} from "@/utils/blogUnreadCounter";
+import {
   Sidebar,
   SidebarContent,
   SidebarGroup,
@@ -26,6 +30,7 @@ export function AppSidebar() {
   const isCollapsed = state === "collapsed";
   const [unreadCount, setUnreadCount] = useState<number>(0);
   const [popoverOpen, setPopoverOpen] = useState(false);
+  const [unreadInternalBlogCount, setUnreadInternalBlogCount] = useState<number>(0);
 
   useEffect(() => {
     // Get initial unread count from localStorage
@@ -47,6 +52,27 @@ export function AppSidebar() {
     };
   }, []);
 
+  useEffect(() => {
+    const updateBlogUnreadCount = () => {
+      const count = getUnreadInternalBlogCountFromStorage();
+      setUnreadInternalBlogCount(count);
+    };
+
+    updateBlogUnreadCount();
+
+    const handleBlogPostRead = () => {
+      updateUnreadInternalBlogCount();
+    };
+
+    window.addEventListener("blogPostReadUpdated", handleBlogPostRead);
+    window.addEventListener("unreadInternalBlogPostsUpdated", updateBlogUnreadCount);
+
+    return () => {
+      window.removeEventListener("blogPostReadUpdated", handleBlogPostRead);
+      window.removeEventListener("unreadInternalBlogPostsUpdated", updateBlogUnreadCount);
+    };
+  }, []);
+
   const menuItems = [
     { title: t('sidebar.overview'), url: "/", icon: Eye },
     { title: t('sidebar.current'), url: "/aktuellt", icon: FileText, badge: 6 },
@@ -59,7 +85,7 @@ export function AppSidebar() {
     { title: t('sidebar.mealPlanning'), url: "/maltidsplanering", icon: ClipboardList },
     { title: t('sidebar.forms'), url: "/formular", icon: FileEdit, external: true },
     { title: t('sidebar.pedagogicalWork'), url: "/pedagogiskt-arbete", icon: FolderOpen, external: true, opensNewTab: true },
-    { title: t('sidebar.blog'), url: "/blogg", icon: Rss },
+    { title: t('sidebar.blog'), url: "/blogg", icon: Rss, badge: unreadInternalBlogCount > 0 ? unreadInternalBlogCount : undefined },
     { title: t('sidebar.chat'), url: "/chatt", icon: MessageSquare, badge: unreadCount > 0 ? unreadCount : undefined },
     { title: t('sidebar.appointments'), url: "/samtalsbokningar", icon: CalendarDays },
     { title: t('sidebar.documentManager'), url: "/document-manager", icon: FolderOpen },
