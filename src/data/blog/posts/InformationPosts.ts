@@ -41,6 +41,7 @@ Förskolechefen`,
     category: "INFORMATION",
     internalOnly: false,
     readers: generateReaders(false, 95),
+    departments: ["Blåbär", "Lingon", "Odon", "Vildhallon"],
   },
   {
     id: "info-2",
