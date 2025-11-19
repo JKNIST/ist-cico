@@ -12,6 +12,7 @@ import PedagogicalWorkLanding from "./pages/PedagogicalWorkLanding";
 import Calendar from "./pages/Calendar";
 import Administration from "./pages/Administration";
 import Blog from "./pages/Blog";
+import Chat from "./pages/Chat";
 import NotFound from "./pages/NotFound";
 import "./i18n/config";
 
@@ -51,7 +52,7 @@ const App = () => (
           <Route path="/maltidsplanering" element={<AppLayout><div className="p-6">Måltidsplanering</div></AppLayout>} />
           <Route path="/formular" element={<AppLayout><div className="p-6">Formulär</div></AppLayout>} />
           <Route path="/blogg" element={<AppLayout><Blog /></AppLayout>} />
-          <Route path="/chatt" element={<AppLayout><div className="p-6">Chatt</div></AppLayout>} />
+          <Route path="/chatt" element={<AppLayout><Chat /></AppLayout>} />
           <Route path="/samtalsbokningar" element={<AppLayout><div className="p-6">Samtalsbokningar</div></AppLayout>} />
           <Route path="/document-manager" element={<AppLayout><div className="p-6">Document Manager</div></AppLayout>} />
           <Route path="/om" element={<AppLayout><div className="p-6">Om Lämna & hämta</div></AppLayout>} />

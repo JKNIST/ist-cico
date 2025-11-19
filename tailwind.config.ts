@@ -67,6 +67,14 @@ export default {
           internal: "hsl(var(--calendar-internal))",
           "internal-foreground": "hsl(var(--calendar-internal-foreground))",
         },
+        chat: {
+          "message-own": "hsl(var(--chat-message-own))",
+          "message-other": "hsl(var(--chat-message-other))",
+          "area-bg": "hsl(var(--chat-area-bg))",
+          active: "hsl(var(--chat-active))",
+          unread: "hsl(var(--chat-unread))",
+          badge: "hsl(var(--chat-badge))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
