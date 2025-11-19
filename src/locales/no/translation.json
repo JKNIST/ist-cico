@@ -170,5 +170,52 @@
     "thisInstance": "Kun denne forekomsten",
     "allInstances": "Alle fremtidige forekomster",
     "cancel": "Avbryt"
+  },
+  "blog": {
+    "title": "Blogg",
+    "newPost": "NYTT INNLEGG",
+    "filter": "FILTRER",
+    "categories": {
+      "alla": "ALLE",
+      "importantdates": "VIKTIGE DATOER",
+      "regularupdates": "REGELMESSIGE OPPDATERINGER",
+      "information": "INFORMASJON"
+    },
+    "status": {
+      "published": "Publisert",
+      "scheduled": "Planlagt",
+      "unread": "Ulest"
+    },
+    "filters": {
+      "showUnpublished": "Vis upubliserte innlegg",
+      "showInternalOnly": "Vis kun interne innlegg",
+      "activeFilters": "Aktive filtre"
+    },
+    "readers": {
+      "seenBy": "Sett av",
+      "external": "Eksterne mottakere",
+      "internal": "Interne mottakere",
+      "noneYet": "Ingen har sett ennå"
+    },
+    "form": {
+      "title": "Opprett nytt blogginnlegg",
+      "titlePlaceholder": "Tittel *",
+      "category": "Kategori *",
+      "selectCategory": "Velg kategori",
+      "markImportant": "Merk som viktig",
+      "recipients": "Velg mottakere",
+      "externalRecipients": "Eksterne mottakere (foresatte)",
+      "internalRecipients": "Interne mottakere (ansatte)",
+      "classesGroups": "Klasser/Grupper",
+      "students": "Elever/Barn",
+      "staff": "Ansatte",
+      "publicationDate": "Publiseringsdato",
+      "publicationTime": "Publiseringstid",
+      "autoDelete": "Sett dato for å slette innlegget",
+      "policyNote": "Merk at dette blogginnlegget vil bli slettet automatisk i samsvar med kommunens retningslinjer.",
+      "cancel": "AVBRYT",
+      "publish": "PUBLISER"
+    }
   }
+}
 }
