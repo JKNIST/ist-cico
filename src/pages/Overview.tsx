@@ -8,21 +8,21 @@ import { Label } from "@/components/ui/label";
 import { useDepartmentFilter } from "@/contexts/DepartmentFilterContext";
 
 const mockChildren = [
-  { name: "Zero Aarne", initials: "ZA", department: "Spindeln", status: "absent" as const, time: "06:35", timeLabel: "Ej hämtas:" },
-  { name: "Mio Adler", initials: "MA", department: "Spindeln", status: "present" as const, time: "10:00", timeLabel: "Ej hämtas:" },
-  { name: "Ilse Nilsson", initials: "IN", department: "Fjärilen", status: "soon" as const, time: "12:00", timeLabel: "Hämtas snart:" },
-  { name: "Lemmy Tedsson", initials: "LT", department: "Baggen", status: "present" as const, time: "15:00", timeLabel: "Hämtas:" },
-  { name: "Lisa Karlsson", initials: "LK", department: "Spindeln", status: "present" as const, time: "15:00", timeLabel: "Hämtas:" },
-  { name: "Iris Ahlberg", initials: "IA", department: "Fjärilen", status: "present" as const, time: "15:50", timeLabel: "Hämtas:" },
-  { name: "-- --", initials: "--", department: "Baggen", status: "present" as const, time: "16:00", timeLabel: "Hämtas:" },
-  { name: "Anna Andersson", initials: "AA", department: "Spindeln", status: "present" as const, time: "16:00", timeLabel: "Hämtas:" },
-  { name: "Anna Hillman", initials: "AH", department: "Fjärilen", status: "present" as const, time: "16:00", timeLabel: "Hämtas:" },
-  { name: "Emil Jr Gunnarsson", initials: "EG", department: "Baggen", status: "present" as const, time: "16:00", timeLabel: "Hämtas:" },
-  { name: "Hanna Olsson", initials: "HO", department: "Fjärilen", status: "present" as const, time: "16:00", timeLabel: "Hämtas:" },
-  { name: "Hemline Team", initials: "HT", department: "Baggen", status: "present" as const, time: "16:00", timeLabel: "Hämtas:" },
-  { name: "Ismat Khan", initials: "IK", department: "Spindeln", status: "present" as const, time: "16:00", timeLabel: "Hämtas:" },
-  { name: "Justin Ferdinand", initials: "JF", department: "Baggen", status: "present" as const, time: "16:00", timeLabel: "Hämtas:" },
-  { name: "Marit Larsson", initials: "ML", department: "Baggen", status: "present" as const, time: "16:00", timeLabel: "Hämtas:" },
+  { name: "Zero Aarne", initials: "ZA", department: "Blåbär", status: "absent" as const, time: "06:35", timeLabel: "Ej hämtas:" },
+  { name: "Mio Adler", initials: "MA", department: "Blåbär", status: "present" as const, time: "10:00", timeLabel: "Ej hämtas:" },
+  { name: "Ilse Nilsson", initials: "IN", department: "Lingon", status: "soon" as const, time: "12:00", timeLabel: "Hämtas snart:" },
+  { name: "Lemmy Tedsson", initials: "LT", department: "Odon", status: "present" as const, time: "15:00", timeLabel: "Hämtas:" },
+  { name: "Lisa Karlsson", initials: "LK", department: "Blåbär", status: "present" as const, time: "15:00", timeLabel: "Hämtas:" },
+  { name: "Iris Ahlberg", initials: "IA", department: "Lingon", status: "present" as const, time: "15:50", timeLabel: "Hämtas:" },
+  { name: "-- --", initials: "--", department: "Odon", status: "present" as const, time: "16:00", timeLabel: "Hämtas:" },
+  { name: "Anna Andersson", initials: "AA", department: "Blåbär", status: "present" as const, time: "16:00", timeLabel: "Hämtas:" },
+  { name: "Anna Hillman", initials: "AH", department: "Lingon", status: "present" as const, time: "16:00", timeLabel: "Hämtas:" },
+  { name: "Emil Jr Gunnarsson", initials: "EG", department: "Odon", status: "present" as const, time: "16:00", timeLabel: "Hämtas:" },
+  { name: "Hanna Olsson", initials: "HO", department: "Lingon", status: "present" as const, time: "16:00", timeLabel: "Hämtas:" },
+  { name: "Hemline Team", initials: "HT", department: "Odon", status: "present" as const, time: "16:00", timeLabel: "Hämtas:" },
+  { name: "Ismat Khan", initials: "IK", department: "Blåbär", status: "present" as const, time: "16:00", timeLabel: "Hämtas:" },
+  { name: "Justin Ferdinand", initials: "JF", department: "Vildhallon", status: "present" as const, time: "16:00", timeLabel: "Hämtas:" },
+  { name: "Marit Larsson", initials: "ML", department: "Vildhallon", status: "present" as const, time: "16:00", timeLabel: "Hämtas:" },
 ];
 
 export default function Overview() {

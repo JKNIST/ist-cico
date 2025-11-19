@@ -8,8 +8,10 @@ import { initialConversations } from "@/features/chat/data/mockData";
 import { useConversationFilters } from "@/features/chat/hooks/useConversationFilters";
 import { toast } from "@/hooks/use-toast";
 import { useLocation } from "react-router-dom";
+import { useDepartmentFilter } from "@/contexts/DepartmentFilterContext";
 
 const Chat = () => {
+  const { selectedDepartments } = useDepartmentFilter();
   const [isNewMessageModalOpen, setIsNewMessageModalOpen] = useState(false);
   const [currentTab, setCurrentTab] = useState<'external' | 'internal'>('external');
   const location = useLocation();
@@ -24,6 +26,12 @@ const Chat = () => {
     leaveConversation
   } = useConversations(initialConversations);
 
+  // Filter conversations based on selected departments
+  const filteredConversations = conversations.filter(conv => {
+    if (selectedDepartments.length === 0) return true;
+    return conv.department && selectedDepartments.includes(conv.department);
+  });
+
   const {
     externalConversations,
     internalConversations,
@@ -31,7 +39,7 @@ const Chat = () => {
     externalUnreadCount,
     internalUnreadCount,
     departmentUnreadCount
-  } = useConversationFilters(conversations);
+  } = useConversationFilters(filteredConversations);
 
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);

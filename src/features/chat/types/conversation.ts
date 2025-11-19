@@ -7,6 +7,8 @@ export interface Conversation {
   participants: string[];
   messages: Message[];
   isLocked?: boolean;
+  department?: string;
+  student?: string;
 }
 
 export interface ConversationsState {
