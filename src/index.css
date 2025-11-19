@@ -59,6 +59,13 @@ All colors MUST be HSL.
     --sidebar-accent-foreground: 0 0% 100%;
     --sidebar-border: 185 50% 30%;
     --sidebar-ring: 185 45% 42%;
+
+    --chat-message-own: 45 100% 92%;
+    --chat-message-other: 0 0% 100%;
+    --chat-area-bg: 40 100% 97%;
+    --chat-active: 45 100% 95%;
+    --chat-unread: 25 95% 53%;
+    --chat-badge: 185 54% 37%;
   }
 
   .dark {
@@ -98,6 +105,13 @@ All colors MUST be HSL.
     --calendar-external-foreground: 0 0% 10%;
     --calendar-internal: 210 100% 90%;
     --calendar-internal-foreground: 0 0% 10%;
+
+    --chat-message-own: 45 100% 88%;
+    --chat-message-other: 0 0% 15%;
+    --chat-area-bg: 40 100% 10%;
+    --chat-active: 45 100% 20%;
+    --chat-unread: 25 95% 53%;
+    --chat-badge: 185 54% 37%;
   }
 }
 
