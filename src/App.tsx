@@ -6,6 +6,9 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { LanguageSelector } from "@/components/LanguageSelector";
+import { DepartmentSelector } from "@/components/DepartmentSelector";
+import { UserProfile } from "@/components/UserProfile";
+import { DepartmentFilterProvider } from "@/contexts/DepartmentFilterContext";
 import Overview from "./pages/Overview";
 import PedagogicalWork from "./pages/PedagogicalWork";
 import PedagogicalWorkLanding from "./pages/PedagogicalWorkLanding";
@@ -25,8 +28,10 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => (
     <div className="flex min-h-screen w-full">
       <AppSidebar />
       <div className="flex-1 flex flex-col">
-        <header className="border-b bg-background px-6 py-3 flex justify-end">
+        <header className="sticky top-0 z-50 border-b bg-background px-6 py-3 flex justify-end items-center gap-4">
+          <DepartmentSelector />
           <LanguageSelector />
+          <UserProfile />
         </header>
         <main className="flex-1 overflow-auto">{children}</main>
       </div>
@@ -37,10 +42,11 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => (
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
+      <DepartmentFilterProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
           <Route path="/" element={<AppLayout><Overview /></AppLayout>} />
           <Route path="/pedagogiskt-arbete" element={<PedagogicalWorkLanding />} />
           <Route path="/pedagogiskt-arbete/dokumentation" element={<PedagogicalWork />} />
@@ -62,8 +68,9 @@ const App = () => (
           <Route path="/forbattringsforslag" element={<AppLayout><div className="p-6">Förbättringsförslag</div></AppLayout>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
+          </Routes>
+        </BrowserRouter>
+      </DepartmentFilterProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );

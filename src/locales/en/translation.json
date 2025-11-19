@@ -237,5 +237,10 @@
       "cancel": "CANCEL",
       "publish": "PUBLISH"
     }
+  },
+  "departmentFilter": {
+    "selectDepartments": "Select departments",
+    "allDepartments": "All departments",
+    "departmentsSelected": "{{count}} departments selected"
   }
 }

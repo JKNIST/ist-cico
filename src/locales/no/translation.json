@@ -237,5 +237,10 @@
       "cancel": "AVBRYT",
       "publish": "PUBLISER"
     }
+  },
+  "departmentFilter": {
+    "selectDepartments": "Velg avdelinger",
+    "allDepartments": "Alle avdelinger",
+    "departmentsSelected": "{{count}} avdelinger valgt"
   }
 }
