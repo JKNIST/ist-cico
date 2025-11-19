@@ -792,11 +792,60 @@ export default function Calendar() {
                                   <p className="text-xs text-muted-foreground">
                                     {calEvent!.startTime} - {calEvent!.endTime}
                                   </p>
-                                )}
-                                <p className="text-xs text-muted-foreground">
-                                  {getCategoryLabel(calEvent!.category)}
-                                </p>
-                                <div className="flex gap-2 pt-1">
+                                 )}
+                                 <p className="text-xs text-muted-foreground">
+                                   {getCategoryLabel(calEvent!.category)}
+                                 </p>
+                                 
+                                 {/* Avdelningar */}
+                                 {calEvent!.departments && calEvent!.departments.length > 0 && (
+                                   <div className="pt-1">
+                                     <p className="text-xs font-medium text-muted-foreground mb-1">Avdelningar:</p>
+                                     <div className="flex flex-wrap gap-1">
+                                       {calEvent!.departments.map((dept) => (
+                                         <span key={dept} className="text-xs bg-teal-50 text-teal-700 px-2 py-0.5 rounded border border-teal-200">
+                                           {dept}
+                                         </span>
+                                       ))}
+                                     </div>
+                                   </div>
+                                 )}
+                                 
+                                 {/* Grupper */}
+                                 {calEvent!.groups && calEvent!.groups.length > 0 && (
+                                   <div className="pt-1">
+                                     <p className="text-xs font-medium text-muted-foreground mb-1">Grupper:</p>
+                                     <div className="flex flex-wrap gap-1">
+                                       {calEvent!.groups.map((groupFullName) => {
+                                         // Försök hitta gruppens färg från mock data
+                                         const groupColor = groupFullName.includes('Blå') ? '#3b82f6' :
+                                                          groupFullName.includes('Grön') ? '#10b981' :
+                                                          groupFullName.includes('Röd') ? '#ef4444' :
+                                                          groupFullName.includes('Gul') ? '#eab308' :
+                                                          groupFullName.includes('Lila') ? '#a855f7' :
+                                                          groupFullName.includes('Orange') ? '#f97316' :
+                                                          groupFullName.includes('Rosa') ? '#ec4899' :
+                                                          groupFullName.includes('Turkos') ? '#06b6d4' :
+                                                          '#6b7280';
+                                         return (
+                                           <span 
+                                             key={groupFullName} 
+                                             className="text-xs px-2 py-0.5 rounded border"
+                                             style={{
+                                               backgroundColor: `${groupColor}20`,
+                                               borderColor: groupColor,
+                                               color: groupColor
+                                             }}
+                                           >
+                                             {groupFullName}
+                                           </span>
+                                         );
+                                       })}
+                                     </div>
+                                   </div>
+                                 )}
+                                 
+                                 <div className="flex gap-2 pt-1">
                                   {calEvent!.isSharedWithGuardians && (
                                     <span className="text-xs text-green-600">Delat med vårdnadshavare</span>
                                   )}

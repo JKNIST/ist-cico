@@ -1,9 +1,10 @@
 import { BlogPost } from "@/types/blog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronUp, Lock, Calendar } from "lucide-react";
+import { ChevronDown, ChevronUp, Lock, Calendar, Building2, Users } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
+import { mockGroups } from "@/data/groups/mockGroups";
 
 interface BlogPostHeaderProps {
   post: BlogPost;
@@ -60,6 +61,42 @@ export function BlogPostHeader({
         >
           {post.category}
         </Badge>
+
+        {/* Department Badges */}
+        {post.departments?.map((dept) => (
+          <Badge 
+            key={dept} 
+            variant="secondary"
+            className="bg-teal-50 text-teal-700 border border-teal-200"
+          >
+            <Building2 className="h-3 w-3 mr-1" />
+            {dept}
+          </Badge>
+        ))}
+
+        {/* Group Badges */}
+        {post.groups?.map((groupFullName) => {
+          const group = mockGroups.find(g => g.fullName === groupFullName);
+          return (
+            <Badge 
+              key={groupFullName} 
+              variant="secondary"
+              className="border"
+              style={
+                group?.color
+                  ? {
+                      backgroundColor: `${group.color}20`,
+                      borderColor: group.color,
+                      color: group.color,
+                    }
+                  : {}
+              }
+            >
+              <Users className="h-3 w-3 mr-1" />
+              {groupFullName}
+            </Badge>
+          );
+        })}
 
         {/* Tags */}
         {post.tags.map((tag) => (
