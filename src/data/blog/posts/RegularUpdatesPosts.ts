@@ -11,7 +11,7 @@ export const regularUpdatesPosts: BlogPost[] = [
   {
     id: "update-1",
     title: "Veckans tema: Vinter och snö",
-    tags: ["Spindeln", "Fjärilen"],
+    tags: ["Blåbär", "Lingon"],
     author: "Astrid Lindgren",
     date: formatRelativeDate(date1),
     publishedDate: date1,
@@ -50,7 +50,7 @@ Trevlig vecka önskar pedagogerna!`,
   {
     id: "update-2",
     title: "Baggeavdelningens byggprojekt",
-    tags: ["Baggen"],
+    tags: ["Odon"],
     author: "Zlatan Ibrahimović",
     date: formatRelativeDate(date2),
     publishedDate: date2,
@@ -83,7 +83,7 @@ Välkomna!
   {
     id: "update-3",
     title: "Spindelns utomhusäventyr i skogen",
-    tags: ["Spindeln"],
+    tags: ["Vildhallon"],
     author: "Ingrid Bergman",
     date: formatRelativeDate(date3),
     publishedDate: date3,
@@ -116,7 +116,7 @@ Ingrid och Spindel-teamet`,
   {
     id: "update-4",
     title: "Fjärilsavdelningens musikvecka",
-    tags: ["Fjärilen"],
+    tags: ["Lingon"],
     author: "Annika Sörenstam",
     date: formatRelativeDate(date4),
     publishedDate: date4,
@@ -141,5 +141,6 @@ Tack för en underbar vecka!
     category: "REGELBUNDNA UPPDATERINGAR",
     internalOnly: false,
     readers: generateReaders(false, 72),
+    departments: ["Lingon"],
   },
 ];

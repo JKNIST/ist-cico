@@ -73,6 +73,7 @@ Tack!
     hasImages: false,
     isRead: false,
     category: "INFORMATION",
+    departments: ["Blåbär", "Lingon", "Odon", "Vildhallon"],
     internalOnly: false,
     readers: generateReaders(false, 58),
   },
