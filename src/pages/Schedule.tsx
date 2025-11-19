@@ -156,36 +156,36 @@ export default function Schedule() {
           </Button>
         </div>
 
-        <div className="flex gap-6">
+        <div className="flex gap-4">
           <div className="flex-1 bg-card rounded-lg border overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full">
+            <div>
+              <table className="w-full text-xs">
                 <thead>
                   <tr className="border-b bg-muted/50">
-                    <th className="text-left p-4 font-medium">
+                    <th className="text-left px-2 py-1 font-medium w-[160px]">
                       <div className="text-sm text-muted-foreground">
                         {format(weekStart, "MMMM", { locale: getDateLocale() })}
                       </div>
                       <div className="text-xs text-muted-foreground">W {weekNumber}</div>
                     </th>
                     {weekDays.map((day, index) => (
-                      <th key={index} className="text-center p-4 min-w-[120px]">
-                        <div className="font-medium">
+                      <th key={index} className="text-center px-2 py-1">
+                        <div className="font-medium leading-tight">
                           {format(day, "EEE dd", { locale: getDateLocale() })}
                         </div>
                       </th>
                     ))}
                   </tr>
                   <tr className="border-b">
-                    <td className="p-4 text-sm text-muted-foreground">
+                    <td className="px-2 py-1 text-xs text-muted-foreground">
                       Children present
                     </td>
                     {weekDays.map((_, dayIndex) => {
                       const count = getChildrenPresentCount(dayIndex);
                       return (
-                        <td key={dayIndex} className="p-2">
+                        <td key={dayIndex} className="px-2 py-1">
                           {count > 0 && (
-                            <div className="bg-[hsl(210,55%,45%)] text-white rounded p-3 text-center text-sm font-medium">
+                            <div className="bg-[hsl(210,55%,45%)] text-white rounded px-1 py-1 text-center text-[11px] font-medium">
                               {count} pres.
                             </div>
                           )}
@@ -197,10 +197,10 @@ export default function Schedule() {
                 <tbody>
                   {filteredChildren.map((child) => (
                     <tr key={child.id} className="border-b hover:bg-muted/30">
-                      <td className="p-4">
-                        <div className="flex items-center gap-2">
+                      <td className="px-2 py-1">
+                        <div className="flex items-center gap-1">
                           <div>
-                            <div className="font-medium text-sm">{child.name}</div>
+                            <div className="font-medium text-xs break-words">{child.name}</div>
                             <div className="text-xs text-muted-foreground font-semibold">
                               {child.department}
                             </div>
@@ -215,11 +215,11 @@ export default function Schedule() {
                       {weekDays.map((_, dayIndex) => {
                         const schedule = child.schedules[dayIndex.toString()];
                         return (
-                          <td key={dayIndex} className="p-2">
+                          <td key={dayIndex} className="px-2 py-1">
                             {schedule && (
                               <div
                                 className={cn(
-                                  "rounded p-3 text-center text-sm",
+                                  "rounded px-1 py-1 text-center text-[11px]",
                                   schedule.isTemporary
                                     ? "bg-[hsl(45,95%,70%)] text-foreground"
                                     : "bg-[hsl(210,55%,75%)] text-foreground"
