@@ -482,8 +482,26 @@ export default function Calendar() {
 
   const weekDays = ["MÅN", "TIS", "ONS", "TORS", "FRE", "LÖR", "SÖN"];
 
-  const goToPreviousMonth = () => setCurrentDate(subMonths(currentDate, 1));
-  const goToNextMonth = () => setCurrentDate(addMonths(currentDate, 1));
+  const goToPrevious = () => {
+    if (viewMode === 'day') {
+      setCurrentDate(addDays(currentDate, -1));
+    } else if (viewMode === 'week') {
+      setCurrentDate(addDays(currentDate, -7));
+    } else {
+      setCurrentDate(subMonths(currentDate, 1));
+    }
+  };
+
+  const goToNext = () => {
+    if (viewMode === 'day') {
+      setCurrentDate(addDays(currentDate, 1));
+    } else if (viewMode === 'week') {
+      setCurrentDate(addDays(currentDate, 7));
+    } else {
+      setCurrentDate(addMonths(currentDate, 1));
+    }
+  };
+
   const goToToday = () => setCurrentDate(new Date());
 
   const toggleFilter = (filter: string) => {
@@ -513,15 +531,60 @@ export default function Calendar() {
     });
   };
 
+  const MAX_EVENTS_IN_MONTH_VIEW = 3;
+
   const getEventsForDay = (day: Date) => {
     const filteredEvents = filterEvents(allEvents);
     const regularEvents = filteredEvents.filter(event => isSameDay(event.date, day));
     const adminEvents = administrativeEvents.filter(event => isSameDay(event.date, day));
     
-    // Combine and sort - administrative events first
-    return [...adminEvents, ...regularEvents].sort((a, b) => 
-      ('priority' in b ? b.priority : 0) - ('priority' in a ? a.priority : 0)
-    );
+    // Combine and sort: first by priority (admin events first), then by time
+    return [...adminEvents, ...regularEvents].sort((a, b) => {
+      // First sort by priority (admin events have higher priority)
+      const priorityA = 'priority' in a ? a.priority : 0;
+      const priorityB = 'priority' in b ? b.priority : 0;
+      
+      if (priorityA !== priorityB) {
+        return priorityB - priorityA; // Higher priority first
+      }
+      
+      // Then sort by time
+      const getEventTime = (event: CalendarEvent | AdministrativeEvent) => {
+        if ('startTime' in event && event.startTime) {
+          const [hours, minutes] = event.startTime.split(':').map(Number);
+          return hours * 60 + minutes; // Convert to minutes for comparison
+        }
+        if ('allDay' in event && event.allDay) {
+          return -1; // All-day events first
+        }
+        return 0; // No time specified
+      };
+      
+      return getEventTime(a) - getEventTime(b);
+    });
+  };
+
+  const getVisibleAndHiddenEvents = (events: (CalendarEvent | AdministrativeEvent)[]) => {
+    if (viewMode !== 'month') {
+      return { visible: events, hidden: [] };
+    }
+    
+    return {
+      visible: events.slice(0, MAX_EVENTS_IN_MONTH_VIEW),
+      hidden: events.slice(MAX_EVENTS_IN_MONTH_VIEW)
+    };
+  };
+
+  const getDisplayDate = () => {
+    if (viewMode === 'day') {
+      return format(currentDate, 'd MMMM yyyy', { locale: sv });
+    } else if (viewMode === 'week') {
+      const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 });
+      const weekEnd = endOfWeek(currentDate, { weekStartsOn: 1 });
+      return `${format(weekStart, 'd MMM', { locale: sv })} - ${format(weekEnd, 'd MMM yyyy', { locale: sv })}`;
+    } else {
+      return format(currentDate, 'MMMM yyyy', { locale: sv });
+    }
   };
 
   const handleEventClick = (event: CalendarEvent | AdministrativeEvent) => {
@@ -608,6 +671,347 @@ export default function Calendar() {
     }
   };
 
+  const renderMonthView = () => {
+    return (
+      <div className="bg-white rounded-lg border overflow-hidden">
+        {/* Week days header */}
+        <div className="grid grid-cols-7 border-b bg-gray-50">
+          {weekDays.map((day) => (
+            <div key={day} className="p-2 text-center text-xs font-semibold text-gray-700 border-r last:border-r-0">
+              {day}
+            </div>
+          ))}
+        </div>
+
+        {/* Calendar days grid */}
+        <div className="grid grid-cols-7">
+          {calendarDays.map((day, idx) => {
+            const events = getEventsForDay(day);
+            const { visible, hidden } = getVisibleAndHiddenEvents(events);
+            const isCurrentMonth = day.getMonth() === currentDate.getMonth();
+            const isTodayDate = isToday(day);
+
+            return (
+              <div
+                key={idx}
+                className={`min-h-[120px] p-2 border-r border-b last:border-r-0 ${
+                  !isCurrentMonth ? "bg-gray-50" : "bg-white"
+                }`}
+              >
+                <div className="flex justify-center mb-2">
+                  {isTodayDate ? (
+                    <div className="w-8 h-8 rounded-full bg-[#2a9d8f] text-white flex items-center justify-center text-sm font-medium">
+                      {format(day, "d")}
+                    </div>
+                  ) : (
+                    <div className={`text-sm ${!isCurrentMonth ? "text-gray-400" : "text-gray-700"}`}>
+                      {format(day, "d")}
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-1">
+                  {visible.map((event) => {
+                    const isAdmin = 'type' in event && 'sourceId' in event;
+                    const calEvent = !isAdmin ? event as CalendarEvent : null;
+                    const adminEvent = isAdmin ? event as AdministrativeEvent : null;
+                    
+                    const published = adminEvent ? isPublished(adminEvent) : true;
+                    
+                    return (
+                      <Tooltip key={isAdmin ? adminEvent!.sourceId : calEvent!.id}>
+                        <TooltipTrigger asChild>
+                          <div
+                            onClick={() => handleEventClick(event)}
+                            className={cn(
+                              "text-xs p-1.5 rounded cursor-pointer transition-colors relative overflow-hidden",
+                              isAdmin 
+                                ? "font-medium" 
+                                : getCategoryBgClass(calEvent!.category),
+                              !published && "opacity-60"
+                            )}
+                            style={isAdmin ? { 
+                              backgroundColor: adminEvent!.color,
+                              color: 'white'
+                            } : undefined}
+                          >
+                            <div className="flex items-start gap-1">
+                              <div className="flex-shrink-0 mt-0.5">
+                                {isAdmin ? (
+                                  adminEvent!.type === 'closure' ? (
+                                    <XCircle className="w-3 h-3" />
+                                  ) : (
+                                    <AlertTriangle className="w-3 h-3" />
+                                  )
+                                ) : (
+                                  <>
+                                    {calEvent!.isSharedWithGuardians && (
+                                      <Share2 className="w-3 h-3" />
+                                    )}
+                                    {!calEvent!.isSharedWithGuardians && (
+                                      <Lock className="w-3 h-3" />
+                                    )}
+                                    {calEvent!.isRecurring && (
+                                      <Repeat className="w-3 h-3" />
+                                    )}
+                                  </>
+                                )}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="truncate font-semibold">{event.title}</div>
+                                {!isAdmin && calEvent!.startTime && (
+                                  <div className="text-[10px] opacity-90">{calEvent!.startTime}</div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent side="right" className="max-w-xs">
+                          <div className="space-y-1">
+                            <p className="font-semibold">{event.title}</p>
+                            {isAdmin ? (
+                              <>
+                                <p className="text-xs text-muted-foreground">
+                                  {adminEvent!.type === 'closure' ? 'Stängningsperiod' : 'Begränsad kapacitet'}
+                                </p>
+                                {!published && (
+                                  <p className="text-xs text-amber-600">
+                                    {adminEvent!.type === 'closure' 
+                                      ? `Publiceras ${format(adminEvent!.publishDate!, 'd MMM', { locale: sv })}`
+                                      : `Aktiveras ${format(adminEvent!.activateDate!, 'd MMM', { locale: sv })}`
+                                    }
+                                  </p>
+                                )}
+                              </>
+                            ) : (
+                              <>
+                                {calEvent!.description && (
+                                  <p className="text-xs">{calEvent!.description}</p>
+                                )}
+                                {calEvent!.startTime && (
+                                  <p className="text-xs text-muted-foreground">
+                                    {calEvent!.startTime} - {calEvent!.endTime}
+                                  </p>
+                                )}
+                                <p className="text-xs text-muted-foreground">
+                                  {getCategoryLabel(calEvent!.category)}
+                                </p>
+                                <div className="flex gap-2 pt-1">
+                                  {calEvent!.isSharedWithGuardians && (
+                                    <span className="text-xs text-green-600">Delat med vårdnadshavare</span>
+                                  )}
+                                  {!calEvent!.isSharedWithGuardians && (
+                                    <span className="text-xs text-gray-600">Intern (ej delad)</span>
+                                  )}
+                                  {calEvent!.isRecurring && (
+                                    <span className="text-xs text-blue-600">Återkommande</span>
+                                  )}
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        </TooltipContent>
+                      </Tooltip>
+                    );
+                  })}
+                  
+                  {hidden.length > 0 && (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="text-xs p-1.5 rounded cursor-pointer bg-gray-100 hover:bg-gray-200 transition-colors text-gray-700 text-center font-medium">
+                          +{hidden.length} mer
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent side="right" className="max-w-xs">
+                        <div className="space-y-1.5">
+                          <p className="font-semibold text-sm mb-2">
+                            {hidden.length} dolda händelser:
+                          </p>
+                          {hidden.map((event, idx) => {
+                            const isAdmin = 'type' in event && 'sourceId' in event;
+                            const time = 'startTime' in event && event.startTime 
+                              ? `${event.startTime}` 
+                              : 'Heldag';
+                            
+                            return (
+                              <div key={idx} className="flex items-start gap-2 text-xs">
+                                <span className="text-muted-foreground">{time}</span>
+                                <span className="flex-1">{event.title}</span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </TooltipContent>
+                    </Tooltip>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
+  const renderDayView = () => {
+    const hours = Array.from({ length: 15 }, (_, i) => i + 6); // 6:00 to 20:00
+    const dayEvents = getEventsForDay(currentDate);
+    
+    return (
+      <div className="bg-white rounded-lg border overflow-hidden">
+        <div className="border-b p-4 bg-gray-50">
+          <h3 className="font-semibold text-lg">
+            {format(currentDate, 'EEEE d MMMM yyyy', { locale: sv })}
+          </h3>
+        </div>
+        
+        <div className="relative">
+          {/* Time slots */}
+          {hours.map((hour) => (
+            <div key={hour} className="flex border-b" style={{ height: '60px' }}>
+              <div className="w-20 p-2 text-sm text-gray-600 border-r flex-shrink-0">
+                {hour.toString().padStart(2, '0')}:00
+              </div>
+              <div className="flex-1 relative"></div>
+            </div>
+          ))}
+          
+          {/* Overlay events */}
+          <div className="absolute inset-0 left-20 pointer-events-none">
+            {dayEvents.map((event, eventIdx) => {
+              const isAdmin = 'type' in event && 'sourceId' in event;
+              const calEvent = !isAdmin ? event as CalendarEvent : null;
+              
+              if (!calEvent || !calEvent.startTime || !calEvent.endTime) return null;
+              
+              const [startHour, startMin] = calEvent.startTime.split(':').map(Number);
+              const [endHour, endMin] = calEvent.endTime.split(':').map(Number);
+              
+              const startMinutes = (startHour - 6) * 60 + startMin;
+              const duration = (endHour * 60 + endMin) - (startHour * 60 + startMin);
+              
+              const top = startMinutes;
+              const height = Math.max(duration, 30);
+              
+              return (
+                <div
+                  key={eventIdx}
+                  className={cn(
+                    "absolute left-1 right-1 rounded p-2 cursor-pointer pointer-events-auto shadow-sm",
+                    getCategoryBgClass(calEvent.category)
+                  )}
+                  style={{
+                    top: `${top}px`,
+                    height: `${height}px`,
+                  }}
+                  onClick={() => handleEventClick(event)}
+                >
+                  <div className="text-xs font-semibold">{calEvent.title}</div>
+                  <div className="text-xs opacity-90">
+                    {calEvent.startTime} - {calEvent.endTime}
+                  </div>
+                  {calEvent.description && height > 50 && (
+                    <div className="text-[10px] opacity-75 mt-1 line-clamp-2">{calEvent.description}</div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const renderWeekView = () => {
+    const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 });
+    const weekDaysArray = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
+    const hours = Array.from({ length: 15 }, (_, i) => i + 6);
+    
+    return (
+      <div className="bg-white rounded-lg border overflow-hidden">
+        {/* Header with dates */}
+        <div className="grid grid-cols-[80px_repeat(7,1fr)] border-b bg-gray-50">
+          <div className="p-2"></div>
+          {weekDaysArray.map((day, idx) => (
+            <div key={idx} className="p-2 text-center border-l">
+              <div className="text-xs text-gray-600">{weekDays[idx]}</div>
+              <div className={cn(
+                "text-sm font-medium",
+                isToday(day) && "text-[#2a9d8f] font-bold"
+              )}>
+                {format(day, 'd')}
+              </div>
+            </div>
+          ))}
+        </div>
+        
+        {/* Time grid */}
+        <div className="relative overflow-auto" style={{ maxHeight: '600px' }}>
+          {hours.map((hour) => (
+            <div key={hour} className="grid grid-cols-[80px_repeat(7,1fr)] border-b" style={{ height: '60px' }}>
+              <div className="p-2 text-sm text-gray-600 border-r">
+                {hour.toString().padStart(2, '0')}:00
+              </div>
+              {weekDaysArray.map((day, idx) => (
+                <div key={idx} className="border-l relative"></div>
+              ))}
+            </div>
+          ))}
+          
+          {/* Overlay events for each day */}
+          {weekDaysArray.map((day, dayIdx) => {
+            const dayEvents = getEventsForDay(day);
+            
+            return (
+              <div
+                key={dayIdx}
+                className="absolute top-0 pointer-events-none"
+                style={{
+                  left: `calc(80px + ${dayIdx * (100 / 7)}%)`,
+                  width: `calc(${100 / 7}%)`,
+                  height: '100%'
+                }}
+              >
+                {dayEvents.map((event, eventIdx) => {
+                  const isAdmin = 'type' in event && 'sourceId' in event;
+                  const calEvent = !isAdmin ? event as CalendarEvent : null;
+                  
+                  if (!calEvent || !calEvent.startTime || !calEvent.endTime) return null;
+                  
+                  const [startHour, startMin] = calEvent.startTime.split(':').map(Number);
+                  const [endHour, endMin] = calEvent.endTime.split(':').map(Number);
+                  
+                  const startMinutes = (startHour - 6) * 60 + startMin;
+                  const duration = (endHour * 60 + endMin) - (startHour * 60 + startMin);
+                  
+                  return (
+                    <div
+                      key={eventIdx}
+                      className={cn(
+                        "absolute left-1 right-1 rounded p-1 cursor-pointer pointer-events-auto shadow-sm",
+                        getCategoryBgClass(calEvent.category)
+                      )}
+                      style={{
+                        top: `${startMinutes}px`,
+                        height: `${Math.max(duration, 25)}px`,
+                      }}
+                      onClick={() => handleEventClick(event)}
+                    >
+                      <div className="text-xs font-semibold truncate">{calEvent.title}</div>
+                      <div className="text-[10px] opacity-90">
+                        {calEvent.startTime}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <TooltipProvider>
       <div className="min-h-screen bg-gray-50">
@@ -623,14 +1027,14 @@ export default function Calendar() {
             >
               IDAG
             </Button>
-            <Button variant="ghost" size="sm" onClick={goToPreviousMonth}>
+            <Button variant="ghost" size="sm" onClick={goToPrevious}>
               <ChevronLeft className="h-4 w-4" />
             </Button>
-            <Button variant="ghost" size="sm" onClick={goToNextMonth}>
+            <Button variant="ghost" size="sm" onClick={goToNext}>
               <ChevronRight className="h-4 w-4" />
             </Button>
             <h2 className="text-lg font-semibold text-gray-900 ml-2">
-              {format(currentDate, "MMMM yyyy", { locale: sv })}
+              {getDisplayDate()}
             </h2>
           </div>
 
@@ -670,196 +1074,9 @@ export default function Calendar() {
           <ColorLegend />
         </div>
         
-        <div className="bg-white rounded-lg border overflow-hidden">
-          {/* Week days header */}
-          <div className="grid grid-cols-7 border-b bg-gray-50">
-            {weekDays.map((day) => (
-              <div key={day} className="p-2 text-center text-xs font-semibold text-gray-700 border-r last:border-r-0">
-                {day}
-              </div>
-            ))}
-          </div>
-
-          {/* Calendar days grid */}
-          <div className="grid grid-cols-7">
-            {calendarDays.map((day, idx) => {
-              const events = getEventsForDay(day);
-              const isCurrentMonth = day.getMonth() === currentDate.getMonth();
-              const isTodayDate = isToday(day);
-
-              return (
-                <div
-                  key={idx}
-                  className={`min-h-[120px] p-2 border-r border-b last:border-r-0 ${
-                    !isCurrentMonth ? "bg-gray-50" : "bg-white"
-                  }`}
-                >
-                  <div className="flex justify-center mb-2">
-                    {isTodayDate ? (
-                      <div className="w-8 h-8 rounded-full bg-[#2a9d8f] text-white flex items-center justify-center text-sm font-medium">
-                        {format(day, "d")}
-                      </div>
-                    ) : (
-                      <div className={`text-sm ${!isCurrentMonth ? "text-gray-400" : "text-gray-700"}`}>
-                        {format(day, "d")}
-                      </div>
-                    )}
-                  </div>
-                  <div className="space-y-1">
-                    {events.map((event) => {
-                      const isAdminEvent = 'type' in event && 'sourceId' in event;
-                      const adminEvent = isAdminEvent ? event as AdministrativeEvent : null;
-                      const calEvent = !isAdminEvent ? event as CalendarEvent : null;
-                      
-                      return (
-                        <Tooltip key={calEvent ? calEvent.id : `${adminEvent?.type}-${adminEvent?.sourceId}-${format(event.date, 'yyyy-MM-dd')}`}>
-                          <TooltipTrigger asChild>
-                            <div
-                              className={cn(
-                                "text-xs p-1.5 rounded cursor-pointer hover:opacity-90 transition-opacity flex items-center gap-1.5",
-                                calEvent && getCategoryBgClass(calEvent.category),
-                                adminEvent?.type === 'limited-capacity' && "bg-calendar-warning text-calendar-warning-foreground border-l-4 border-l-amber-600",
-                                adminEvent?.type === 'closure' && "bg-calendar-closure text-calendar-closure-foreground font-semibold border-l-4 border-l-red-700"
-                              )}
-                              onClick={() => handleEventClick(event)}
-                            >
-                              {adminEvent?.type === 'limited-capacity' && (
-                                <AlertTriangle className="h-3.5 w-3.5 flex-shrink-0" />
-                              )}
-                              {adminEvent?.type === 'closure' && (
-                                <XCircle className="h-3.5 w-3.5 flex-shrink-0" />
-                              )}
-                              <span className="truncate flex-1">{event.title}</span>
-                              
-                              {/* Metadata badges for regular events */}
-                              {calEvent && (
-                                <div className="flex gap-0.5 flex-shrink-0">
-                                  {calEvent.isRecurring && (
-                                    <Repeat className="h-3 w-3 opacity-80" />
-                                  )}
-                                  {calEvent.isSharedWithGuardians ? (
-                                    <Share2 className="h-3 w-3 opacity-80" />
-                                  ) : (
-                                    <Lock className="h-3 w-3 opacity-80" />
-                                  )}
-                                </div>
-                              )}
-                              
-                              {/* Share2 badge for admin events (only if published) */}
-                              {adminEvent && isPublished(adminEvent) && (
-                                <Share2 className="h-3 w-3 opacity-80 flex-shrink-0" />
-                              )}
-                            </div>
-                          </TooltipTrigger>
-                          <TooltipContent side="top" className="max-w-xs">
-                            <div className="space-y-1.5">
-                              <div className="font-semibold">{event.title}</div>
-                              
-                              {calEvent && (
-                                <>
-                                  {calEvent.description && (
-                                    <div className="text-sm">{calEvent.description}</div>
-                                  )}
-                                  
-                                  {(calEvent.startTime || calEvent.endTime) && (
-                                    <div className="text-sm">
-                                      {calEvent.startTime && calEvent.endTime 
-                                        ? `${calEvent.startTime} - ${calEvent.endTime}`
-                                        : calEvent.startTime || calEvent.endTime}
-                                    </div>
-                                  )}
-                                  
-                                  <div className="text-sm pt-1 border-t space-y-0.5">
-                                    <div className="flex items-center gap-1.5">
-                                      {calEvent.isSharedWithGuardians ? (
-                                        <>
-                                          <Share2 className="h-3 w-3" />
-                                          <span>Delat med vårdnadshavare</span>
-                                        </>
-                                      ) : (
-                                        <>
-                                          <Lock className="h-3 w-3" />
-                                          <span>Intern (ej delad)</span>
-                                        </>
-                                      )}
-                                    </div>
-                                    
-                                    {calEvent.isRecurring && (
-                                      <div className="flex items-center gap-1.5">
-                                        <Repeat className="h-3 w-3" />
-                                        <span>Återkommande händelse</span>
-                                      </div>
-                                    )}
-                                    
-                                    <div className="flex items-center gap-1.5">
-                                      <div 
-                                        className="h-3 w-3 rounded" 
-                                        style={{ backgroundColor: getCategoryColor(calEvent.category) }}
-                                      />
-                                      <span>{getCategoryLabel(calEvent.category)}</span>
-                                    </div>
-                                  </div>
-                                </>
-                              )}
-                              
-                              {adminEvent && (
-                                <>
-                                  <div className="text-sm pt-1 border-t space-y-0.5">
-                                    {adminEvent.type === 'limited-capacity' && (
-                                      <>
-                                        <div className="flex items-center gap-1.5">
-                                          <AlertTriangle className="h-3 w-3" />
-                                          <span>Begränsad kapacitet</span>
-                                        </div>
-                                        
-                                        {isPublished(adminEvent) ? (
-                                          <div className="flex items-center gap-1.5">
-                                            <Share2 className="h-3 w-3" />
-                                            <span>Delat med vårdnadshavare</span>
-                                          </div>
-                                        ) : adminEvent.activateDate && (
-                                          <div className="flex items-center gap-1.5 text-muted-foreground">
-                                            <CalendarIcon className="h-3 w-3" />
-                                            <span>Kommer att aktiveras {format(adminEvent.activateDate, 'PPP', { locale: sv })}</span>
-                                          </div>
-                                        )}
-                                      </>
-                                    )}
-                                    
-                                    {adminEvent.type === 'closure' && (
-                                      <>
-                                        <div className="flex items-center gap-1.5">
-                                          <XCircle className="h-3 w-3" />
-                                          <span>Stängningsperiod</span>
-                                        </div>
-                                        
-                                        {isPublished(adminEvent) ? (
-                                          <div className="flex items-center gap-1.5">
-                                            <Share2 className="h-3 w-3" />
-                                            <span>Delat med vårdnadshavare</span>
-                                          </div>
-                                        ) : adminEvent.publishDate && (
-                                          <div className="flex items-center gap-1.5 text-muted-foreground">
-                                            <CalendarIcon className="h-3 w-3" />
-                                            <span>Publiceras {format(adminEvent.publishDate, 'PPP', { locale: sv })}</span>
-                                          </div>
-                                        )}
-                                      </>
-                                    )}
-                                  </div>
-                                </>
-                              )}
-                            </div>
-                          </TooltipContent>
-                        </Tooltip>
-                      );
-                    })}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
+        {viewMode === 'month' && renderMonthView()}
+        {viewMode === 'week' && renderWeekView()}
+        {viewMode === 'day' && renderDayView()}
 
         {/* Add Event Button */}
         <div className="mt-6 flex justify-end">
