@@ -1,6 +1,7 @@
 import { Eye, FileText, Calendar, Grid3x3, BarChart3, CalendarDays, UserCog, FileEdit, Rss, MessageSquare, ClipboardList, FolderOpen, Info, ExternalLink } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { useState, useEffect } from "react";
 import {
   Sidebar,
   SidebarContent,
@@ -12,11 +13,39 @@ import {
   SidebarHeader,
   useSidebar,
 } from "@/components/ui/sidebar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { UnreadMessagesPopover } from "@/features/layout/components/UnreadMessagesPopover";
 
 export function AppSidebar() {
   const { t } = useTranslation();
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
+  const [unreadCount, setUnreadCount] = useState<number>(0);
+  const [popoverOpen, setPopoverOpen] = useState(false);
+
+  useEffect(() => {
+    // Get initial unread count from localStorage
+    const storedUnreadCount = localStorage.getItem('unreadMessages');
+    if (storedUnreadCount) {
+      setUnreadCount(parseInt(storedUnreadCount, 10));
+    }
+
+    // Listen for unread messages updates
+    const handleUnreadMessagesUpdate = (event: Event) => {
+      const customEvent = event as CustomEvent;
+      setUnreadCount(customEvent.detail.count);
+    };
+
+    window.addEventListener('unreadMessagesUpdated', handleUnreadMessagesUpdate);
+
+    return () => {
+      window.removeEventListener('unreadMessagesUpdated', handleUnreadMessagesUpdate);
+    };
+  }, []);
 
   const menuItems = [
     { title: t('sidebar.overview'), url: "/", icon: Eye },
@@ -31,7 +60,7 @@ export function AppSidebar() {
     { title: t('sidebar.forms'), url: "/formular", icon: FileEdit, external: true },
     { title: t('sidebar.pedagogicalWork'), url: "/pedagogiskt-arbete", icon: FolderOpen, external: true, opensNewTab: true },
     { title: t('sidebar.blog'), url: "/blogg", icon: Rss },
-    { title: t('sidebar.chat'), url: "/chatt", icon: MessageSquare },
+    { title: t('sidebar.chat'), url: "/chatt", icon: MessageSquare, badge: unreadCount > 0 ? unreadCount : undefined },
     { title: t('sidebar.appointments'), url: "/samtalsbokningar", icon: CalendarDays },
     { title: t('sidebar.documentManager'), url: "/document-manager", icon: FolderOpen },
     { title: t('sidebar.about'), url: "/om", icon: Info },
@@ -61,57 +90,99 @@ export function AppSidebar() {
             <SidebarMenu>
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    {item.opensNewTab ? (
-                      <a 
-                        href={item.url} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-3 text-sidebar-foreground hover:bg-sidebar-accent transition-colors"
+                  {item.url === "/chatt" && unreadCount > 0 ? (
+                    <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
+                      <PopoverTrigger asChild>
+                        <div>
+                          <SidebarMenuButton asChild>
+                            <NavLink
+                              to={item.url}
+                              className={({ isActive }) =>
+                                `flex items-center gap-3 ${
+                                  isActive
+                                    ? "bg-sidebar-accent text-sidebar-foreground font-medium"
+                                    : "text-sidebar-foreground hover:bg-sidebar-accent"
+                                } transition-colors`
+                              }
+                              onClick={() => setPopoverOpen(false)}
+                            >
+                              <item.icon className="h-4 w-4 flex-shrink-0" />
+                              {!isCollapsed && (
+                                <>
+                                  <span className="flex-1">{item.title}</span>
+                                  {item.badge && (
+                                    <span className="bg-chat-badge text-white px-2 py-0.5 rounded-full text-xs font-medium">
+                                      {item.badge}
+                                    </span>
+                                  )}
+                                </>
+                              )}
+                            </NavLink>
+                          </SidebarMenuButton>
+                        </div>
+                      </PopoverTrigger>
+                      <PopoverContent 
+                        side="right" 
+                        align="start" 
+                        className="w-96 p-0"
+                        sideOffset={8}
                       >
-                        <item.icon className="h-4 w-4 flex-shrink-0" />
-                        {!isCollapsed && (
-                          <>
-                            <span className="flex-1">{item.title}</span>
-                            {item.badge && (
-                              <span className="bg-white text-primary px-2 py-0.5 rounded text-xs font-medium">
-                                {item.badge}
-                              </span>
-                            )}
-                            {item.external && (
-                              <ExternalLink className="h-3 w-3 flex-shrink-0" />
-                            )}
-                          </>
-                        )}
-                      </a>
-                    ) : (
-                      <NavLink
-                        to={item.url}
-                        className={({ isActive }) =>
-                          `flex items-center gap-3 ${
-                            isActive
-                              ? "bg-sidebar-accent text-sidebar-foreground font-medium"
-                              : "text-sidebar-foreground hover:bg-sidebar-accent"
-                          } transition-colors`
-                        }
-                      >
-                        <item.icon className="h-4 w-4 flex-shrink-0" />
-                        {!isCollapsed && (
-                          <>
-                            <span className="flex-1">{item.title}</span>
-                            {item.badge && (
-                              <span className="bg-white text-primary px-2 py-0.5 rounded text-xs font-medium">
-                                {item.badge}
-                              </span>
-                            )}
-                            {item.external && (
-                              <ExternalLink className="h-3 w-3 flex-shrink-0" />
-                            )}
-                          </>
-                        )}
-                      </NavLink>
-                    )}
-                  </SidebarMenuButton>
+                        <UnreadMessagesPopover onMessageClick={() => setPopoverOpen(false)} />
+                      </PopoverContent>
+                    </Popover>
+                  ) : (
+                    <SidebarMenuButton asChild>
+                      {item.opensNewTab ? (
+                        <a 
+                          href={item.url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-3 text-sidebar-foreground hover:bg-sidebar-accent transition-colors"
+                        >
+                          <item.icon className="h-4 w-4 flex-shrink-0" />
+                          {!isCollapsed && (
+                            <>
+                              <span className="flex-1">{item.title}</span>
+                              {item.badge && (
+                                <span className="bg-white text-primary px-2 py-0.5 rounded text-xs font-medium">
+                                  {item.badge}
+                                </span>
+                              )}
+                              {item.external && (
+                                <ExternalLink className="h-3 w-3 flex-shrink-0" />
+                              )}
+                            </>
+                          )}
+                        </a>
+                      ) : (
+                        <NavLink
+                          to={item.url}
+                          className={({ isActive }) =>
+                            `flex items-center gap-3 ${
+                              isActive
+                                ? "bg-sidebar-accent text-sidebar-foreground font-medium"
+                                : "text-sidebar-foreground hover:bg-sidebar-accent"
+                            } transition-colors`
+                          }
+                        >
+                          <item.icon className="h-4 w-4 flex-shrink-0" />
+                          {!isCollapsed && (
+                            <>
+                              <span className="flex-1">{item.title}</span>
+                              {item.badge && (
+                                <span className="bg-white text-primary px-2 py-0.5 rounded text-xs font-medium">
+                                  {item.badge}
+                                </span>
+                              )}
+                              {item.external && (
+                                <ExternalLink className="h-3 w-3 flex-shrink-0" />
+                              )}
+                            </>
+                          )}
+                        </NavLink>
+                      )}
+                    </SidebarMenuButton>
+                  )}
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>
