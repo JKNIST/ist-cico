@@ -21,6 +21,8 @@ export interface BlogPost {
   images?: string[];
   internalOnly?: boolean;
   readers?: Reader[];
+  departments?: string[];
+  groups?: string[];
 }
 
 export type BlogCategory = "ALLA" | "VIKTIGA DATUM" | "REGELBUNDNA UPPDATERINGAR" | "INFORMATION";
