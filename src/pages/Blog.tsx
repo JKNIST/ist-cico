@@ -8,9 +8,11 @@ import { FilterOptions } from "@/components/blog/FilterOptions";
 import { BlogPostForm } from "@/components/BlogPostForm";
 import { allBlogPosts } from "@/data/blog";
 import { BlogCategory } from "@/types/blog";
+import { useDepartmentFilter } from "@/contexts/DepartmentFilterContext";
 
 export default function Blog() {
   const { t } = useTranslation();
+  const { selectedDepartments } = useDepartmentFilter();
   const [selectedCategory, setSelectedCategory] = useState<BlogCategory>("ALLA");
   const [showInternalOnly, setShowInternalOnly] = useState(false);
   const [showUnpublished, setShowUnpublished] = useState(false);
@@ -31,6 +33,17 @@ export default function Blog() {
     // Opublicerad-filter (visa även schemalagda)
     if (!showUnpublished && post.status === "Schemalagd") {
       return false;
+    }
+
+    // Department-filter
+    if (selectedDepartments.length > 0) {
+      const postDepartments = post.departments || [];
+      const hasMatchingDepartment = postDepartments.some(dept => 
+        selectedDepartments.includes(dept)
+      );
+      if (!hasMatchingDepartment) {
+        return false;
+      }
     }
 
     return true;

@@ -15,6 +15,7 @@ import { ColorLegend } from "@/components/ColorLegend";
 import { AdministrativeEvent, TemporarySchemaPeriod, ClosurePeriod, CalendarEvent, EventCategory, EventType } from "@/types/administration";
 import { getCategoryColor, getCategoryBgClass } from "@/lib/calendarUtils";
 import { cn } from "@/lib/utils";
+import { useDepartmentFilter } from "@/contexts/DepartmentFilterContext";
 
 const mockEvents: CalendarEvent[] = [
   { 
@@ -460,6 +461,7 @@ const isPublished = (adminEvent: AdministrativeEvent): boolean => {
 };
 
 export default function Calendar() {
+  const { selectedDepartments } = useDepartmentFilter();
   const [currentDate, setCurrentDate] = useState(new Date(2025, 10, 3)); // November 2025
   const [viewMode, setViewMode] = useState<"day" | "week" | "month">("month");
   const [isAddEventOpen, setIsAddEventOpen] = useState(false);
@@ -480,6 +482,32 @@ export default function Calendar() {
   const [isClosurePeriodDialogOpen, setIsClosurePeriodDialogOpen] = useState(false);
   const [selectedTemporaryPeriod, setSelectedTemporaryPeriod] = useState<TemporarySchemaPeriod | null>(null);
   const [selectedClosurePeriod, setSelectedClosurePeriod] = useState<ClosurePeriod | null>(null);
+
+  // Helper function to filter by department
+  const filterByDepartment = (departments?: string[]) => {
+    if (selectedDepartments.length === 0) return true;
+    if (!departments || departments.length === 0) return true;
+    return departments.some(dept => selectedDepartments.includes(dept));
+  };
+
+  // Filter events, temporary periods, and closure periods by department
+  const filteredEvents = allEvents.filter(event => 
+    filterByDepartment(event.departments)
+  );
+  
+  const filteredTemporaryPeriods = temporaryPeriods.filter(period =>
+    filterByDepartment(period.departments)
+  );
+  
+  const filteredClosurePeriods = closurePeriods.filter(period =>
+    filterByDepartment(period.departments)
+  );
+
+  // Generate administrative events from filtered periods
+  const filteredAdministrativeEvents = generateAdministrativeEvents(
+    filteredTemporaryPeriods,
+    filteredClosurePeriods
+  );
 
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);

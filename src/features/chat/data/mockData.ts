@@ -3,6 +3,7 @@ export const initialConversations = [
     id: 1,
     title: "Chat med vårdnadshavare",
     student: "Emma Andersson",
+    department: "Blåbär",
     lastMessage: "Vi ses imorgon!",
     participants: [
       "Emma's Guardian", 
@@ -51,6 +52,7 @@ export const initialConversations = [
   {
     id: 2,
     title: "Teammöte planering",
+    department: "Blåbär",
     lastMessage: "Vi behöver diskutera budget för nästa kvartal",
     participants: ["Jonas Nilsson", "Maria Larsson", "Anna Svensson", "Erik Berg"],
     messages: [
@@ -95,6 +97,7 @@ export const initialConversations = [
     id: 3,
     title: "Föräldramöte planering",
     student: "Alex Nilsson",
+    department: "Lingon",
     lastMessage: "Tack för all information!",
     participants: [
       "Alex's Guardian",
@@ -144,6 +147,7 @@ export const initialConversations = [
     id: 4,
     title: "Utflykt planering",
     student: "Lisa Berg",
+    department: "Odon",
     lastMessage: "Perfekt, vi ser fram emot utflykten!",
     participants: [
       "Lisa's Guardian",
@@ -186,6 +190,7 @@ export const initialConversations = [
     id: 5,
     title: "Sommarfest diskussion",
     student: "Max Pettersson",
+    department: "Vildhallon",
     lastMessage: "Alla är välkomna!",
     participants: [
       "Max's Guardian",
@@ -227,6 +232,7 @@ export const initialConversations = [
   {
     id: 6,
     title: "IT-support",
+    department: "Blåbär",
     lastMessage: "Problem med skrivaren på andra våningen",
     participants: ["Jonas Nilsson", "IT Support", "System Admin", "Network Team"],
     messages: [
@@ -264,6 +270,7 @@ export const initialConversations = [
     id: 7,
     title: "After-school Activities",
     student: "Peter Smith",
+    department: "Lingon",
     lastMessage: "Looking forward to the event",
     participants: ["Activity Leader", "Peter's Guardian", "Class Teacher"],
     messages: [
@@ -307,6 +314,7 @@ export const initialConversations = [
   {
     id: 8,
     title: "Personalschema",
+    department: "Odon",
     lastMessage: "Schema för nästa vecka",
     participants: ["Jonas Nilsson", "Team Odon", "HR Staff", "Department Head"],
     messages: [
@@ -343,6 +351,7 @@ export const initialConversations = [
   {
     id: 9,
     title: "Blåbär - Veckoinformation",
+    department: "Blåbär",
     lastMessage: "Information om nästa veckas aktiviteter",
     participants: [
       "All Guardians Blåbär",
@@ -383,6 +392,7 @@ export const initialConversations = [
   {
     id: 10,
     title: "Lingon - Matteinformation",
+    department: "Lingon",
     lastMessage: "Nya matematikmaterial har anlänt",
     participants: [
       "All Guardians Lingon",
@@ -423,6 +433,7 @@ export const initialConversations = [
   {
     id: 11,
     title: "Odon - Utomhusaktiviteter",
+    department: "Odon",
     lastMessage: "Påminnelse om kläder efter väder",
     participants: [
       "All Guardians Odon",
@@ -463,6 +474,7 @@ export const initialConversations = [
   {
     id: 12,
     title: "Vildhallon - Föräldramöte",
+    department: "Vildhallon",
     lastMessage: "Agenda för föräldramötet är nu klar",
     participants: [
       "All Guardians Vildhallon",
