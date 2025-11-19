@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { TemporarySchemaPeriodDialog } from "@/components/TemporarySchemaPeriodDialog";
 import { ClosurePeriodDialog } from "@/components/ClosurePeriodDialog";
+import { GroupsManagement } from "@/components/administration/GroupsManagement";
 import { TemporarySchemaPeriod, ClosurePeriod } from "@/types/administration";
 
 const mockPeriods: TemporarySchemaPeriod[] = [
@@ -110,18 +111,21 @@ export default function Administration() {
     <div className="min-h-screen bg-muted/30">
       <div className="p-6">
         <Tabs defaultValue="temporary" className="w-full">
-          <TabsList className="grid w-full grid-cols-4 mb-6">
+          <TabsList className="grid w-full grid-cols-5 mb-6">
             <TabsTrigger value="temporary" className="text-xs uppercase font-medium">
               Temporära schemaperioder
             </TabsTrigger>
             <TabsTrigger value="closures" className="text-xs uppercase font-medium">
               Stängningsperioder
             </TabsTrigger>
-            <TabsTrigger value="no-schedule" className="text-xs uppercase font-medium">
-              Saknar schema
+            <TabsTrigger value="staff" className="text-xs uppercase font-medium">
+              Personal
             </TabsTrigger>
-            <TabsTrigger value="places" className="text-xs uppercase font-medium">
-              Platser
+            <TabsTrigger value="groups" className="text-xs uppercase font-medium">
+              Grupper
+            </TabsTrigger>
+            <TabsTrigger value="archived" className="text-xs uppercase font-medium">
+              Arkiv
             </TabsTrigger>
           </TabsList>
 
@@ -314,15 +318,19 @@ export default function Administration() {
             </div>
           </TabsContent>
 
-          <TabsContent value="no-schedule">
+          <TabsContent value="staff">
             <div className="text-center py-12 text-muted-foreground">
-              Saknar schema kommer snart
+              Personal kommer snart
             </div>
           </TabsContent>
 
-          <TabsContent value="places">
+          <TabsContent value="groups">
+            <GroupsManagement />
+          </TabsContent>
+
+          <TabsContent value="archived">
             <div className="text-center py-12 text-muted-foreground">
-              Platser kommer snart
+              Arkiv kommer snart
             </div>
           </TabsContent>
         </Tabs>
