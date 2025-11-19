@@ -318,20 +318,40 @@ export default function Administration() {
             </div>
           </TabsContent>
 
-          <TabsContent value="staff">
-            <div className="text-center py-12 text-muted-foreground">
-              Personal kommer snart
-            </div>
+          <TabsContent value="noSchedule">
+            <Card className="bg-card">
+              <CardContent className="p-8">
+                <div className="flex flex-col items-center justify-center text-center space-y-4">
+                  <Calendar className="h-16 w-16 text-muted-foreground/50" />
+                  <div className="space-y-2">
+                    <h2 className="text-lg font-semibold text-foreground">Saknar schema</h2>
+                    <p className="text-muted-foreground max-w-md">
+                      Här visas barn som saknar schema. Funktionalitet för att hantera barn utan schema kommer snart.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="places">
+            <Card className="bg-card">
+              <CardContent className="p-8">
+                <div className="flex flex-col items-center justify-center text-center space-y-4">
+                  <Calendar className="h-16 w-16 text-muted-foreground/50" />
+                  <div className="space-y-2">
+                    <h2 className="text-lg font-semibold text-foreground">Platser</h2>
+                    <p className="text-muted-foreground max-w-md">
+                      Här visas information om tillgängliga platser och kapacitet. Funktionalitet för platser kommer snart.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="groups">
             <GroupsManagement />
-          </TabsContent>
-
-          <TabsContent value="archived">
-            <div className="text-center py-12 text-muted-foreground">
-              Arkiv kommer snart
-            </div>
           </TabsContent>
         </Tabs>
 

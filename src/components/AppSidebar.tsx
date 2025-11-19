@@ -1,5 +1,5 @@
-import { Eye, FileText, Calendar, Grid3x3, BarChart3, CalendarDays, UserCog, FileEdit, Rss, MessageSquare, ClipboardList, FolderOpen, Info, ExternalLink } from "lucide-react";
-import { NavLink } from "react-router-dom";
+import { Eye, FileText, Calendar, Grid3x3, BarChart3, CalendarDays, UserCog, FileEdit, Rss, MessageSquare, ClipboardList, FolderOpen, Info, ExternalLink, ChevronRight } from "lucide-react";
+import { NavLink, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useState, useEffect } from "react";
 import {
@@ -14,9 +14,18 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubItem,
+  SidebarMenuSubButton,
   SidebarHeader,
   useSidebar,
+  SidebarGroupLabel,
 } from "@/components/ui/sidebar";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import {
   Popover,
   PopoverContent,
@@ -27,10 +36,14 @@ import { UnreadMessagesPopover } from "@/features/layout/components/UnreadMessag
 export function AppSidebar() {
   const { t } = useTranslation();
   const { state } = useSidebar();
+  const location = useLocation();
   const isCollapsed = state === "collapsed";
   const [unreadCount, setUnreadCount] = useState<number>(0);
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [unreadInternalBlogCount, setUnreadInternalBlogCount] = useState<number>(0);
+  const [scheduleOpen, setScheduleOpen] = useState(
+    location.pathname === "/schema" || location.pathname === "/schema/personal"
+  );
 
   useEffect(() => {
     // Get initial unread count from localStorage
@@ -76,7 +89,14 @@ export function AppSidebar() {
   const menuItems = [
     { title: t('sidebar.overview'), url: "/", icon: Eye },
     { title: t('sidebar.current'), url: "/aktuellt", icon: FileText, badge: 6 },
-    { title: t('sidebar.schedule'), url: "/schema", icon: Calendar },
+    { 
+      title: t('sidebar.schedule'), 
+      url: "/schema", 
+      icon: Calendar,
+      submenu: [
+        { title: t('sidebar.staffSchedule'), url: "/schema/personal" }
+      ]
+    },
     { title: t('sidebar.placements'), url: "/placeringar", icon: Grid3x3 },
     { title: t('sidebar.prints'), url: "/utskrifter", icon: FileText },
     { title: t('sidebar.analysis'), url: "/analys", icon: BarChart3, external: true },
@@ -116,7 +136,61 @@ export function AppSidebar() {
             <SidebarMenu>
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  {item.url === "/chatt" && unreadCount > 0 ? (
+                  {item.submenu ? (
+                    <Collapsible open={scheduleOpen} onOpenChange={setScheduleOpen}>
+                      <CollapsibleTrigger asChild>
+                        <SidebarMenuButton asChild>
+                          <NavLink
+                            to={item.url}
+                            className={({ isActive }) =>
+                              `flex items-center gap-3 ${
+                                isActive || location.pathname.startsWith("/schema")
+                                  ? "bg-sidebar-accent text-sidebar-foreground font-medium"
+                                  : "text-sidebar-foreground hover:bg-sidebar-accent"
+                              } transition-colors`
+                            }
+                            end
+                          >
+                            <item.icon className="h-4 w-4 flex-shrink-0" />
+                            {!isCollapsed && (
+                              <>
+                                <span className="flex-1">{item.title}</span>
+                                <ChevronRight
+                                  className={`h-4 w-4 transition-transform ${
+                                    scheduleOpen ? "rotate-90" : ""
+                                  }`}
+                                />
+                              </>
+                            )}
+                          </NavLink>
+                        </SidebarMenuButton>
+                      </CollapsibleTrigger>
+                      {!isCollapsed && (
+                        <CollapsibleContent>
+                          <SidebarMenuSub>
+                            {item.submenu.map((subItem) => (
+                              <SidebarMenuSubItem key={subItem.title}>
+                                <SidebarMenuSubButton asChild>
+                                  <NavLink
+                                    to={subItem.url}
+                                    className={({ isActive }) =>
+                                      `flex items-center gap-3 ${
+                                        isActive
+                                          ? "bg-sidebar-accent text-sidebar-foreground font-medium"
+                                          : "text-sidebar-foreground hover:bg-sidebar-accent"
+                                      } transition-colors`
+                                    }
+                                  >
+                                    <span>{subItem.title}</span>
+                                  </NavLink>
+                                </SidebarMenuSubButton>
+                              </SidebarMenuSubItem>
+                            ))}
+                          </SidebarMenuSub>
+                        </CollapsibleContent>
+                      )}
+                    </Collapsible>
+                  ) : item.url === "/chatt" && unreadCount > 0 ? (
                     <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
                       <PopoverTrigger asChild>
                         <div>
