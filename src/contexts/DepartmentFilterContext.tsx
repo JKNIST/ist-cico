@@ -23,7 +23,7 @@ interface DepartmentFilterProviderProps {
 export const DepartmentFilterProvider = ({ children }: DepartmentFilterProviderProps) => {
   const [selectedDepartments, setSelectedDepartmentsState] = useState<string[]>(() => {
     const saved = localStorage.getItem("selectedDepartments");
-    return saved ? JSON.parse(saved) : [];
+    return saved ? JSON.parse(saved) : ["Blåbär"];
   });
 
   useEffect(() => {

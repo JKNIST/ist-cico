@@ -38,9 +38,19 @@ export function DepartmentSelector() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" className="w-[200px] justify-start">
+        <Button 
+          variant={selectedDepartments.length > 0 ? "default" : "outline"} 
+          className="w-[200px] justify-start"
+        >
           <Building2 className="h-4 w-4 mr-2" />
-          <span className="truncate">{getDisplayText()}</span>
+          <span className="truncate">
+            {getDisplayText()}
+            {selectedDepartments.length > 0 && (
+              <span className="ml-1 opacity-70">
+                ({selectedDepartments.length})
+              </span>
+            )}
+          </span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-[200px]">
