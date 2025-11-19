@@ -11,6 +11,7 @@ import PedagogicalWork from "./pages/PedagogicalWork";
 import PedagogicalWorkLanding from "./pages/PedagogicalWorkLanding";
 import Calendar from "./pages/Calendar";
 import Administration from "./pages/Administration";
+import Blog from "./pages/Blog";
 import NotFound from "./pages/NotFound";
 import "./i18n/config";
 
@@ -49,7 +50,7 @@ const App = () => (
           <Route path="/administration" element={<AppLayout><Administration /></AppLayout>} />
           <Route path="/maltidsplanering" element={<AppLayout><div className="p-6">Måltidsplanering</div></AppLayout>} />
           <Route path="/formular" element={<AppLayout><div className="p-6">Formulär</div></AppLayout>} />
-          <Route path="/blogg" element={<AppLayout><div className="p-6">Blogg</div></AppLayout>} />
+          <Route path="/blogg" element={<AppLayout><Blog /></AppLayout>} />
           <Route path="/chatt" element={<AppLayout><div className="p-6">Chatt</div></AppLayout>} />
           <Route path="/samtalsbokningar" element={<AppLayout><div className="p-6">Samtalsbokningar</div></AppLayout>} />
           <Route path="/document-manager" element={<AppLayout><div className="p-6">Document Manager</div></AppLayout>} />
