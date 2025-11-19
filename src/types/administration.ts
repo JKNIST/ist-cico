@@ -53,6 +53,7 @@ export interface CalendarEvent {
   isRecurring: boolean;
   recurrenceRule?: RecurrenceRule;
   departments: string[];
+  groups?: string[];
   participants?: string;
   
   // System metadata

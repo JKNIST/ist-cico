@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils";
 import { CalendarEvent, EventCategory } from "@/types/administration";
 import { useTranslation } from "react-i18next";
 import { useLocale } from "@/hooks/useLocale";
+import { CalendarGroupSelector } from "./calendar/CalendarGroupSelector";
 
 interface AddEventDialogProps {
   open: boolean;
@@ -34,6 +35,7 @@ export function AddEventDialog({ open, onOpenChange, mode = "add", eventData, ed
   const [title, setTitle] = useState(eventData?.title || "");
   const [description, setDescription] = useState(eventData?.description || "");
   const [selectedDepartments, setSelectedDepartments] = useState<string[]>(eventData?.departments || ["Blåbär", "Lingon", "Odon", "Vildhallon", "Gråsparven", "laser kittens", "örg"]);
+  const [selectedGroups, setSelectedGroups] = useState<string[]>(eventData?.groups || []);
   const [participants, setParticipants] = useState(eventData?.participants || "35");
   const [allDay, setAllDay] = useState(eventData?.allDay || false);
   const [startDate, setStartDate] = useState<Date>(eventData?.date || new Date(2025, 10, 3));
@@ -58,6 +60,7 @@ export function AddEventDialog({ open, onOpenChange, mode = "add", eventData, ed
       setTitle(eventData.title || "");
       setDescription(eventData.description || "");
       setSelectedDepartments(eventData.departments || ["Blåbär", "Lingon", "Odon", "Vildhallon", "Gråsparven", "laser kittens", "örg"]);
+      setSelectedGroups(eventData.groups || []);
       setParticipants(eventData.participants || "35");
       setAllDay(eventData.allDay || false);
       
@@ -84,6 +87,7 @@ export function AddEventDialog({ open, onOpenChange, mode = "add", eventData, ed
       setTitle("");
       setDescription("");
       setSelectedDepartments(["Blåbär", "Lingon", "Odon", "Vildhallon", "Gråsparven", "laser kittens", "örg"]);
+      setSelectedGroups([]);
       setParticipants("35");
       setAllDay(false);
       setStartDate(new Date(2025, 10, 3));
@@ -260,6 +264,13 @@ export function AddEventDialog({ open, onOpenChange, mode = "add", eventData, ed
               )}
             </div>
           </div>
+
+          {/* Select Groups */}
+          <CalendarGroupSelector
+            selectedDepartments={selectedDepartments}
+            selectedGroups={selectedGroups}
+            onGroupsChange={setSelectedGroups}
+          />
 
           {/* Select Participants */}
           <div className="space-y-2">
