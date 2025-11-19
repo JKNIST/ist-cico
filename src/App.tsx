@@ -11,6 +11,7 @@ import PedagogicalWork from "./pages/PedagogicalWork";
 import PedagogicalWorkLanding from "./pages/PedagogicalWorkLanding";
 import Calendar from "./pages/Calendar";
 import Administration from "./pages/Administration";
+import StaffSchedule from "./pages/StaffSchedule";
 import Blog from "./pages/Blog";
 import Chat from "./pages/Chat";
 import NotFound from "./pages/NotFound";
@@ -44,6 +45,7 @@ const App = () => (
           <Route path="/pedagogiskt-arbete/dokumentation" element={<PedagogicalWork />} />
           <Route path="/aktuellt" element={<AppLayout><div className="p-6">Aktuellt</div></AppLayout>} />
           <Route path="/schema" element={<AppLayout><div className="p-6">Schema</div></AppLayout>} />
+          <Route path="/schema/personal" element={<AppLayout><StaffSchedule /></AppLayout>} />
           <Route path="/placeringar" element={<AppLayout><div className="p-6">Placeringar</div></AppLayout>} />
           <Route path="/utskrifter" element={<AppLayout><div className="p-6">Utskrifter</div></AppLayout>} />
           <Route path="/analys" element={<AppLayout><div className="p-6">Analys</div></AppLayout>} />
