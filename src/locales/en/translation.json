@@ -19,6 +19,20 @@
     "about": "About Drop-off & Pick-up",
     "improvements": "Improvement Suggestions"
   },
+  "schedule": {
+    "title": "Schedule",
+    "childrenPresent": "Children present",
+    "staffPresent": "Staff present",
+    "ratio": "Ratio",
+    "understaffed": "Understaffed",
+    "staffingSettings": {
+      "title": "Staffing Ratios",
+      "description": "Set max children per staff for each department",
+      "childrenPerStaff": "children per staff",
+      "save": "Save settings",
+      "saved": "Staffing settings saved"
+    }
+  },
   "calendar": {
     "today": "TODAY",
     "day": "DAY",

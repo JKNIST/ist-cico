@@ -1,11 +1,14 @@
-import { useState } from "react";
-import { ChevronLeft, ChevronRight, Printer, Calendar } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ChevronLeft, ChevronRight, Printer, Calendar, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { format, addDays, startOfWeek, getWeek } from "date-fns";
 import { sv, enUS, nb } from "date-fns/locale";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { useDepartmentFilter } from "@/contexts/DepartmentFilterContext";
+import { mockStaffSchedules } from "@/data/staff/mockStaffSchedules";
+import { getMaxRatioForDepartment } from "@/data/staff/staffingRatios";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface ChildSchedule {
   id: string;
@@ -86,9 +89,30 @@ export default function Schedule() {
   const { i18n } = useTranslation();
   const { selectedDepartments } = useDepartmentFilter();
   const [currentDate, setCurrentDate] = useState(new Date(2025, 10, 17)); // Nov 17, 2025
+  const [staffingRatios, setStaffingRatios] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    const updateRatios = () => {
+      const departments = ["Blåbär", "Lingon", "Odon", "Vildhallon"];
+      const ratios: Record<string, number> = {};
+      departments.forEach((dept) => {
+        ratios[dept] = getMaxRatioForDepartment(dept);
+      });
+      setStaffingRatios(ratios);
+    };
+
+    updateRatios();
+    window.addEventListener("staffingRatiosUpdated", updateRatios);
+    return () => window.removeEventListener("staffingRatiosUpdated", updateRatios);
+  }, []);
 
   const filteredChildren = mockChildrenSchedules.filter((child) => {
     return selectedDepartments.length === 0 || selectedDepartments.includes(child.department);
+  });
+
+  const filteredStaff = mockStaffSchedules.filter((staff) => {
+    if (!staff.department) return false;
+    return selectedDepartments.length === 0 || selectedDepartments.includes(staff.department);
   });
 
   const getDateLocale = () => {
@@ -118,6 +142,53 @@ export default function Schedule() {
     return filteredChildren.filter(
       (child) => child.schedules[dayIndex.toString()]
     ).length;
+  };
+
+  const getStaffPresentCount = (dayIndex: number) => {
+    return filteredStaff.filter((staff) => staff.schedules[dayIndex.toString()]).length;
+  };
+
+  const getStaffingRatio = (dayIndex: number) => {
+    const children = getChildrenPresentCount(dayIndex);
+    const staff = getStaffPresentCount(dayIndex);
+    return { children, staff, ratio: staff > 0 ? children / staff : children };
+  };
+
+  const isUnderStaffed = (dayIndex: number) => {
+    const { children, staff, ratio } = getStaffingRatio(dayIndex);
+    if (staff === 0 && children > 0) return true;
+    
+    // Check across all departments for filtered data
+    const uniqueDepartments = Array.from(
+      new Set(filteredChildren.map((c) => c.department))
+    );
+    
+    // Consider understaffed if any department exceeds its ratio
+    for (const dept of uniqueDepartments) {
+      const deptChildren = filteredChildren.filter(
+        (c) => c.department === dept && c.schedules[dayIndex.toString()]
+      ).length;
+      const deptStaff = filteredStaff.filter(
+        (s) => s.department === dept && s.schedules[dayIndex.toString()]
+      ).length;
+      
+      const maxRatio = staffingRatios[dept] || 5;
+      if (deptStaff > 0 && deptChildren / deptStaff > maxRatio) {
+        return true;
+      }
+      if (deptStaff === 0 && deptChildren > 0) {
+        return true;
+      }
+    }
+    
+    return false;
+  };
+
+  const getStaffPresentNames = (dayIndex: number) => {
+    return filteredStaff
+      .filter((staff) => staff.schedules[dayIndex.toString()])
+      .map((staff) => `${staff.name} (${staff.department})`)
+      .join(", ");
   };
 
   return (
@@ -188,6 +259,77 @@ export default function Schedule() {
                             <div className="bg-[hsl(210,55%,45%)] text-white rounded px-1 py-1 text-center text-[11px] font-medium">
                               {count} pres.
                             </div>
+                          )}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                  <tr className="border-b">
+                    <td className="px-2 py-1 text-xs text-muted-foreground">
+                      Staff present
+                    </td>
+                    {weekDays.map((_, dayIndex) => {
+                      const count = getStaffPresentCount(dayIndex);
+                      const names = getStaffPresentNames(dayIndex);
+                      return (
+                        <td key={dayIndex} className="px-2 py-1">
+                          {count > 0 && (
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <div className="bg-[hsl(142,76%,75%)] text-foreground rounded px-1 py-1 text-center text-[11px] font-medium cursor-help">
+                                    {count} pers.
+                                  </div>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p className="text-xs">{names}</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          )}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                  <tr className="border-b">
+                    <td className="px-2 py-1 text-xs text-muted-foreground">
+                      Ratio
+                    </td>
+                    {weekDays.map((_, dayIndex) => {
+                      const { children, staff, ratio } = getStaffingRatio(dayIndex);
+                      const understaffed = isUnderStaffed(dayIndex);
+                      
+                      return (
+                        <td key={dayIndex} className="px-2 py-1">
+                          {children > 0 && (
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <div
+                                    className={cn(
+                                      "rounded px-1 py-1 text-center text-[11px] font-medium flex items-center justify-center gap-1 cursor-help",
+                                      understaffed
+                                        ? "bg-[hsl(0,84%,75%)] text-foreground"
+                                        : "bg-muted text-foreground"
+                                    )}
+                                  >
+                                    {staff > 0 ? `1:${Math.round(ratio)}` : "0:1"}
+                                    {understaffed && <AlertTriangle className="h-3 w-3" />}
+                                  </div>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <div className="text-xs space-y-1">
+                                    <p>Barn: {children}</p>
+                                    <p>Personal: {staff}</p>
+                                    {understaffed && (
+                                      <p className="text-destructive font-medium">
+                                        ⚠️ För lite personal
+                                      </p>
+                                    )}
+                                  </div>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
                           )}
                         </td>
                       );
