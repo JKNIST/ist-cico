@@ -15,6 +15,7 @@ export interface Conversation {
   messages: Message[];
   student?: string;
   isLocked?: boolean;
+  department?: string;
 }
 
 export interface Recipient {

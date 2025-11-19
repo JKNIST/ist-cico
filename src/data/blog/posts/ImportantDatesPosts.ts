@@ -67,7 +67,7 @@ Förskolechefen`,
   {
     id: "important-3",
     title: "Fotografering 12 mars - glöm inte att klä barnen fint!",
-    tags: ["Spindeln", "Fjärilen", "Baggen"],
+    tags: ["Blåbär", "Lingon"],
     author: "Greta Thunberg",
     date: formatRelativeDate(date3),
     publishedDate: date3,
