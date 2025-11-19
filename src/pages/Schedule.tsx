@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight, Printer, Calendar, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { format, addDays, startOfWeek, getWeek } from "date-fns";
 import { sv, enUS, nb } from "date-fns/locale";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { useDepartmentFilter } from "@/contexts/DepartmentFilterContext";
+import { mockChildren } from "@/data/groups/mockChildren";
 import { mockStaffSchedules } from "@/data/staff/mockStaffSchedules";
 import { getMaxRatioForDepartment } from "@/data/staff/staffingRatios";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -20,70 +22,58 @@ interface ChildSchedule {
   alertCount?: number;
 }
 
-const mockChildrenSchedules: ChildSchedule[] = [
-  {
-    id: "1",
-    name: "Anette ATeamHomess",
-    department: "Blåbär",
-    schedules: {
-      "0": { start: "08:00", end: "16:00" },
-      "1": { start: "08:00", end: "16:00" },
-      "2": { start: "08:00", end: "16:00" },
-      "3": { start: "08:00", end: "16:00" },
-      "4": { start: "08:00", end: "16:00" },
-      "5": { start: "08:00", end: "16:00" },
-      "6": { start: "08:00", end: "16:00" },
-    },
-  },
-  {
-    id: "2",
-    name: "Björn Ali",
-    department: "Lingon",
-    schedules: {
-      "0": { start: "08:00", end: "16:00" },
-    },
-  },
-  {
-    id: "3",
-    name: "Ellinor Wikström",
-    department: "Vildhallon",
-    schedules: {},
-    alertCount: 1,
-  },
-  {
-    id: "4",
-    name: "Erica af Forsell",
-    department: "Vildhallon",
-    schedules: {
-      "1": { start: "08:00", end: "16:00" },
-      "2": { start: "08:00", end: "16:00" },
-      "3": { start: "08:00", end: "16:00" },
-      "4": { start: "08:00", end: "16:00" },
-    },
-  },
-  {
-    id: "5",
-    name: "Jimmie Engstedt",
-    department: "Blåbär",
-    schedules: {
-      "0": { start: "08:00", end: "16:00" },
-    },
-  },
-  {
-    id: "6",
-    name: "Lizette Ahlberg",
-    department: "Odon",
-    schedules: {},
-    alertCount: 1,
-  },
-  {
-    id: "7",
-    name: "Vida Bache",
-    department: "Blåbär",
-    schedules: {},
-    alertCount: 1,
-  },
-];
+// Generate realistic schedules for children
+const generateChildSchedules = (): ChildSchedule[] => {
+  return mockChildren.map((child, index) => {
+    const rand = index % 20; // Deterministic variation
+    
+    // 80% full-time (Mon-Fri), 15% part-time (3-4 days), 5% no schedule
+    let schedules: ChildSchedule["schedules"] = {};
+    
+    if (rand < 16) {
+      // Full-time schedule (80%)
+      const startTime = rand % 3 === 0 ? "07:00" : rand % 3 === 1 ? "08:00" : "07:30";
+      const endTime = rand % 3 === 0 ? "16:00" : rand % 3 === 1 ? "17:00" : "16:30";
+      
+      schedules = {
+        "0": { start: startTime, end: endTime },
+        "1": { start: startTime, end: endTime },
+        "2": { start: startTime, end: endTime },
+        "3": { start: startTime, end: endTime },
+        "4": { start: startTime, end: endTime },
+        "5": null,
+        "6": null,
+      };
+    } else if (rand < 19) {
+      // Part-time schedule (15%)
+      const startTime = "08:00";
+      const endTime = "16:00";
+      
+      schedules = {
+        "0": rand % 2 === 0 ? { start: startTime, end: endTime } : null,
+        "1": { start: startTime, end: endTime },
+        "2": { start: startTime, end: endTime },
+        "3": rand % 3 === 0 ? null : { start: startTime, end: endTime },
+        "4": { start: startTime, end: endTime },
+        "5": null,
+        "6": null,
+      };
+    } else {
+      // No schedule (5%)
+      schedules = {};
+    }
+    
+    return {
+      id: child.id,
+      name: child.name,
+      department: child.department,
+      schedules,
+      alertCount: Object.keys(schedules).length === 0 ? 1 : 0,
+    };
+  });
+};
+
+const childrenSchedules = generateChildSchedules();
 
 export default function Schedule() {
   const { i18n } = useTranslation();
@@ -106,7 +96,7 @@ export default function Schedule() {
     return () => window.removeEventListener("staffingRatiosUpdated", updateRatios);
   }, []);
 
-  const filteredChildren = mockChildrenSchedules.filter((child) => {
+  const filteredChildren = childrenSchedules.filter((child) => {
     return selectedDepartments.length === 0 || selectedDepartments.includes(child.department);
   });
 
@@ -226,6 +216,15 @@ export default function Schedule() {
             <Printer className="h-4 w-4" />
           </Button>
         </div>
+
+        {selectedDepartments.length > 0 && (
+          <div className="mb-4 flex items-center gap-2 text-sm">
+            <span className="text-muted-foreground">Visar avdelningar:</span>
+            {selectedDepartments.map((dept) => (
+              <Badge key={dept} variant="secondary">{dept}</Badge>
+            ))}
+          </div>
+        )}
 
         <div className="flex gap-4">
           <div className="flex-1 bg-card rounded-lg border overflow-hidden">
