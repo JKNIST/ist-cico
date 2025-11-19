@@ -6,9 +6,6 @@ import { sv, enUS, nb } from "date-fns/locale";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { useDepartmentFilter } from "@/contexts/DepartmentFilterContext";
-import { LanguageSelector } from "@/components/LanguageSelector";
-import { DepartmentSelector } from "@/components/DepartmentSelector";
-import { UserProfile } from "@/components/UserProfile";
 
 interface ChildSchedule {
   id: string;
@@ -124,16 +121,7 @@ export default function Schedule() {
   };
 
   return (
-    <div className="min-h-screen bg-muted/30">
-      {/* Header */}
-      <div className="sticky top-0 z-50 bg-background border-b">
-        <div className="flex items-center justify-end gap-4 px-6 py-3">
-          <LanguageSelector />
-          <DepartmentSelector />
-          <UserProfile />
-        </div>
-      </div>
-      
+    <div className="h-full bg-muted/30">
       <div className="p-6">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-4">
