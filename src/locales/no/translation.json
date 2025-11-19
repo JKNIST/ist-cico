@@ -19,6 +19,20 @@
     "about": "Om Levering og henting",
     "improvements": "Forbedringsforslag"
   },
+  "schedule": {
+    "title": "Timeplan",
+    "childrenPresent": "Barn tilstede",
+    "staffPresent": "Personale tilstede",
+    "ratio": "Ratio",
+    "understaffed": "For lite personale",
+    "staffingSettings": {
+      "title": "Bemanningsnøkkeltall",
+      "description": "Angi maks antall barn per personale for hver avdeling",
+      "childrenPerStaff": "barn per personale",
+      "save": "Lagre innstillinger",
+      "saved": "Bemanningsinnstillinger lagret"
+    }
+  },
   "calendar": {
     "today": "I DAG",
     "day": "DAG",

@@ -19,6 +19,20 @@
     "about": "Om Lämna & hämta",
     "improvements": "Förbättringsförslag"
   },
+  "schedule": {
+    "title": "Schema",
+    "childrenPresent": "Children present",
+    "staffPresent": "Staff present",
+    "ratio": "Ratio",
+    "understaffed": "För lite personal",
+    "staffingSettings": {
+      "title": "Bemanningsnyckeltal",
+      "description": "Ange max antal barn per personal för varje avdelning",
+      "childrenPerStaff": "barn per personal",
+      "save": "Spara inställningar",
+      "saved": "Bemanningsinställningar sparade"
+    }
+  },
   "calendar": {
     "today": "IDAG",
     "day": "DAG",
