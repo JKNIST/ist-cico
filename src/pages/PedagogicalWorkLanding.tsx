@@ -4,7 +4,7 @@ import { PedagogicalSidebar } from "@/components/PedagogicalSidebar";
 export default function PedagogicalWorkLanding() {
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen w-full">
+      <div className="flex h-screen w-full overflow-hidden">
         <PedagogicalSidebar />
         <main className="flex-1 overflow-auto">
           <div className="p-6">
