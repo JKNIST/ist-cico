@@ -96,6 +96,17 @@ export function DayView({ date, children, staff, expandedStaffRows, onToggleStaf
     return staffCount > 0 && childrenCount / staffCount > maxRatio;
   };
 
+  // Helper: Get department color for visual distinction
+  const getDepartmentColor = (department: string): string => {
+    const colors: Record<string, string> = {
+      'Blåbär': 'bg-blue-50',
+      'Lingon': 'bg-red-50',
+      'Odon': 'bg-purple-50',
+      'Vildhallon': 'bg-pink-50'
+    };
+    return colors[department] || 'bg-gray-50';
+  };
+
   // Group children by department
   const departmentGroups = children.reduce((acc, child) => {
     if (!acc[child.department]) {
@@ -104,6 +115,22 @@ export function DayView({ date, children, staff, expandedStaffRows, onToggleStaf
     acc[child.department].push(child);
     return acc;
   }, {} as Record<string, ChildSchedule[]>);
+
+  // Calculate sticky positions
+  const headerHeight = 48;
+  const departmentHeaderHeight = 36;
+  const summaryRowHeight = 34;
+  
+  const getStickyPositions = (deptIndex: number) => {
+    const baseTop = headerHeight;
+    const blockOffset = deptIndex * (departmentHeaderHeight + (3 * summaryRowHeight));
+    return {
+      deptHeader: baseTop + blockOffset,
+      childrenRow: baseTop + blockOffset + departmentHeaderHeight,
+      staffRow: baseTop + blockOffset + departmentHeaderHeight + summaryRowHeight,
+      ratioRow: baseTop + blockOffset + departmentHeaderHeight + (2 * summaryRowHeight),
+    };
+  };
 
   return (
     <div className="bg-card rounded-lg border">
@@ -122,21 +149,28 @@ export function DayView({ date, children, staff, expandedStaffRows, onToggleStaf
             </tr>
           </thead>
         <tbody>
-          {Object.entries(departmentGroups).map(([department, deptChildren]) => {
+          {Object.entries(departmentGroups).map(([department, deptChildren], deptIndex) => {
             const deptStaff = staff.filter(s => s.department === department);
+            const stickyPos = getStickyPositions(deptIndex);
             
             return (
               <React.Fragment key={department}>
-                {/* Department header */}
-                <tr className="border-b bg-primary/5">
-                  <td className="px-3 py-2 font-semibold text-sm sticky left-0 bg-primary/5 z-10 border-r" colSpan={timeIntervals.length + 1}>
+                {/* Department header - sticky */}
+                <tr 
+                  className="border-b bg-primary/5 sticky z-[25]" 
+                  style={{ top: `${stickyPos.deptHeader}px` }}
+                >
+                  <td className="px-3 py-2 font-semibold text-sm sticky left-0 bg-primary/5 z-20 border-r" colSpan={timeIntervals.length + 1}>
                     {department}
                   </td>
                 </tr>
 
-                {/* Children present row */}
-                <tr className="border-b bg-muted/20">
-                  <td className="px-3 py-1.5 text-xs text-muted-foreground sticky left-0 bg-muted/20 z-10 border-r">
+                {/* Children present row - sticky */}
+                <tr 
+                  className="border-b bg-muted/20 sticky z-[24]" 
+                  style={{ top: `${stickyPos.childrenRow}px` }}
+                >
+                  <td className="px-3 py-1.5 text-xs text-muted-foreground sticky left-0 bg-muted/20 z-20 border-r">
                     Barn närvarande
                   </td>
                   {timeIntervals.map((interval, idx) => {
@@ -154,10 +188,13 @@ export function DayView({ date, children, staff, expandedStaffRows, onToggleStaf
                   })}
                 </tr>
 
-                {/* Staff present row - expandable */}
-                <tr className="border-b bg-[hsl(142,76%,85%)]">
+                {/* Staff present row - sticky & expandable */}
+                <tr 
+                  className="border-b bg-[hsl(142,76%,85%)] sticky z-[23]" 
+                  style={{ top: `${stickyPos.staffRow}px` }}
+                >
                   <td 
-                    className="px-3 py-1.5 text-xs text-foreground sticky left-0 bg-[hsl(142,76%,85%)] z-10 cursor-pointer hover:bg-[hsl(142,76%,80%)] transition-colors border-r"
+                    className="px-3 py-1.5 text-xs text-foreground sticky left-0 bg-[hsl(142,76%,85%)] z-20 cursor-pointer hover:bg-[hsl(142,76%,80%)] transition-colors border-r"
                     onClick={() => onToggleStaffExpand(currentDayIndex)}
                   >
                     <div className="flex items-center gap-1">
@@ -194,15 +231,18 @@ export function DayView({ date, children, staff, expandedStaffRows, onToggleStaf
                   })}
                 </tr>
 
-                {/* Expanded staff details */}
+                {/* Expanded staff details - with visual distinction */}
                 {expandedStaffRows.has(currentDayIndex) && deptStaff.map((staffMember) => {
                   const schedule = staffMember.schedules[currentDayIndex.toString()];
                   if (!schedule) return null;
                   
                   return (
-                    <tr key={staffMember.id} className="border-b bg-muted/10">
-                      <td className="px-6 py-1 text-xs sticky left-0 bg-muted/10 z-10 border-r">
-                        {staffMember.name} - {staffMember.role}
+                    <tr key={staffMember.id} className="border-b bg-green-50/50">
+                      <td className="px-6 py-1 text-xs sticky left-0 bg-green-50/50 z-10 border-r">
+                        <div className="flex items-center gap-2">
+                          <span className="text-muted-foreground">👤</span>
+                          {staffMember.name} - {staffMember.role}
+                        </div>
                       </td>
                       {timeIntervals.map((interval, idx) => {
                         const isWorking = overlapsInterval(schedule, interval);
@@ -220,9 +260,12 @@ export function DayView({ date, children, staff, expandedStaffRows, onToggleStaf
                   );
                 })}
 
-                {/* Ratio row */}
-                <tr className="border-b">
-                  <td className="px-3 py-1.5 text-xs text-muted-foreground sticky left-0 bg-background z-10 border-r">
+                {/* Ratio row - sticky */}
+                <tr 
+                  className="border-b bg-background sticky z-[22]" 
+                  style={{ top: `${stickyPos.ratioRow}px` }}
+                >
+                  <td className="px-3 py-1.5 text-xs text-muted-foreground sticky left-0 bg-background z-20 border-r">
                     Ratio
                   </td>
                   {timeIntervals.map((interval, idx) => {
@@ -265,14 +308,15 @@ export function DayView({ date, children, staff, expandedStaffRows, onToggleStaf
                   })}
                 </tr>
 
-                {/* Children rows */}
+                {/* Children rows - with department color coding */}
                 {deptChildren.map((child) => {
                   const schedule = child.schedules[currentDayIndex.toString()];
                   if (!schedule) return null;
+                  const deptColor = getDepartmentColor(department);
                   
                   return (
-                    <tr key={child.id} className="border-b hover:bg-muted/30 transition-colors">
-                      <td className="px-3 py-1.5 sticky left-0 bg-background z-10 border-r">
+                    <tr key={child.id} className={`border-b hover:opacity-80 transition-all ${deptColor}`}>
+                      <td className={`px-3 py-1.5 sticky left-0 z-10 border-r ${deptColor}`}>
                         <div className="font-medium text-xs">{child.name}</div>
                       </td>
                       {timeIntervals.map((interval, idx) => {
