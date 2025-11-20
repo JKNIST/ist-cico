@@ -9,7 +9,7 @@ import { useLocale } from "@/hooks/useLocale";
 import { useDepartmentFilter } from "@/contexts/DepartmentFilterContext";
 import { mockStaffSchedules } from "@/data/staff/mockStaffSchedules";
 import { StaffScheduleDialog } from "@/components/staff/StaffScheduleDialog";
-import { StaffingRatioSettings } from "@/components/administration/StaffingRatioSettings";
+import { ScheduleSettings } from "@/components/administration/ScheduleSettings";
 import { cn } from "@/lib/utils";
 
 export default function StaffSchedule() {
@@ -86,7 +86,7 @@ export default function StaffSchedule() {
         <Tabs defaultValue="schedule" className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-6">
             <TabsTrigger value="schedule">Schema</TabsTrigger>
-            <TabsTrigger value="staffing">Personaltäthet</TabsTrigger>
+            <TabsTrigger value="staffing">Inställningar</TabsTrigger>
           </TabsList>
 
           <TabsContent value="schedule" className="space-y-4">
@@ -206,7 +206,7 @@ export default function StaffSchedule() {
           </TabsContent>
 
           <TabsContent value="staffing">
-            <StaffingRatioSettings />
+            <ScheduleSettings />
           </TabsContent>
         </Tabs>
 
