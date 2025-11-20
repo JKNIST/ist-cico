@@ -25,15 +25,15 @@ const queryClient = new QueryClient();
 
 const AppLayout = ({ children }: { children: React.ReactNode }) => (
   <SidebarProvider>
-    <div className="flex min-h-screen w-full">
+    <div className="flex h-screen w-full overflow-hidden">
       <AppSidebar />
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <header className="sticky top-0 z-50 border-b bg-background px-6 py-3 flex justify-end items-center gap-4">
+      <div className="flex-1 flex flex-col h-screen overflow-hidden">
+        <header className="flex-shrink-0 z-50 border-b bg-background px-6 py-3 flex justify-end items-center gap-4">
           <DepartmentSelector />
           <LanguageSelector />
           <UserProfile />
         </header>
-        <main className="flex-1 overflow-y-auto overflow-x-hidden">{children}</main>
+        <main className="flex-1 overflow-auto">{children}</main>
       </div>
     </div>
   </SidebarProvider>
