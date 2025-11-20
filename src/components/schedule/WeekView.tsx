@@ -26,9 +26,10 @@ interface WeekViewProps {
   weekDays: Date[];
   children: ChildSchedule[];
   staff: StaffSchedule[];
+  onStaffCellClick?: (staffId: string, staffName: string, dayIndex: number, schedule: { start: string; end: string } | null) => void;
 }
 
-export function WeekView({ weekStart, weekDays, children, staff }: WeekViewProps) {
+export function WeekView({ weekStart, weekDays, children, staff, onStaffCellClick }: WeekViewProps) {
   const locale = useLocale();
 
   const getChildrenPresentCount = (dayIndex: number, department: string) => {
@@ -228,6 +229,41 @@ export function WeekView({ weekStart, weekDays, children, staff }: WeekViewProps
                   })}
                 </tr>
               ))}
+
+              {/* Staff rows */}
+              {staff
+                .filter((s) => s.department === department)
+                .map((staffMember) => (
+                  <tr key={staffMember.id} className="border-b hover:bg-muted/30 bg-green-50/30">
+                    <td className="px-3 py-2 sticky left-0 bg-green-50/30 z-10">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-xs">{staffMember.name}</span>
+                        <span className="text-[10px] text-muted-foreground">({staffMember.role})</span>
+                      </div>
+                    </td>
+                    {weekDays.map((_, dayIndex) => {
+                      const schedule = staffMember.schedules[dayIndex.toString()];
+                      
+                      return (
+                        <td 
+                          key={dayIndex} 
+                          className="px-2 py-2 text-center cursor-pointer hover:bg-muted/50"
+                          onClick={() => onStaffCellClick?.(staffMember.id, staffMember.name, dayIndex, schedule)}
+                        >
+                          {schedule ? (
+                            <div className="bg-[hsl(210,55%,75%)] text-foreground rounded px-2 py-1 text-[11px]">
+                              {schedule.start} - {schedule.end}
+                            </div>
+                          ) : (
+                            <div className="bg-muted/30 text-muted-foreground rounded px-2 py-1 text-[11px]">
+                              Ledig
+                            </div>
+                          )}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
             </React.Fragment>
           ))}
         </tbody>

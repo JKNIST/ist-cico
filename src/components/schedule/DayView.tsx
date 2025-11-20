@@ -29,6 +29,7 @@ interface DayViewProps {
   expandedStaffRows: Set<number>;
   onToggleStaffExpand: (dayIndex: number) => void;
   intervalResolution?: 'default' | 'hourly';
+  onStaffCellClick?: (staffId: string, staffName: string, dayIndex: number, schedule: { start: string; end: string } | null) => void;
 }
 
 // Helper: Convert time string to minutes
@@ -62,7 +63,7 @@ const overlapsInterval = (
   return scheduleStart < intervalEnd && scheduleEnd > intervalStart;
 };
 
-export function DayView({ date, children, staff, expandedStaffRows, onToggleStaffExpand, intervalResolution = 'default' }: DayViewProps) {
+export function DayView({ date, children, staff, expandedStaffRows, onToggleStaffExpand, intervalResolution = 'default', onStaffCellClick }: DayViewProps) {
   const locale = useLocale();
   const timeIntervals = intervalResolution === 'hourly' ? hourlyIntervals : getTimeIntervals();
   const columnWidth = intervalResolution === 'hourly' ? 'min-w-[60px]' : 'min-w-[90px]';
@@ -452,7 +453,11 @@ export function DayView({ date, children, staff, expandedStaffRows, onToggleStaf
                         {timeIntervals.map((interval, idx) => {
                           const isWorking = overlapsInterval(schedule, interval);
                           return (
-                            <td key={idx} className="px-2 py-1 border-r">
+                            <td 
+                              key={idx} 
+                              className="px-2 py-1 border-r cursor-pointer hover:bg-muted/30"
+                              onClick={() => onStaffCellClick?.(staffMember.id, staffMember.name, currentDayIndex, schedule)}
+                            >
                               {isWorking && (
                                 <div className="bg-[hsl(210,55%,75%)] rounded px-2 py-1 text-center text-[11px] text-foreground">
                                   ✓
