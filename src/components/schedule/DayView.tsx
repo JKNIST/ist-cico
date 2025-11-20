@@ -85,16 +85,55 @@ export function DayView({ date, children, staff, expandedStaffRows, onToggleStaf
     });
   };
 
+  // Check if any hour within interval is understaffed (for standard intervals)
+  const hasAnyUnderStaffedHour = (interval: TimeInterval, department: string) => {
+    const intervalStart = timeToMinutes(interval.start);
+    const intervalEnd = interval.end === "00:00" ? 24 * 60 : timeToMinutes(interval.end);
+    
+    // For hourly intervals, just check the interval itself
+    if (intervalEnd - intervalStart <= 60) {
+      const childrenInDept = getChildrenInInterval(interval).filter(c => c.department === department);
+      const staffInDept = getStaffInInterval(interval).filter(s => s.department === department);
+      const childrenCount = childrenInDept.length;
+      const staffCount = staffInDept.length;
+      const maxRatio = getMaxRatioForDepartment(department);
+      return staffCount > 0 && childrenCount / staffCount > maxRatio;
+    }
+    
+    // For standard intervals, check each hour within the interval
+    for (let hourStart = intervalStart; hourStart < intervalEnd; hourStart += 60) {
+      const hourEnd = Math.min(hourStart + 60, intervalEnd);
+      const hourInterval: TimeInterval = {
+        start: `${String(Math.floor(hourStart / 60)).padStart(2, '0')}:${String(hourStart % 60).padStart(2, '0')}`,
+        end: `${String(Math.floor(hourEnd / 60)).padStart(2, '0')}:${String(hourEnd % 60).padStart(2, '0')}`,
+        label: ''
+      };
+      
+      const childrenInHour = children.filter((child) => {
+        const schedule = child.schedules[currentDayIndex.toString()];
+        return schedule && overlapsInterval(schedule, hourInterval) && child.department === department;
+      });
+      
+      const staffInHour = staff.filter((s) => {
+        const schedule = s.schedules[currentDayIndex.toString()];
+        return schedule && overlapsInterval(schedule, hourInterval) && s.department === department;
+      });
+      
+      const childrenCount = childrenInHour.length;
+      const staffCount = staffInHour.length;
+      const maxRatio = getMaxRatioForDepartment(department);
+      
+      if (staffCount > 0 && childrenCount / staffCount > maxRatio) {
+        return true; // Found at least one understaffed hour
+      }
+    }
+    
+    return false;
+  };
+
   // Check if understaffed in interval
   const isUnderStaffedInInterval = (interval: TimeInterval, department: string) => {
-    const childrenInDept = getChildrenInInterval(interval).filter(c => c.department === department);
-    const staffInDept = getStaffInInterval(interval).filter(s => s.department === department);
-    
-    const childrenCount = childrenInDept.length;
-    const staffCount = staffInDept.length;
-    const maxRatio = getMaxRatioForDepartment(department);
-
-    return staffCount > 0 && childrenCount / staffCount > maxRatio;
+    return hasAnyUnderStaffedHour(interval, department);
   };
 
   // Helper: Get department color for visual distinction
