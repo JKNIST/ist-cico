@@ -25,12 +25,26 @@
     "staffPresent": "Staff present",
     "ratio": "Ratio",
     "understaffed": "Understaffed",
+    "viewMode": {
+      "week": "Week",
+      "day": "Day"
+    },
     "staffingSettings": {
       "title": "Staffing Ratios",
       "description": "Set max children per staff for each department",
       "childrenPerStaff": "children per staff",
       "save": "Save settings",
       "saved": "Staffing settings saved"
+    },
+    "timeIntervals": {
+      "title": "Time intervals for day view",
+      "description": "Set which time intervals to display in day view",
+      "resolution": {
+        "default": "Default intervals",
+        "hourly": "Per hour (24 intervals)",
+        "custom": "Custom intervals"
+      },
+      "addInterval": "Add interval"
     }
   },
   "calendar": {

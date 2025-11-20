@@ -25,12 +25,26 @@
     "staffPresent": "Personale tilstede",
     "ratio": "Ratio",
     "understaffed": "For lite personale",
+    "viewMode": {
+      "week": "Uke",
+      "day": "Dag"
+    },
     "staffingSettings": {
       "title": "Bemanningsnøkkeltall",
       "description": "Angi maks antall barn per personale for hver avdeling",
       "childrenPerStaff": "barn per personale",
       "save": "Lagre innstillinger",
       "saved": "Bemanningsinnstillinger lagret"
+    },
+    "timeIntervals": {
+      "title": "Tidsintervaller for dagvisning",
+      "description": "Angi hvilke tidsintervaller som skal vises i dagvisning",
+      "resolution": {
+        "default": "Standard intervaller",
+        "hourly": "Per time (24 intervaller)",
+        "custom": "Tilpassede intervaller"
+      },
+      "addInterval": "Legg til intervall"
     }
   },
   "calendar": {

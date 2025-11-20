@@ -25,12 +25,26 @@
     "staffPresent": "Staff present",
     "ratio": "Ratio",
     "understaffed": "För lite personal",
+    "viewMode": {
+      "week": "Vecka",
+      "day": "Dag"
+    },
     "staffingSettings": {
       "title": "Bemanningsnyckeltal",
       "description": "Ange max antal barn per personal för varje avdelning",
       "childrenPerStaff": "barn per personal",
       "save": "Spara inställningar",
       "saved": "Bemanningsinställningar sparade"
+    },
+    "timeIntervals": {
+      "title": "Tidsintervaller för dagvy",
+      "description": "Ange vilka tidsintervaller som ska visas i dagvyn",
+      "resolution": {
+        "default": "Standard intervaller",
+        "hourly": "Per timme (24 intervall)",
+        "custom": "Anpassade intervaller"
+      },
+      "addInterval": "Lägg till intervall"
     }
   },
   "calendar": {
