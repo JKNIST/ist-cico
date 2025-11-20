@@ -289,6 +289,9 @@ export default function StaffSchedule() {
                             </div>
                           </th>
                         ))}
+                        <th className="text-center px-2 py-1 w-[80px]">
+                          <div className="text-xs text-muted-foreground">Åtgärder</div>
+                        </th>
                       </tr>
                       <tr className="border-b">
                         <td className="px-2 py-1 text-xs text-muted-foreground">
@@ -310,15 +313,33 @@ export default function StaffSchedule() {
                     </thead>
                     <tbody>
                       {filteredStaff.map((staff) => (
-                        <tr key={staff.id} className="border-b hover:bg-muted/30">
+                        <tr 
+                          key={staff.id} 
+                          className={cn(
+                            "border-b hover:bg-muted/30",
+                            staff.isSubstitute && !isSubstituteExpired(staff) && "bg-yellow-50/50"
+                          )}
+                        >
                           <td className="px-2 py-1">
                             <div className="flex items-center gap-1">
                               <div>
-                                <div className="font-medium text-xs break-words">{staff.name}</div>
+                                <div className="flex items-center gap-2">
+                                  <span className="font-medium text-xs break-words">{staff.name}</span>
+                                  {staff.isSubstitute && (
+                                    <Badge variant="outline" className="text-[10px] px-1 py-0">
+                                      Vikarie
+                                    </Badge>
+                                  )}
+                                </div>
                                 <div className="text-xs text-muted-foreground">
                                   {staff.role}
                                   {staff.department && ` · ${staff.department}`}
                                 </div>
+                                {staff.isSubstitute && staff.substituteStartDate && staff.substituteEndDate && (
+                                  <div className="text-[10px] text-muted-foreground mt-0.5">
+                                    {format(new Date(staff.substituteStartDate), "dd MMM", { locale })} - {format(new Date(staff.substituteEndDate), "dd MMM", { locale })}
+                                  </div>
+                                )}
                               </div>
                             </div>
                           </td>
@@ -344,6 +365,26 @@ export default function StaffSchedule() {
                               </td>
                             );
                           })}
+                          <td className="px-2 py-1">
+                            <div className="flex items-center justify-center gap-1">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-6 w-6 p-0"
+                                onClick={() => handleEditStaff(staff)}
+                              >
+                                <Edit className="h-3 w-3" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-6 w-6 p-0"
+                                onClick={() => handleDeleteClick(staff.id)}
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          </td>
                         </tr>
                       ))}
                     </tbody>
@@ -376,6 +417,25 @@ export default function StaffSchedule() {
           </TabsContent>
         </Tabs>
 
+        <AddStaffDialog
+          open={addDialogOpen}
+          onOpenChange={setAddDialogOpen}
+          onAdd={handleAddStaff}
+        />
+
+        <EditStaffDialog
+          open={editDialogOpen}
+          onOpenChange={setEditDialogOpen}
+          staff={selectedStaffForEdit}
+          onSave={handleSaveEdit}
+        />
+
+        <ImportStaffDialog
+          open={importDialogOpen}
+          onOpenChange={setImportDialogOpen}
+          onImport={handleImportStaff}
+        />
+
         {selectedStaff && (
           <StaffScheduleDialog
             open={dialogOpen}
@@ -386,6 +446,25 @@ export default function StaffSchedule() {
             onSave={handleSaveSchedule}
           />
         )}
+
+        <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>{t("staffSchedule.deleteStaff")}</AlertDialogTitle>
+              <AlertDialogDescription>
+                {t("staffSchedule.confirmDelete", { 
+                  name: staffSchedules.find(s => s.id === selectedStaffForDelete)?.name 
+                })}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
+              <AlertDialogAction onClick={handleConfirmDelete}>
+                {t("common.delete")}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   );
