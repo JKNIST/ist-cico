@@ -1,22 +1,29 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { X } from "lucide-react";
 import { GroupsSelection } from "./GroupsSelection";
+import { mockDepartments } from "@/data/groups/mockGroups";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export function ExternalRecipientsSection() {
   const { t } = useTranslation();
-  const [departments, setDepartments] = useState<string[]>(["Spindeln", "Fjärilen"]);
+  const [departments, setDepartments] = useState<string[]>([]);
   const [students, setStudents] = useState<string[]>([]);
-  const [departmentInput, setDepartmentInput] = useState("");
   const [studentInput, setStudentInput] = useState("");
 
-  const handleAddDepartment = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && departmentInput.trim()) {
-      setDepartments([...departments, departmentInput.trim()]);
-      setDepartmentInput("");
+  const availableDepartments = mockDepartments.map(dept => dept.name);
+
+  const handleAddDepartment = (value: string) => {
+    if (value && !departments.includes(value)) {
+      setDepartments([...departments, value]);
     }
   };
 
@@ -40,12 +47,20 @@ export function ExternalRecipientsSection() {
       {/* Avdelningar */}
       <div className="space-y-2">
         <Label>{t("blog.form.classesGroups")}</Label>
-        <Input
-          placeholder="Tryck Enter för att lägga till..."
-          value={departmentInput}
-          onChange={(e) => setDepartmentInput(e.target.value)}
-          onKeyDown={handleAddDepartment}
-        />
+        <Select onValueChange={handleAddDepartment}>
+          <SelectTrigger className="bg-background">
+            <SelectValue placeholder="Välj avdelning att lägga till..." />
+          </SelectTrigger>
+          <SelectContent className="bg-background z-50">
+            {availableDepartments
+              .filter(dept => !departments.includes(dept))
+              .map((dept) => (
+                <SelectItem key={dept} value={dept}>
+                  {dept}
+                </SelectItem>
+              ))}
+          </SelectContent>
+        </Select>
         <div className="flex flex-wrap gap-2">
           {departments.map((dept, index) => (
             <Badge key={index} variant="secondary" className="gap-1">
@@ -65,12 +80,26 @@ export function ExternalRecipientsSection() {
       {/* Elever/Barn */}
       <div className="space-y-2">
         <Label>{t("blog.form.students")}</Label>
-        <Input
-          placeholder="Tryck Enter för att lägga till..."
-          value={studentInput}
-          onChange={(e) => setStudentInput(e.target.value)}
-          onKeyDown={handleAddStudent}
-        />
+        <Select onValueChange={(value) => {
+          if (value && !students.includes(value)) {
+            setStudents([...students, value]);
+          }
+        }}>
+          <SelectTrigger className="bg-background">
+            <SelectValue placeholder="Välj barn att lägga till..." />
+          </SelectTrigger>
+          <SelectContent className="bg-background z-50">
+            {mockDepartments
+              .filter(dept => departments.includes(dept.name))
+              .flatMap(dept => dept.children)
+              .filter(child => !students.includes(child.name))
+              .map((child) => (
+                <SelectItem key={child.id} value={child.name}>
+                  {child.name} ({child.department})
+                </SelectItem>
+              ))}
+          </SelectContent>
+        </Select>
         <div className="flex flex-wrap gap-2">
           {students.map((student, index) => (
             <Badge key={index} variant="secondary" className="gap-1">
