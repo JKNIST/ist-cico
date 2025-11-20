@@ -63,6 +63,7 @@ export default function Schedule() {
   const { selectedDepartments } = useDepartmentFilter();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<'week' | 'day'>('week');
+  const [intervalResolution, setIntervalResolution] = useState<'default' | 'hourly'>('default');
   const [expandedStaffRows, setExpandedStaffRows] = useState<Set<number>>(new Set());
 
   useEffect(() => {
@@ -126,6 +127,28 @@ export default function Schedule() {
               </Button>
             </div>
 
+            {viewMode === 'day' && (
+              <div className="flex items-center gap-2 border-l pl-4 ml-2">
+                <span className="text-sm text-muted-foreground">Visa:</span>
+                <div className="flex items-center gap-1 border rounded-lg p-1 bg-card">
+                  <Button
+                    variant={intervalResolution === 'default' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => setIntervalResolution('default')}
+                  >
+                    Standard
+                  </Button>
+                  <Button
+                    variant={intervalResolution === 'hourly' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => setIntervalResolution('hourly')}
+                  >
+                    Timvis
+                  </Button>
+                </div>
+              </div>
+            )}
+
             <div className="text-sm text-muted-foreground">
               {viewMode === 'week' ? (
                 <>{format(weekStart, "d MMM", { locale: getDateLocale() })} - {format(addDays(weekStart, 6), "d MMM yyyy", { locale: getDateLocale() })}</>
@@ -154,7 +177,7 @@ export default function Schedule() {
         {viewMode === 'week' ? (
           <WeekView weekStart={weekStart} weekDays={weekDays} children={filteredChildren} staff={filteredStaff} />
         ) : (
-          <DayView date={currentDate} children={filteredChildren} staff={filteredStaff} expandedStaffRows={expandedStaffRows} onToggleStaffExpand={toggleStaffExpand} />
+          <DayView date={currentDate} children={filteredChildren} staff={filteredStaff} expandedStaffRows={expandedStaffRows} onToggleStaffExpand={toggleStaffExpand} intervalResolution={intervalResolution} />
         )}
 
         <ColorLegend />

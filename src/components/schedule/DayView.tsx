@@ -1,7 +1,7 @@
 import { format } from "date-fns";
 import { ChevronDown, ChevronRight, AlertTriangle } from "lucide-react";
 import { useLocale } from "@/hooks/useLocale";
-import { getTimeIntervals, type TimeInterval } from "@/data/staff/timeIntervalSettings";
+import { getTimeIntervals, hourlyIntervals, type TimeInterval } from "@/data/staff/timeIntervalSettings";
 import { getMaxRatioForDepartment } from "@/data/staff/staffingRatios";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
@@ -27,6 +27,7 @@ interface DayViewProps {
   staff: StaffSchedule[];
   expandedStaffRows: Set<number>;
   onToggleStaffExpand: (dayIndex: number) => void;
+  intervalResolution?: 'default' | 'hourly';
 }
 
 // Helper: Convert time string to minutes
@@ -60,9 +61,10 @@ const overlapsInterval = (
   return scheduleStart < intervalEnd && scheduleEnd > intervalStart;
 };
 
-export function DayView({ date, children, staff, expandedStaffRows, onToggleStaffExpand }: DayViewProps) {
+export function DayView({ date, children, staff, expandedStaffRows, onToggleStaffExpand, intervalResolution = 'default' }: DayViewProps) {
   const locale = useLocale();
-  const timeIntervals = getTimeIntervals();
+  const timeIntervals = intervalResolution === 'hourly' ? hourlyIntervals : getTimeIntervals();
+  const columnWidth = intervalResolution === 'hourly' ? 'min-w-[60px]' : 'min-w-[90px]';
   const currentDayIndex = date.getDay();
 
   // Get children present in an interval
@@ -103,7 +105,7 @@ export function DayView({ date, children, staff, expandedStaffRows, onToggleStaf
   }, {} as Record<string, ChildSchedule[]>);
 
   return (
-    <div className="bg-card rounded-lg border overflow-x-auto">
+    <div className="bg-card rounded-lg border overflow-x-auto schedule-day-scroll">
       <table className="w-full text-xs border-collapse">
         <thead>
           <tr className="border-b bg-muted/50">
@@ -111,7 +113,7 @@ export function DayView({ date, children, staff, expandedStaffRows, onToggleStaf
               {format(date, "EEEE dd MMMM", { locale })}
             </th>
             {timeIntervals.map((interval, idx) => (
-              <th key={idx} className="text-center px-2 py-2 min-w-[90px] font-medium text-xs border-r">
+              <th key={idx} className={`text-center px-2 py-2 ${columnWidth} font-medium text-xs border-r`}>
                 {interval.label}
               </th>
             ))}
