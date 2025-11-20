@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Calendar, ChevronLeft, ChevronRight, UserPlus, FileUp, Edit, Trash2 } from "lucide-react";
+import { Calendar, ChevronLeft, ChevronRight, UserPlus, FileUp, Edit, Trash2, Sparkles } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -13,6 +13,8 @@ import { AddStaffDialog } from "@/components/staff/AddStaffDialog";
 import { EditStaffDialog } from "@/components/staff/EditStaffDialog";
 import { ImportStaffDialog } from "@/components/staff/ImportStaffDialog";
 import { ScheduleSettings } from "@/components/administration/ScheduleSettings";
+import { AIScheduleSuggestionDialog } from "@/components/staff/AIScheduleSuggestionDialog";
+import { getStaffingRatios } from "@/data/staff/staffingRatios";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
@@ -38,6 +40,7 @@ export default function StaffSchedule() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedStaffForEdit, setSelectedStaffForEdit] = useState<StaffScheduleType | null>(null);
   const [selectedStaffForDelete, setSelectedStaffForDelete] = useState<string | null>(null);
+  const [aiDialogOpen, setAiDialogOpen] = useState(false);
 
   // Load from localStorage on mount
   useEffect(() => {
@@ -231,6 +234,19 @@ export default function StaffSchedule() {
     return isPast(new Date(staff.substituteEndDate));
   };
 
+  const handleAcceptAISuggestions = (suggestions: any[]) => {
+    setStaffSchedules((prev) => {
+      const updated = [...prev];
+      suggestions.forEach((suggestion) => {
+        const staffIndex = updated.findIndex(s => s.id === suggestion.staffId);
+        if (staffIndex >= 0) {
+          updated[staffIndex].schedules = suggestion.schedule;
+        }
+      });
+      return updated;
+    });
+  };
+
   return (
     <div className="min-h-screen bg-muted/30">
       <div className="p-6">
@@ -255,6 +271,15 @@ export default function StaffSchedule() {
                 <Button variant="outline" size="sm" onClick={() => setImportDialogOpen(true)}>
                   <FileUp className="h-4 w-4 mr-2" />
                   {t("staffSchedule.importStaff")}
+                </Button>
+                <Button 
+                  variant="default" 
+                  size="sm" 
+                  onClick={() => setAiDialogOpen(true)}
+                  className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                >
+                  <Sparkles className="h-4 w-4 mr-2" />
+                  AI-förslag
                 </Button>
               </div>
               <div className="flex items-center gap-2">
@@ -446,6 +471,28 @@ export default function StaffSchedule() {
             onSave={handleSaveSchedule}
           />
         )}
+
+        <AIScheduleSuggestionDialog
+          open={aiDialogOpen}
+          onOpenChange={setAiDialogOpen}
+          weekStart={weekStart}
+          childCounts={{}}
+          staffList={filteredStaff}
+          staffingRatios={[]}
+          currentSchedules={staffSchedules}
+          onAcceptSuggestions={handleAcceptAISuggestions}
+        />
+
+        <AIScheduleSuggestionDialog
+          open={aiDialogOpen}
+          onOpenChange={setAiDialogOpen}
+          weekStart={weekStart}
+          childCounts={{}}
+          staffList={filteredStaff}
+          staffingRatios={getStaffingRatios()}
+          currentSchedules={staffSchedules}
+          onAcceptSuggestions={handleAcceptAISuggestions}
+        />
 
         <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
           <AlertDialogContent>
