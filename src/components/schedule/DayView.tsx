@@ -1,3 +1,4 @@
+import React from "react";
 import { format } from "date-fns";
 import { ChevronDown, ChevronRight, AlertTriangle } from "lucide-react";
 import { useLocale } from "@/hooks/useLocale";
@@ -105,20 +106,21 @@ export function DayView({ date, children, staff, expandedStaffRows, onToggleStaf
   }, {} as Record<string, ChildSchedule[]>);
 
   return (
-    <div className="bg-card rounded-lg border overflow-x-auto schedule-day-scroll">
-      <table className="w-full text-xs border-collapse">
-        <thead>
-          <tr className="border-b bg-muted/50">
-            <th className="text-left px-3 py-2 font-medium w-[180px] sticky left-0 bg-muted/50 z-20 border-r">
-              {format(date, "EEEE dd MMMM", { locale })}
-            </th>
-            {timeIntervals.map((interval, idx) => (
-              <th key={idx} className={`text-center px-2 py-2 ${columnWidth} font-medium text-xs border-r`}>
-                {interval.label}
+    <div className="bg-card rounded-lg border">
+      <div className="overflow-x-auto schedule-day-scroll">
+        <table className="w-full text-xs border-collapse">
+          <thead className="sticky top-0 z-30 bg-muted/95 backdrop-blur shadow-sm">
+            <tr className="border-b">
+              <th className="text-left px-3 py-2 font-medium w-[180px] sticky left-0 bg-muted/95 z-20 border-r">
+                {format(date, "EEEE dd MMMM", { locale })}
               </th>
-            ))}
-          </tr>
-        </thead>
+              {timeIntervals.map((interval, idx) => (
+                <th key={idx} className={`text-center px-2 py-2 ${columnWidth} font-medium text-xs border-r bg-muted/95`}>
+                  {interval.label}
+                </th>
+              ))}
+            </tr>
+          </thead>
         <tbody>
           {Object.entries(departmentGroups).map(([department, deptChildren]) => {
             const deptStaff = staff.filter(s => s.department === department);
@@ -293,9 +295,7 @@ export function DayView({ date, children, staff, expandedStaffRows, onToggleStaf
           })}
         </tbody>
       </table>
+      </div>
     </div>
   );
 }
-
-// Add React import for Fragment
-import React from "react";
