@@ -3,6 +3,9 @@ export interface StaffSchedule {
   name: string;
   role: string;
   department?: string;
+  isSubstitute?: boolean;
+  substituteStartDate?: string;
+  substituteEndDate?: string;
   schedules: {
     [key: string]: { start: string; end: string } | null;
   };

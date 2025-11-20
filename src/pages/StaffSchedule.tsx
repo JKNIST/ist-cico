@@ -1,15 +1,21 @@
-import { useState } from "react";
-import { Calendar, Users, ChevronLeft, ChevronRight } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Calendar, ChevronLeft, ChevronRight, UserPlus, FileUp, Edit, Trash2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useTranslation } from "react-i18next";
-import { format, startOfWeek, addDays, addWeeks, subWeeks, getWeek } from "date-fns";
+import { format, startOfWeek, addDays, addWeeks, subWeeks, getWeek, isPast } from "date-fns";
 import { useLocale } from "@/hooks/useLocale";
 import { useDepartmentFilter } from "@/contexts/DepartmentFilterContext";
-import { mockStaffSchedules } from "@/data/staff/mockStaffSchedules";
+import { mockStaffSchedules, StaffSchedule as StaffScheduleType } from "@/data/staff/mockStaffSchedules";
 import { StaffScheduleDialog } from "@/components/staff/StaffScheduleDialog";
+import { AddStaffDialog } from "@/components/staff/AddStaffDialog";
+import { EditStaffDialog } from "@/components/staff/EditStaffDialog";
+import { ImportStaffDialog } from "@/components/staff/ImportStaffDialog";
 import { ScheduleSettings } from "@/components/administration/ScheduleSettings";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
+import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
 export default function StaffSchedule() {
@@ -25,7 +31,34 @@ export default function StaffSchedule() {
     dayName: string;
     currentSchedule: { start: string; end: string } | null;
   } | null>(null);
-  const [staffSchedules, setStaffSchedules] = useState(mockStaffSchedules);
+  const [staffSchedules, setStaffSchedules] = useState<StaffScheduleType[]>([]);
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedStaffForEdit, setSelectedStaffForEdit] = useState<StaffScheduleType | null>(null);
+  const [selectedStaffForDelete, setSelectedStaffForDelete] = useState<string | null>(null);
+
+  // Load from localStorage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem("staffSchedules");
+    if (saved) {
+      try {
+        setStaffSchedules(JSON.parse(saved));
+      } catch {
+        setStaffSchedules(mockStaffSchedules);
+      }
+    } else {
+      setStaffSchedules(mockStaffSchedules);
+    }
+  }, []);
+
+  // Save to localStorage when staffSchedules changes
+  useEffect(() => {
+    if (staffSchedules.length > 0) {
+      localStorage.setItem("staffSchedules", JSON.stringify(staffSchedules));
+    }
+  }, [staffSchedules]);
 
   const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 });
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
@@ -75,6 +108,129 @@ export default function StaffSchedule() {
     return filteredStaff.filter((staff) => staff.schedules[dayIndex.toString()]).length;
   };
 
+  const handleAddStaff = (newStaff: {
+    name: string;
+    role: string;
+    department: string;
+    isSubstitute: boolean;
+    substituteStartDate?: string;
+    substituteEndDate?: string;
+    defaultSchedule?: { start: string; end: string };
+  }) => {
+    const id = `staff${Date.now()}`;
+    const schedules: { [key: string]: { start: string; end: string } | null } = {};
+    
+    // Apply default schedule to weekdays (1-5) if provided
+    if (newStaff.defaultSchedule) {
+      for (let i = 1; i <= 5; i++) {
+        schedules[i.toString()] = newStaff.defaultSchedule;
+      }
+    }
+
+    const staff: StaffScheduleType = {
+      id,
+      name: newStaff.name,
+      role: newStaff.role,
+      department: newStaff.department,
+      isSubstitute: newStaff.isSubstitute,
+      substituteStartDate: newStaff.substituteStartDate,
+      substituteEndDate: newStaff.substituteEndDate,
+      schedules,
+    };
+
+    setStaffSchedules((prev) => [...prev, staff]);
+    toast({
+      title: t("staffSchedule.staffAdded"),
+      description: t("staffSchedule.staffAddedSuccess", { name: newStaff.name }),
+    });
+  };
+
+  const handleEditStaff = (staff: StaffScheduleType) => {
+    setSelectedStaffForEdit(staff);
+    setEditDialogOpen(true);
+  };
+
+  const handleSaveEdit = (
+    staffId: string,
+    updates: {
+      name: string;
+      role: string;
+      department: string;
+      isSubstitute: boolean;
+      substituteStartDate?: string;
+      substituteEndDate?: string;
+    }
+  ) => {
+    setStaffSchedules((prev) =>
+      prev.map((staff) =>
+        staff.id === staffId
+          ? {
+              ...staff,
+              name: updates.name,
+              role: updates.role,
+              department: updates.department,
+              isSubstitute: updates.isSubstitute,
+              substituteStartDate: updates.substituteStartDate,
+              substituteEndDate: updates.substituteEndDate,
+            }
+          : staff
+      )
+    );
+    toast({
+      title: t("staffSchedule.staffUpdated"),
+      description: t("staffSchedule.staffUpdatedSuccess"),
+    });
+  };
+
+  const handleDeleteClick = (staffId: string) => {
+    setSelectedStaffForDelete(staffId);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (!selectedStaffForDelete) return;
+    
+    const staff = staffSchedules.find((s) => s.id === selectedStaffForDelete);
+    setStaffSchedules((prev) => prev.filter((s) => s.id !== selectedStaffForDelete));
+    
+    toast({
+      title: t("staffSchedule.staffDeleted"),
+      description: t("staffSchedule.staffDeletedSuccess", { name: staff?.name }),
+    });
+    
+    setSelectedStaffForDelete(null);
+    setDeleteDialogOpen(false);
+  };
+
+  const handleImportStaff = (
+    importedStaff: Array<{
+      name: string;
+      role: string;
+      department: string;
+      isSubstitute: boolean;
+      substituteStartDate?: string;
+      substituteEndDate?: string;
+    }>
+  ) => {
+    const newStaff: StaffScheduleType[] = importedStaff.map((staff, index) => ({
+      id: `staff${Date.now()}_${index}`,
+      name: staff.name,
+      role: staff.role,
+      department: staff.department,
+      isSubstitute: staff.isSubstitute,
+      substituteStartDate: staff.substituteStartDate,
+      substituteEndDate: staff.substituteEndDate,
+      schedules: {},
+    }));
+
+    setStaffSchedules((prev) => [...prev, ...newStaff]);
+  };
+
+  const isSubstituteExpired = (staff: StaffScheduleType) => {
+    if (!staff.isSubstitute || !staff.substituteEndDate) return false;
+    return isPast(new Date(staff.substituteEndDate));
+  };
+
   return (
     <div className="min-h-screen bg-muted/30">
       <div className="p-6">
@@ -90,7 +246,17 @@ export default function StaffSchedule() {
           </TabsList>
 
           <TabsContent value="schedule" className="space-y-4">
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm" onClick={() => setAddDialogOpen(true)}>
+                  <UserPlus className="h-4 w-4 mr-2" />
+                  {t("staffSchedule.addStaff")}
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => setImportDialogOpen(true)}>
+                  <FileUp className="h-4 w-4 mr-2" />
+                  {t("staffSchedule.importStaff")}
+                </Button>
+              </div>
               <div className="flex items-center gap-2">
                 <Button variant="outline" size="sm" onClick={goToPreviousWeek}>
                   <ChevronLeft className="h-4 w-4" />
