@@ -11,6 +11,7 @@ import { mockStaffSchedules } from "@/data/staff/mockStaffSchedules";
 import { WeekView } from "@/components/schedule/WeekView";
 import { DayView } from "@/components/schedule/DayView";
 import { ColorLegend } from "@/components/ColorLegend";
+import { StaffScheduleDialog } from "@/components/staff/StaffScheduleDialog";
 
 interface ChildSchedule {
   id: string;
@@ -65,6 +66,15 @@ export default function Schedule() {
   const [viewMode, setViewMode] = useState<'week' | 'day'>('week');
   const [intervalResolution, setIntervalResolution] = useState<'default' | 'hourly'>('default');
   const [expandedStaffRows, setExpandedStaffRows] = useState<Set<number>>(new Set());
+  const [staffDialogOpen, setStaffDialogOpen] = useState(false);
+  const [selectedStaff, setSelectedStaff] = useState<{
+    staffId: string;
+    staffName: string;
+    dayIndex: number;
+    dayName: string;
+    currentSchedule: { start: string; end: string } | null;
+  } | null>(null);
+  const [staffSchedules, setStaffSchedules] = useState(mockStaffSchedules);
 
   useEffect(() => {
     const handleIntervalsUpdated = () => setExpandedStaffRows(new Set());
@@ -72,11 +82,30 @@ export default function Schedule() {
     return () => window.removeEventListener("timeIntervalsUpdated", handleIntervalsUpdated);
   }, []);
 
+  // Load staff schedules from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem("staffSchedules");
+    if (saved) {
+      try {
+        setStaffSchedules(JSON.parse(saved));
+      } catch {
+        setStaffSchedules(mockStaffSchedules);
+      }
+    }
+  }, []);
+
+  // Save staff schedules to localStorage
+  useEffect(() => {
+    if (staffSchedules.length > 0) {
+      localStorage.setItem("staffSchedules", JSON.stringify(staffSchedules));
+    }
+  }, [staffSchedules]);
+
   const filteredChildren = childrenSchedules.filter((child) =>
     selectedDepartments.length === 0 || selectedDepartments.includes(child.department)
   );
 
-  const filteredStaff = mockStaffSchedules.filter((staff) =>
+  const filteredStaff = staffSchedules.filter((staff) =>
     staff.department && (selectedDepartments.length === 0 || selectedDepartments.includes(staff.department))
   );
 
@@ -106,6 +135,36 @@ export default function Schedule() {
       newSet.has(dayIndex) ? newSet.delete(dayIndex) : newSet.add(dayIndex);
       return newSet;
     });
+  };
+
+  const handleStaffCellClick = (
+    staffId: string,
+    staffName: string,
+    dayIndex: number,
+    currentSchedule: { start: string; end: string } | null
+  ) => {
+    const dayDate = viewMode === 'week' ? weekDays[dayIndex] : currentDate;
+    const dayName = format(dayDate, "EEEE d MMMM", { locale: getDateLocale() });
+    setSelectedStaff({ staffId, staffName, dayIndex, dayName, currentSchedule });
+    setStaffDialogOpen(true);
+  };
+
+  const handleSaveStaffSchedule = (schedule: { start: string; end: string } | null) => {
+    if (!selectedStaff) return;
+
+    setStaffSchedules((prev) =>
+      prev.map((staff) =>
+        staff.id === selectedStaff.staffId
+          ? {
+              ...staff,
+              schedules: {
+                ...staff.schedules,
+                [selectedStaff.dayIndex]: schedule,
+              },
+            }
+          : staff
+      )
+    );
   };
 
   return (
@@ -175,12 +234,37 @@ export default function Schedule() {
         )}
 
         {viewMode === 'week' ? (
-          <WeekView weekStart={weekStart} weekDays={weekDays} children={filteredChildren} staff={filteredStaff} />
+          <WeekView 
+            weekStart={weekStart} 
+            weekDays={weekDays} 
+            children={filteredChildren} 
+            staff={filteredStaff}
+            onStaffCellClick={handleStaffCellClick}
+          />
         ) : (
-          <DayView date={currentDate} children={filteredChildren} staff={filteredStaff} expandedStaffRows={expandedStaffRows} onToggleStaffExpand={toggleStaffExpand} intervalResolution={intervalResolution} />
+          <DayView 
+            date={currentDate} 
+            children={filteredChildren} 
+            staff={filteredStaff} 
+            expandedStaffRows={expandedStaffRows} 
+            onToggleStaffExpand={toggleStaffExpand} 
+            intervalResolution={intervalResolution}
+            onStaffCellClick={handleStaffCellClick}
+          />
         )}
 
         <ColorLegend />
+
+        {selectedStaff && (
+          <StaffScheduleDialog
+            open={staffDialogOpen}
+            onOpenChange={setStaffDialogOpen}
+            staffName={selectedStaff.staffName}
+            dayName={selectedStaff.dayName}
+            currentSchedule={selectedStaff.currentSchedule}
+            onSave={handleSaveStaffSchedule}
+          />
+        )}
       </div>
     </div>
   );
