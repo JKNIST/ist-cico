@@ -481,9 +481,9 @@ export function AddEventDialog({
               <Switch 
                 checked={isRecurring} 
                 onCheckedChange={setIsRecurring}
-                disabled={editScope === "single"}
+                disabled={mode === "edit" && editScope === "single"}
               />
-              <Label className={editScope === "single" ? "text-muted-foreground" : ""}>
+              <Label className={mode === "edit" && editScope === "single" ? "text-muted-foreground" : ""}>
                 Är händelsen återkommande?
               </Label>
             </div>
