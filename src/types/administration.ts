@@ -34,6 +34,7 @@ export interface RecurrenceRule {
   endDate?: Date;
   seriesId: string;
   selectedDays?: string[];
+  excludedDates?: Date[];
 }
 
 export interface CalendarEvent {

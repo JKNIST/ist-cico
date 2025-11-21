@@ -13,10 +13,13 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { CalendarIcon, Clock, X, Users } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import { CalendarEvent, EventCategory } from "@/types/administration";
+import { CalendarEvent, EventCategory, ClosurePeriod, TemporarySchemaPeriod } from "@/types/administration";
 import { useTranslation } from "react-i18next";
 import { useLocale } from "@/hooks/useLocale";
 import { CalendarGroupSelector } from "./calendar/CalendarGroupSelector";
+import { validateEventConflicts, ValidationResult } from "@/lib/eventConflictValidation";
+import { EventConflictWarning } from "./calendar/EventConflictWarning";
+import { toast } from "sonner";
 
 interface AddEventDialogProps {
   open: boolean;
@@ -24,11 +27,21 @@ interface AddEventDialogProps {
   mode?: "add" | "edit";
   eventData?: CalendarEvent;
   editScope?: "single" | "future" | "all";
+  closurePeriods: ClosurePeriod[];
+  temporaryPeriods: TemporarySchemaPeriod[];
 }
 
 const departments = ["Blåbär", "Lingon", "Odon", "Vildhallon", "Gråsparven", "laser kittens", "örg"];
 
-export function AddEventDialog({ open, onOpenChange, mode = "add", eventData, editScope }: AddEventDialogProps) {
+export function AddEventDialog({ 
+  open, 
+  onOpenChange, 
+  mode = "add", 
+  eventData, 
+  editScope,
+  closurePeriods,
+  temporaryPeriods 
+}: AddEventDialogProps) {
   const { t } = useTranslation();
   const locale = useLocale();
   const [category, setCategory] = useState<EventCategory>(eventData?.category || EventCategory.EXTERNAL);
@@ -49,9 +62,63 @@ export function AddEventDialog({ open, onOpenChange, mode = "add", eventData, ed
   const [recurrenceEndDate, setRecurrenceEndDate] = useState<Date | undefined>(eventData?.recurrenceRule?.endDate);
   const [selectedWeekDays, setSelectedWeekDays] = useState<string[]>(eventData?.recurrenceRule?.selectedDays || []);
   const [showDepartmentDropdown, setShowDepartmentDropdown] = useState(false);
+  
+  // Conflict validation state
+  const [conflicts, setConflicts] = useState<ValidationResult | null>(null);
+  const [conflictResolution, setConflictResolution] = useState<"include-all" | "skip-conflicts">("skip-conflicts");
+  const [acknowledgeConflicts, setAcknowledgeConflicts] = useState(false);
 
   // Automatically set isSharedWithGuardians based on category
   const isSharedWithGuardians = category === EventCategory.EXTERNAL || category === EventCategory.CLOSURE || category === EventCategory.WARNING;
+
+  // Validate conflicts when event data changes
+  useEffect(() => {
+    if (!open || !startDate) {
+      setConflicts(null);
+      return;
+    }
+
+    const timeoutId = setTimeout(() => {
+      const result = validateEventConflicts(
+        {
+          startDate,
+          endDate,
+          isRecurring,
+          recurrenceRule: isRecurring
+            ? {
+                frequency: recurrenceFrequency,
+                interval: parseInt(recurrenceInterval) || 1,
+                endDate: hasRecurrenceEndDate ? recurrenceEndDate : undefined,
+                selectedDays: recurrenceFrequency === "weekly" ? selectedWeekDays : undefined,
+              }
+            : undefined,
+        },
+        closurePeriods,
+        temporaryPeriods
+      );
+      setConflicts(result);
+      
+      // Reset conflict resolution state when conflicts change
+      if (!result.hasConflicts) {
+        setConflictResolution("skip-conflicts");
+        setAcknowledgeConflicts(false);
+      }
+    }, 300); // Debounce 300ms
+
+    return () => clearTimeout(timeoutId);
+  }, [
+    open,
+    startDate,
+    endDate,
+    isRecurring,
+    recurrenceFrequency,
+    recurrenceInterval,
+    hasRecurrenceEndDate,
+    recurrenceEndDate,
+    selectedWeekDays,
+    closurePeriods,
+    temporaryPeriods,
+  ]);
 
   // Sync form state when dialog opens or eventData changes
   useEffect(() => {
@@ -120,6 +187,18 @@ export function AddEventDialog({ open, onOpenChange, mode = "add", eventData, ed
   };
 
   const handleSave = () => {
+    // Validate conflict resolution
+    if (conflicts?.hasConflicts && conflictResolution === "include-all" && !acknowledgeConflicts) {
+      toast.error("Du måste bekräfta att du förstår att eventet krockar innan du kan spara");
+      return;
+    }
+
+    // Calculate excluded dates if skipping conflicts
+    const excludedDates = 
+      conflicts?.hasConflicts && conflictResolution === "skip-conflicts"
+        ? conflicts.conflicts.map(c => c.date)
+        : undefined;
+
     // Handle save logic here
     console.log({
       mode,
@@ -139,8 +218,21 @@ export function AddEventDialog({ open, onOpenChange, mode = "add", eventData, ed
       recurrenceFrequency,
       recurrenceInterval,
       selectedWeekDays,
-      recurrenceEndDate
+      recurrenceEndDate,
+      excludedDates,
+      conflictResolution,
     });
+
+    // Show toast with save summary
+    if (conflicts?.hasConflicts && conflictResolution === "skip-conflicts") {
+      const eventsCreated = conflicts.totalInstances - conflicts.conflictingInstances;
+      toast.success(
+        `${eventsCreated} händelser skapade, ${conflicts.conflictingInstances} händelser hoppades över`
+      );
+    } else {
+      toast.success("Event sparat");
+    }
+
     onOpenChange(false);
   };
 
@@ -372,6 +464,17 @@ export function AddEventDialog({ open, onOpenChange, mode = "add", eventData, ed
             )}
           </div>
 
+          {/* Conflict Warning */}
+          {conflicts?.hasConflicts && (
+            <EventConflictWarning
+              conflicts={conflicts}
+              resolution={conflictResolution}
+              acknowledgeConflicts={acknowledgeConflicts}
+              onResolutionChange={setConflictResolution}
+              onAcknowledgeChange={setAcknowledgeConflicts}
+            />
+          )}
+
           {/* Recurring Event */}
           <div className="space-y-4">
             <div className="flex items-center gap-3">
@@ -508,6 +611,7 @@ export function AddEventDialog({ open, onOpenChange, mode = "add", eventData, ed
           <Button
             onClick={handleSave}
             className="bg-[#2a9d8f] hover:bg-[#238276] text-white"
+            disabled={conflicts?.hasConflicts && conflictResolution === "include-all" && !acknowledgeConflicts}
           >
             {t('eventDialog.save')}
           </Button>
