@@ -27,10 +27,7 @@ export function DepartmentSelector() {
     }
   };
 
-  const handleGroupToggle = (groupFullName: string, departmentName: string) => {
-    // Can only select groups if their department is selected
-    if (!selectedDepartments.includes(departmentName)) return;
-
+  const handleGroupToggle = (groupFullName: string) => {
     if (selectedGroups.includes(groupFullName)) {
       setSelectedGroups(selectedGroups.filter(g => g !== groupFullName));
     } else {
@@ -132,19 +129,15 @@ export function DepartmentSelector() {
                 <CollapsibleContent className="ml-6 space-y-1">
                   {departmentGroups.map((group) => {
                     const isGroupSelected = selectedGroups.includes(group.fullName);
-                    const isDisabled = !isDepartmentSelected;
 
                     return (
                       <div
                         key={group.id}
-                        className={`flex items-center gap-2 px-3 py-2 rounded-sm cursor-pointer hover:bg-muted ${
-                          isDisabled ? "opacity-50 cursor-not-allowed" : ""
-                        }`}
-                        onClick={() => !isDisabled && handleGroupToggle(group.fullName, department.name)}
+                        className="flex items-center gap-2 px-3 py-2 rounded-sm cursor-pointer hover:bg-muted"
+                        onClick={() => handleGroupToggle(group.fullName)}
                       >
                         <Checkbox
                           checked={isGroupSelected}
-                          disabled={isDisabled}
                           className="h-4 w-4"
                         />
                         <Users className="h-3 w-3 text-muted-foreground" />
