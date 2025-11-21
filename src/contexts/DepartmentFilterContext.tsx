@@ -43,15 +43,6 @@ export const DepartmentFilterProvider = ({ children }: DepartmentFilterProviderP
 
   const setSelectedDepartments = (deps: string[]) => {
     setSelectedDepartmentsState(deps);
-    
-    // Auto-clear groups that don't belong to selected departments
-    setSelectedGroupsState(prev => {
-      const validGroups = prev.filter(groupFullName => {
-        const department = groupFullName.split('-')[0];
-        return deps.includes(department);
-      });
-      return validGroups;
-    });
   };
 
   const setSelectedGroups = (groups: string[]) => {
