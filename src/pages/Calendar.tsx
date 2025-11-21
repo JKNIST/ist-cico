@@ -318,19 +318,26 @@ const generateRecurringInstances = (events: CalendarEvent[]): CalendarEvent[] =>
   
   events.forEach(event => {
     if (event.isRecurring && event.recurrenceRule) {
-      const { frequency, interval, endDate, seriesId } = event.recurrenceRule;
+      const { frequency, interval, endDate, seriesId, excludedDates } = event.recurrenceRule;
       const start = event.originalStartDate || event.date;
       const end = endDate || addMonths(start, 3); // Default 3 months if no end date
       
       let currentDate = new Date(start);
       
       while (isBefore(currentDate, end) || isSameDay(currentDate, end)) {
-        instances.push({
-          ...event,
-          id: `${event.id}-${format(currentDate, "yyyy-MM-dd")}`,
-          date: new Date(currentDate),
-          instanceDate: new Date(currentDate),
-        });
+        // Check if this date should be excluded
+        const isExcluded = excludedDates?.some(excludedDate => 
+          isSameDay(new Date(excludedDate), currentDate)
+        );
+        
+        if (!isExcluded) {
+          instances.push({
+            ...event,
+            id: `${event.id}-${format(currentDate, "yyyy-MM-dd")}`,
+            date: new Date(currentDate),
+            instanceDate: new Date(currentDate),
+          });
+        }
         
         // Increment based on frequency
         if (frequency === "daily") {
@@ -1180,6 +1187,8 @@ export default function Calendar() {
         mode={editEventData ? "edit" : "add"}
         eventData={editEventData || undefined}
         editScope={editScope}
+        closurePeriods={mockClosurePeriods}
+        temporaryPeriods={mockTemporaryPeriods}
       />
 
       {/* View Event Dialog */}
