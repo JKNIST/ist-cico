@@ -3,6 +3,8 @@ import { createContext, useContext, useState, useEffect, ReactNode } from "react
 interface DepartmentFilterContextType {
   selectedDepartments: string[];
   setSelectedDepartments: (deps: string[]) => void;
+  selectedGroups: string[];
+  setSelectedGroups: (groups: string[]) => void;
   clearFilters: () => void;
 }
 
@@ -26,16 +28,39 @@ export const DepartmentFilterProvider = ({ children }: DepartmentFilterProviderP
     return saved ? JSON.parse(saved) : ["Blåbär"];
   });
 
+  const [selectedGroups, setSelectedGroupsState] = useState<string[]>(() => {
+    const saved = localStorage.getItem("selectedGroups");
+    return saved ? JSON.parse(saved) : [];
+  });
+
   useEffect(() => {
     localStorage.setItem("selectedDepartments", JSON.stringify(selectedDepartments));
   }, [selectedDepartments]);
 
+  useEffect(() => {
+    localStorage.setItem("selectedGroups", JSON.stringify(selectedGroups));
+  }, [selectedGroups]);
+
   const setSelectedDepartments = (deps: string[]) => {
     setSelectedDepartmentsState(deps);
+    
+    // Auto-clear groups that don't belong to selected departments
+    setSelectedGroupsState(prev => {
+      const validGroups = prev.filter(groupFullName => {
+        const department = groupFullName.split('-')[0];
+        return deps.includes(department);
+      });
+      return validGroups;
+    });
+  };
+
+  const setSelectedGroups = (groups: string[]) => {
+    setSelectedGroupsState(groups);
   };
 
   const clearFilters = () => {
     setSelectedDepartmentsState([]);
+    setSelectedGroupsState([]);
   };
 
   return (
@@ -43,6 +68,8 @@ export const DepartmentFilterProvider = ({ children }: DepartmentFilterProviderP
       value={{
         selectedDepartments,
         setSelectedDepartments,
+        selectedGroups,
+        setSelectedGroups,
         clearFilters,
       }}
     >

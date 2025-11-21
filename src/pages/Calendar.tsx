@@ -16,6 +16,7 @@ import { AdministrativeEvent, TemporarySchemaPeriod, ClosurePeriod, CalendarEven
 import { getCategoryColor, getCategoryBgClass } from "@/lib/calendarUtils";
 import { cn } from "@/lib/utils";
 import { useDepartmentFilter } from "@/contexts/DepartmentFilterContext";
+import { filterByDepartmentsAndGroups } from "@/lib/groupFilterUtils";
 
 const mockEvents: CalendarEvent[] = [
   { 
@@ -468,7 +469,7 @@ const isPublished = (adminEvent: AdministrativeEvent): boolean => {
 };
 
 export default function Calendar() {
-  const { selectedDepartments } = useDepartmentFilter();
+  const { selectedDepartments, selectedGroups } = useDepartmentFilter();
   const [currentDate, setCurrentDate] = useState(new Date(2025, 10, 3)); // November 2025
   const [viewMode, setViewMode] = useState<"day" | "week" | "month">("month");
   const [isAddEventOpen, setIsAddEventOpen] = useState(false);
@@ -490,24 +491,36 @@ export default function Calendar() {
   const [selectedTemporaryPeriod, setSelectedTemporaryPeriod] = useState<TemporarySchemaPeriod | null>(null);
   const [selectedClosurePeriod, setSelectedClosurePeriod] = useState<ClosurePeriod | null>(null);
 
-  // Helper function to filter by department
-  const filterByDepartment = (departments?: string[]) => {
-    if (selectedDepartments.length === 0) return true;
+  // Helper function to filter by department and groups
+  const filterByDepartmentAndGroups = (departments?: string[], groups?: string[]) => {
+    if (selectedDepartments.length === 0 && selectedGroups.length === 0) return true;
     if (!departments || departments.length === 0) return true;
-    return departments.some(dept => selectedDepartments.includes(dept));
+    
+    // If groups are selected, check if event has any matching group
+    if (selectedGroups.length > 0 && groups && groups.length > 0) {
+      const hasMatchingGroup = groups.some(group => selectedGroups.includes(group));
+      if (hasMatchingGroup) return true;
+    }
+    
+    // If departments are selected (and no matching groups), check departments
+    if (selectedDepartments.length > 0) {
+      return departments.some(dept => selectedDepartments.includes(dept));
+    }
+    
+    return false;
   };
 
-  // Filter events, temporary periods, and closure periods by department
+  // Filter events, temporary periods, and closure periods by department and groups
   const filteredEvents = allEvents.filter(event => 
-    filterByDepartment(event.departments)
+    filterByDepartmentAndGroups(event.departments, event.groups)
   );
   
   const filteredTemporaryPeriods = temporaryPeriods.filter(period =>
-    filterByDepartment(period.departments)
+    filterByDepartmentAndGroups(period.departments)
   );
   
   const filteredClosurePeriods = closurePeriods.filter(period =>
-    filterByDepartment(period.departments)
+    filterByDepartmentAndGroups(period.departments)
   );
 
   // Generate administrative events from filtered periods

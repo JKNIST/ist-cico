@@ -6,6 +6,7 @@ import { format, addDays, startOfWeek, getWeek, addWeeks, subWeeks } from "date-
 import { sv, enUS, nb } from "date-fns/locale";
 import { useTranslation } from "react-i18next";
 import { useDepartmentFilter } from "@/contexts/DepartmentFilterContext";
+import { filterByDepartmentsAndGroups } from "@/lib/groupFilterUtils";
 import { mockChildren } from "@/data/groups/mockChildren";
 import { mockStaffSchedules } from "@/data/staff/mockStaffSchedules";
 import { WeekView } from "@/components/schedule/WeekView";
@@ -61,7 +62,7 @@ const childrenSchedules = generateChildSchedules();
 
 export default function Schedule() {
   const { i18n, t } = useTranslation();
-  const { selectedDepartments } = useDepartmentFilter();
+  const { selectedDepartments, selectedGroups } = useDepartmentFilter();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<'week' | 'day'>('week');
   const [intervalResolution, setIntervalResolution] = useState<'default' | 'hourly'>('default');
@@ -101,12 +102,18 @@ export default function Schedule() {
     }
   }, [staffSchedules]);
 
-  const filteredChildren = childrenSchedules.filter((child) =>
-    selectedDepartments.length === 0 || selectedDepartments.includes(child.department)
+  const filteredChildren = filterByDepartmentsAndGroups(
+    childrenSchedules,
+    selectedDepartments,
+    selectedGroups,
+    (child) => child.department
   );
 
-  const filteredStaff = staffSchedules.filter((staff) =>
-    staff.department && (selectedDepartments.length === 0 || selectedDepartments.includes(staff.department))
+  const filteredStaff = filterByDepartmentsAndGroups(
+    staffSchedules,
+    selectedDepartments,
+    selectedGroups,
+    (staff) => staff.department
   );
 
   const getDateLocale = () => {
