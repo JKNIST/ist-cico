@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 import { format, startOfWeek, addDays, addWeeks, subWeeks, getWeek, isPast } from "date-fns";
 import { useLocale } from "@/hooks/useLocale";
 import { useDepartmentFilter } from "@/contexts/DepartmentFilterContext";
+import { useUserSettings } from "@/hooks/useUserSettings";
 import { mockStaffSchedules, StaffSchedule as StaffScheduleType } from "@/data/staff/mockStaffSchedules";
 import { StaffScheduleDialog } from "@/components/staff/StaffScheduleDialog";
 import { AddStaffDialog } from "@/components/staff/AddStaffDialog";
@@ -24,6 +25,7 @@ export default function StaffSchedule() {
   const { t } = useTranslation();
   const locale = useLocale();
   const { selectedDepartments } = useDepartmentFilter();
+  const { settings } = useUserSettings();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedStaff, setSelectedStaff] = useState<{
@@ -272,15 +274,17 @@ export default function StaffSchedule() {
                   <FileUp className="h-4 w-4 mr-2" />
                   {t("staffSchedule.importStaff")}
                 </Button>
-                <Button 
-                  variant="default" 
-                  size="sm" 
-                  onClick={() => setAiDialogOpen(true)}
-                  className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
-                >
-                  <Sparkles className="h-4 w-4 mr-2" />
-                  AI-förslag
-                </Button>
+                {settings.showAiScheduleSuggestion && (
+                  <Button 
+                    variant="default" 
+                    size="sm" 
+                    onClick={() => setAiDialogOpen(true)}
+                    className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                  >
+                    <Sparkles className="h-4 w-4 mr-2" />
+                    AI-förslag
+                  </Button>
+                )}
               </div>
               <div className="flex items-center gap-2">
                 <Button variant="outline" size="sm" onClick={goToPreviousWeek}>
