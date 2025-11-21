@@ -9,9 +9,10 @@ import { useConversationFilters } from "@/features/chat/hooks/useConversationFil
 import { toast } from "@/hooks/use-toast";
 import { useLocation } from "react-router-dom";
 import { useDepartmentFilter } from "@/contexts/DepartmentFilterContext";
+import { filterByDepartmentsAndGroups } from "@/lib/groupFilterUtils";
 
 const Chat = () => {
-  const { selectedDepartments } = useDepartmentFilter();
+  const { selectedDepartments, selectedGroups } = useDepartmentFilter();
   const [isNewMessageModalOpen, setIsNewMessageModalOpen] = useState(false);
   const [currentTab, setCurrentTab] = useState<'external' | 'internal'>('external');
   const location = useLocation();
@@ -26,10 +27,13 @@ const Chat = () => {
     leaveConversation
   } = useConversations(initialConversations);
 
-  // Filter conversations based on selected departments
+  // Filter conversations based on selected departments and groups
   const filteredConversations = conversations.filter(conv => {
-    if (selectedDepartments.length === 0) return true;
-    return conv.department && selectedDepartments.includes(conv.department);
+    if (selectedDepartments.length === 0 && selectedGroups.length === 0) return true;
+    if (!conv.department) return true;
+    
+    // For now, conversations don't have groups, so we just check departments
+    return selectedDepartments.includes(conv.department);
   });
 
   const {

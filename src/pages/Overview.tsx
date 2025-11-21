@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { useDepartmentFilter } from "@/contexts/DepartmentFilterContext";
+import { filterByDepartmentsAndGroups } from "@/lib/groupFilterUtils";
 
 const mockChildren = [
   { name: "Zero Aarne", initials: "ZA", department: "Blåbär", status: "absent" as const, time: "06:35", timeLabel: "Ej hämtas:" },
@@ -27,12 +28,18 @@ const mockChildren = [
 
 export default function Overview() {
   const [searchQuery, setSearchQuery] = useState("");
-  const { selectedDepartments } = useDepartmentFilter();
+  const { selectedDepartments, selectedGroups } = useDepartmentFilter();
 
-  const filteredChildren = mockChildren.filter((child) => {
+  const filteredByDepartmentAndGroup = filterByDepartmentsAndGroups(
+    mockChildren,
+    selectedDepartments,
+    selectedGroups,
+    (child) => child.department
+  );
+
+  const filteredChildren = filteredByDepartmentAndGroup.filter((child) => {
     const matchesSearch = child.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesDepartment = selectedDepartments.length === 0 || selectedDepartments.includes(child.department);
-    return matchesSearch && matchesDepartment;
+    return matchesSearch;
   });
 
   return (

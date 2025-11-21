@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 import { format, startOfWeek, addDays, addWeeks, subWeeks, getWeek, isPast } from "date-fns";
 import { useLocale } from "@/hooks/useLocale";
 import { useDepartmentFilter } from "@/contexts/DepartmentFilterContext";
+import { filterByDepartmentsAndGroups } from "@/lib/groupFilterUtils";
 import { useUserSettings } from "@/hooks/useUserSettings";
 import { mockStaffSchedules, StaffSchedule as StaffScheduleType } from "@/data/staff/mockStaffSchedules";
 import { StaffScheduleDialog } from "@/components/staff/StaffScheduleDialog";
@@ -24,7 +25,7 @@ import { cn } from "@/lib/utils";
 export default function StaffSchedule() {
   const { t } = useTranslation();
   const locale = useLocale();
-  const { selectedDepartments } = useDepartmentFilter();
+  const { selectedDepartments, selectedGroups } = useDepartmentFilter();
   const { settings } = useUserSettings();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -69,12 +70,12 @@ export default function StaffSchedule() {
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
   const weekNumber = getWeek(weekStart, { weekStartsOn: 1, firstWeekContainsDate: 4 });
 
-  const filteredStaff =
-    selectedDepartments.length === 0
-      ? staffSchedules
-      : staffSchedules.filter(
-          (staff) => staff.department && selectedDepartments.includes(staff.department)
-        );
+  const filteredStaff = filterByDepartmentsAndGroups(
+    staffSchedules,
+    selectedDepartments,
+    selectedGroups,
+    (staff) => staff.department
+  );
 
   const goToPreviousWeek = () => setCurrentDate(subWeeks(currentDate, 1));
   const goToNextWeek = () => setCurrentDate(addWeeks(currentDate, 1));

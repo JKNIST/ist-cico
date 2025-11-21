@@ -9,10 +9,11 @@ import { BlogPostForm } from "@/components/BlogPostForm";
 import { allBlogPosts } from "@/data/blog";
 import { BlogCategory } from "@/types/blog";
 import { useDepartmentFilter } from "@/contexts/DepartmentFilterContext";
+import { filterByDepartmentsAndGroups } from "@/lib/groupFilterUtils";
 
 export default function Blog() {
   const { t } = useTranslation();
-  const { selectedDepartments } = useDepartmentFilter();
+  const { selectedDepartments, selectedGroups } = useDepartmentFilter();
   const [selectedCategory, setSelectedCategory] = useState<BlogCategory>("ALLA");
   const [showInternalOnly, setShowInternalOnly] = useState(false);
   const [showUnpublished, setShowUnpublished] = useState(false);
@@ -35,22 +36,42 @@ export default function Blog() {
       return false;
     }
 
-    // Department-filter
-    if (selectedDepartments.length > 0) {
-      const postDepartments = post.departments || [];
-      const hasMatchingDepartment = postDepartments.some(dept => 
-        selectedDepartments.includes(dept)
-      );
-      if (!hasMatchingDepartment) {
-        return false;
-      }
-    }
-
     return true;
   });
 
+  // Apply department and group filtering
+  const departmentAndGroupFilteredPosts = filterByDepartmentsAndGroups(
+    filteredPosts,
+    selectedDepartments,
+    selectedGroups,
+    (post) => post.departments?.[0],
+    (post) => post.groups
+  );
+
+  // Final filter: if no department/group filters, include all posts
+  const finalFilteredPosts = (selectedDepartments.length === 0 && selectedGroups.length === 0) 
+    ? filteredPosts 
+    : departmentAndGroupFilteredPosts.filter(post => {
+        const postDepartments = post.departments || [];
+        const postGroups = post.groups || [];
+        
+        // If groups are selected, check if post has any matching group
+        if (selectedGroups.length > 0) {
+          const hasMatchingGroup = postGroups.some(group => selectedGroups.includes(group));
+          if (hasMatchingGroup) return true;
+        }
+        
+        // If departments are selected (and no matching groups), check departments
+        if (selectedDepartments.length > 0) {
+          const hasMatchingDepartment = postDepartments.some(dept => selectedDepartments.includes(dept));
+          return hasMatchingDepartment;
+        }
+        
+        return false;
+      });
+
   // Sortering: Nyaste först baserat på publishedDate
-  const sortedPosts = [...filteredPosts].sort((a, b) => {
+  const sortedPosts = [...finalFilteredPosts].sort((a, b) => {
     return new Date(b.publishedDate).getTime() - new Date(a.publishedDate).getTime();
   });
 
