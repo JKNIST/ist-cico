@@ -409,7 +409,7 @@ const generateAdministrativeEvents = (
         date: day,
         title: 'Begränsad kapacitet',
         sourceId: period.id,
-        color: '#f59e0b',
+        color: '#f7d9a8',
         priority: 1,
         activateDate: period.activateDate
       });
@@ -429,7 +429,7 @@ const generateAdministrativeEvents = (
         date: day,
         title: period.title,
         sourceId: period.id,
-        color: '#ef4444',
+        color: '#f7b8b8',
         priority: 2,
         publishDate: period.publishDate
       });
