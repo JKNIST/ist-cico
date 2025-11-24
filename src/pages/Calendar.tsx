@@ -787,7 +787,7 @@ export default function Calendar() {
                             )}
                             style={isAdmin ? { 
                               backgroundColor: adminEvent!.color,
-                              color: 'white'
+                              color: '#1f2937'
                             } : undefined}
                           >
                             <div className="flex items-start gap-1">
