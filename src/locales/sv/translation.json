@@ -381,5 +381,27 @@
     "aiFeatures": "AI-funktioner",
     "showAiScheduleSuggestion": "Visa AI-schemaförslag",
     "aiScheduleDescription": "Aktivera AI-assistent för automatiska schemaförslag"
+  },
+  "eventConflict": {
+    "warning": "Varning: Eventet krockar med administrativa perioder",
+    "affectedEvents": "{{conflicting}} av {{total}} händelser påverkas",
+    "howToHandle": "Hur vill du hantera detta?",
+    "skipConflicts": "Hoppa över dagar med konflikter (rekommenderat)",
+    "createAll": "Skapa alla händelser (inklusive de som krockar)",
+    "eventsWillBeCreated": "{{count}} händelser kommer att skapas",
+    "allEventsWillBeCreated": "Alla {{count}} händelser kommer att skapas",
+    "acknowledge": "Jag förstår att detta event krockar med administrativa perioder och vill ändå skapa det"
+  },
+  "staffSchedule": {
+    "aiSuggestionGenerated": "AI-förslag genererade!",
+    "errors": {
+      "generateFailed": "Kunde inte generera förslag: ",
+      "unknownError": "Okänt fel"
+    }
+  },
+  "chat": {
+    "modal": {
+      "recipients": "Mottagare"
+    }
   }
 }
