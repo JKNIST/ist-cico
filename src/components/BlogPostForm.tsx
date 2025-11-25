@@ -34,8 +34,8 @@ export function BlogPostForm({ open, onOpenChange }: BlogPostFormProps) {
   const handleSubmit = () => {
     if (!title || !content || !category) {
       toast({
-        title: "Fyll i alla obligatoriska fält",
-        description: "Titel, innehåll och kategori måste fyllas i.",
+        title: t("toast.fillRequiredFields"),
+        description: t("toast.titleContentCategoryRequired"),
         variant: "destructive",
       });
       return;
@@ -53,8 +53,8 @@ export function BlogPostForm({ open, onOpenChange }: BlogPostFormProps) {
     });
 
     toast({
-      title: "Blogginlägg skapat!",
-      description: "Ditt inlägg har publicerats.",
+      title: t("toast.blogPostCreated"),
+      description: t("toast.blogPostPublished"),
     });
 
     // Återställ formulär

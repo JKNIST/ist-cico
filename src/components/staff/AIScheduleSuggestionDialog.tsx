@@ -112,17 +112,17 @@ export function AIScheduleSuggestionDialog({
     );
     
     if (selectedSuggestions.length === 0) {
-      toast.error("Välj minst en personal att applicera schemat för");
+      toast.error(t("staffSchedule.errors.selectAtLeastOne"));
       return;
     }
     
     onAcceptSuggestions(selectedSuggestions);
-    toast.success(`Schema applicerat för ${selectedSuggestions.length} personal`);
+    toast.success(t("staffSchedule.scheduleApplied", { count: selectedSuggestions.length }));
     onOpenChange(false);
   };
 
   const formatTime = (time?: { start: string; end: string } | null) => {
-    if (!time) return "Ledig";
+    if (!time) return t("staffSchedule.offDuty");
     return `${time.start} - ${time.end}`;
   };
 

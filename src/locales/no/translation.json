@@ -397,7 +397,22 @@
     "errors": {
       "generateFailed": "Kunne ikke generere forslag: ",
       "unknownError": "Ukjent feil"
-    }
+    },
+    "scheduleApplied": "Timeplan brukt for {{count}} ansatt",
+    "scheduleApplied_plural": "Timeplan brukt for {{count}} ansatte",
+    "offDuty": "Fri"
+  },
+  "toast": {
+    "eventSaved": "Hendelse lagret",
+    "eventsCreatedSkipped": "{{created}} hendelser opprettet, {{skipped}} hendelser hoppet over",
+    "mustAcknowledgeConflicts": "Du må bekrefte at du forstår at hendelsen er i konflikt før du lagrer",
+    "blogPostCreated": "Blogginnlegg opprettet!",
+    "blogPostPublished": "Innlegget ditt er publisert.",
+    "fillRequiredFields": "Fyll inn alle obligatoriske felt",
+    "titleContentCategoryRequired": "Tittel, innhold og kategori må fylles inn.",
+    "timeIntervalsUpdated": "Tidsintervall-innstillinger oppdatert",
+    "timeIntervalsSaved": "Tidsintervall-innstillinger lagret",
+    "staffingSettingsSaved": "Bemanningsinnstillinger lagret"
   },
   "chat": {
     "modal": {

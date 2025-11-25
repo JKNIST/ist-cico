@@ -397,7 +397,22 @@
     "errors": {
       "generateFailed": "Kunde inte generera förslag: ",
       "unknownError": "Okänt fel"
-    }
+    },
+    "scheduleApplied": "Schema applicerat för {{count}} personal",
+    "scheduleApplied_plural": "Schema applicerat för {{count}} personal",
+    "offDuty": "Ledig"
+  },
+  "toast": {
+    "eventSaved": "Event sparat",
+    "eventsCreatedSkipped": "{{created}} händelser skapade, {{skipped}} händelser hoppades över",
+    "mustAcknowledgeConflicts": "Du måste bekräfta att du förstår att eventet krockar innan du kan spara",
+    "blogPostCreated": "Blogginlägg skapat!",
+    "blogPostPublished": "Ditt inlägg har publicerats.",
+    "fillRequiredFields": "Fyll i alla obligatoriska fält",
+    "titleContentCategoryRequired": "Titel, innehåll och kategori måste fyllas i.",
+    "timeIntervalsUpdated": "Tidsintervall-inställningar uppdaterade",
+    "timeIntervalsSaved": "Tidsintervall-inställningar sparade",
+    "staffingSettingsSaved": "Bemanningsinställningar sparade"
   },
   "chat": {
     "modal": {

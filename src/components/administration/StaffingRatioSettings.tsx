@@ -30,7 +30,7 @@ export function StaffingRatioSettings() {
     ratios.forEach((ratio) => {
       updateStaffingRatio(ratio.department, ratio.maxChildrenPerStaff);
     });
-    toast.success("Bemanningsinställningar sparade");
+    toast.success(t("toast.staffingSettingsSaved"));
   };
 
   return (
