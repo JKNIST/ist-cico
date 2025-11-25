@@ -34,7 +34,7 @@ export function BlogPostContent({ post }: BlogPostContentProps) {
           onClick={() => setShowFullContent(!showFullContent)}
           className="text-primary hover:bg-[#FFF8E0]"
         >
-          {showFullContent ? "Visa mindre" : "Visa mer"}
+          {showFullContent ? t("blog.showLess") : t("blog.showMore")}
         </Button>
       )}
 

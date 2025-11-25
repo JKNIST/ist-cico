@@ -26,7 +26,7 @@ export function InternalRecipientsSection() {
       <div className="space-y-2">
         <Label>{t("blog.form.staff")}</Label>
         <Input
-          placeholder="Tryck Enter för att lägga till..."
+          placeholder={t("blog.form.pressEnterToAdd")}
           value={staffInput}
           onChange={(e) => setStaffInput(e.target.value)}
           onKeyDown={handleAddStaff}

@@ -21,6 +21,8 @@
   },
   "schedule": {
     "title": "Timeplan",
+    "week": "Uke",
+    "day": "Dag",
     "childrenPresent": "Barn tilstede",
     "staffPresent": "Personale tilstede",
     "ratio": "Ratio",
@@ -45,6 +47,51 @@
         "custom": "Tilpassede intervaller"
       },
       "addInterval": "Legg til intervall"
+    },
+    "resolution": {
+      "label": "Vis:",
+      "standard": "Standard",
+      "hourly": "Per time"
+    }
+  },
+  "staffSchedule": {
+    "addStaff": "Legg til personale",
+    "editStaff": "Rediger personale",
+    "deleteStaff": "Slett personale",
+    "deleteConfirm": "Er du sikker på at du vil slette dette personalet?",
+    "name": "Navn",
+    "role": "Rolle",
+    "department": "Avdeling",
+    "employmentType": "Ansettelsestype",
+    "permanent": "Fast ansatt",
+    "substitute": "Vikar",
+    "substituteStart": "Vikariat starter",
+    "substituteEnd": "Vikariat slutter",
+    "save": "Lagre",
+    "cancel": "Avbryt",
+    "import": "Importer personale",
+    "importDescription": "Importer personalliste fra JSON",
+    "pasteJson": "Lim inn JSON her...",
+    "upload": "Last opp fil",
+    "preview": "Forhåndsvisning",
+    "importSelected": "Importer valgte",
+    "validationErrors": {
+      "invalidJson": "Ugyldig JSON-format",
+      "missingName": "Navn mangler for personale #{index}",
+      "missingRole": "Rolle mangler for personale #{index}",
+      "missingDepartment": "Avdeling mangler for personale #{index}",
+      "invalidSubstituteDate": "Ugyldig vikariatdato for {name}"
+    },
+    "importSuccess": "{count} personale importert",
+    "selectFile": "Velg fil",
+    "jsonFile": "JSON-fil",
+    "csvFile": "CSV-fil",
+    "aiSuggestion": "AI-forslag",
+    "today": "I dag",
+    "errors": {
+      "rateLimitExceeded": "Grense overskredet. Prøv igjen senere.",
+      "aiCreditsExhausted": "AI-kreditter oppbrukt. Legg til kreditter i innstillinger.",
+      "selectAtLeastOne": "Velg minst én ansatt for å bruke tidsplanen"
     }
   },
   "calendar": {
@@ -156,7 +203,15 @@
     "lastUpdated": "Sist oppdatert",
     "departments": "Avdelinger",
     "groups": "Grupper",
-    "participants": "deltakere"
+    "participants": "deltakere",
+    "selectDate": "Velg dato",
+    "selectFrequency": "Velg frekvens",
+    "conflicts": {
+      "closure": "Stenging",
+      "limitedCapacity": "Begrenset kapasitet",
+      "showFewer": "Vis færre",
+      "showAll": "Vis alle {count} konflikter"
+    }
   },
   "administration": {
     "title": "Administrasjon",
@@ -223,6 +278,11 @@
     "title": "Blogg",
     "newPost": "NYTT INNLEGG",
     "filter": "FILTRER",
+    "showMore": "Vis mer",
+    "showLess": "Vis mindre",
+    "noPosts": "Ingen innlegg å vise",
+    "showInternalOnly": "Vis kun interne",
+    "showUnpublished": "Vis upubliserte",
     "categories": {
       "alla": "ALLE",
       "importantdates": "VIKTIGE DATOER",
@@ -254,7 +314,7 @@
       "recipients": "Velg mottakere",
       "externalRecipients": "Eksterne mottakere (foresatte)",
       "internalRecipients": "Interne mottakere (ansatte)",
-      "classesGroups": "Avdelninger",
+      "classesGroups": "Avdelinger",
       "groups": "Grupper",
       "students": "Elever/Barn",
       "staff": "Ansatte",
@@ -263,12 +323,63 @@
       "autoDelete": "Sett dato for å slette innlegget",
       "policyNote": "Merk at dette blogginnlegget vil bli slettet automatisk i samsvar med kommunens retningslinjer.",
       "cancel": "AVBRYT",
-      "publish": "PUBLISER"
+      "publish": "PUBLISER",
+      "pressEnterToAdd": "Trykk Enter for å legge til...",
+      "validationError": "Tittel, innhold og kategori må fylles inn."
     }
   },
   "departmentFilter": {
     "selectDepartments": "Velg avdelinger",
     "allDepartments": "Alle avdelinger",
-    "departmentsSelected": "{{count}} avdelinger valgt"
+    "departmentsSelected": "{{count}} avdelinger valgt",
+    "selectedCount": "{count} valgt"
+  },
+  "closurePeriodDialog": {
+    "title": "Stengningsperiode",
+    "titleLabel": "Tittel",
+    "departmentsLabel": "Avdelinger",
+    "closurePeriodLabel": "Stengningsperiode",
+    "from": "Fra",
+    "to": "Til",
+    "publishedNotification": "Publisert - Foresatte varslet",
+    "close": "Lukk"
+  },
+  "temporaryPeriodDialog": {
+    "title": "Midlertidig timeplanperiode",
+    "titleLabel": "Tittel",
+    "departmentsLabel": "Avdelinger",
+    "schedulePeriodFrom": "Timeplanperiode - Fra",
+    "schedulePeriodTo": "Timeplanperiode - Til",
+    "activated": "Aktivert",
+    "deadline": "Frist",
+    "submissionStatus": "Innsendt",
+    "remainingSubmissions": "Gjenstår",
+    "limitedCapacityDays": "Dager med begrenset kapasitet",
+    "noDays": "Ingen dager",
+    "createdBy": "Opprettet av",
+    "close": "Lukk"
+  },
+  "chat": {
+    "modal": {
+      "cancel": "Avbryt",
+      "send": "Send",
+      "recipients": "Mottakere",
+      "selectRecipients": "Velg mottakere",
+      "searchRecipients": "Søk mottakere...",
+      "selected": "valgt",
+      "selectAll": "Velg alle"
+    }
+  },
+  "groups": {
+    "selectDepartmentToAdd": "Velg avdeling å legge til...",
+    "selectChildrenToAdd": "Velg barn å legge til...",
+    "filterGroupsByDepartment": "Filtrer grupper basert på valgte avdelinger",
+    "noGroupsAvailable": "Ingen grupper tilgjengelig for valgte avdelinger"
+  },
+  "userSettings": {
+    "title": "Brukerinnstillinger",
+    "aiFeatures": "AI-funksjoner",
+    "showAiScheduleSuggestion": "Vis AI-timeplanforslag",
+    "aiScheduleDescription": "Aktiver AI-assistent for automatiske timeplanforslag"
   }
 }

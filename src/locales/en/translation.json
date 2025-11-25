@@ -21,6 +21,8 @@
   },
   "schedule": {
     "title": "Schedule",
+    "week": "Week",
+    "day": "Day",
     "childrenPresent": "Children present",
     "staffPresent": "Staff present",
     "ratio": "Ratio",
@@ -45,6 +47,51 @@
         "custom": "Custom intervals"
       },
       "addInterval": "Add interval"
+    },
+    "resolution": {
+      "label": "Display:",
+      "standard": "Standard",
+      "hourly": "Hourly"
+    }
+  },
+  "staffSchedule": {
+    "addStaff": "Add Staff",
+    "editStaff": "Edit Staff",
+    "deleteStaff": "Delete Staff",
+    "deleteConfirm": "Are you sure you want to delete this staff member?",
+    "name": "Name",
+    "role": "Role",
+    "department": "Department",
+    "employmentType": "Employment Type",
+    "permanent": "Permanent",
+    "substitute": "Substitute",
+    "substituteStart": "Substitute starts",
+    "substituteEnd": "Substitute ends",
+    "save": "Save",
+    "cancel": "Cancel",
+    "import": "Import Staff",
+    "importDescription": "Import staff list from JSON",
+    "pasteJson": "Paste JSON here...",
+    "upload": "Upload file",
+    "preview": "Preview",
+    "importSelected": "Import selected",
+    "validationErrors": {
+      "invalidJson": "Invalid JSON format",
+      "missingName": "Name missing for staff #{index}",
+      "missingRole": "Role missing for staff #{index}",
+      "missingDepartment": "Department missing for staff #{index}",
+      "invalidSubstituteDate": "Invalid substitute date for {name}"
+    },
+    "importSuccess": "{count} staff imported",
+    "selectFile": "Select file",
+    "jsonFile": "JSON File",
+    "csvFile": "CSV File",
+    "aiSuggestion": "AI Suggestion",
+    "today": "Today",
+    "errors": {
+      "rateLimitExceeded": "Rate limit exceeded. Try again later.",
+      "aiCreditsExhausted": "AI credits exhausted. Add credits in settings.",
+      "selectAtLeastOne": "Select at least one staff member to apply schedule"
     }
   },
   "calendar": {
@@ -156,7 +203,15 @@
     "lastUpdated": "Last updated",
     "departments": "Departments",
     "groups": "Groups",
-    "participants": "participants"
+    "participants": "participants",
+    "selectDate": "Select date",
+    "selectFrequency": "Select frequency",
+    "conflicts": {
+      "closure": "Closure",
+      "limitedCapacity": "Limited capacity",
+      "showFewer": "Show fewer",
+      "showAll": "Show all {count} conflicts"
+    }
   },
   "administration": {
     "title": "Administration",
@@ -223,6 +278,11 @@
     "title": "Blog",
     "newPost": "NEW POST",
     "filter": "FILTER",
+    "showMore": "Show more",
+    "showLess": "Show less",
+    "noPosts": "No posts to display",
+    "showInternalOnly": "Show internal only",
+    "showUnpublished": "Show unpublished",
     "categories": {
       "alla": "ALL",
       "importantdates": "IMPORTANT DATES",
@@ -263,12 +323,63 @@
       "autoDelete": "Set date to delete post",
       "policyNote": "Note that this blog post will be automatically deleted in accordance with municipal policy.",
       "cancel": "CANCEL",
-      "publish": "PUBLISH"
+      "publish": "PUBLISH",
+      "pressEnterToAdd": "Press Enter to add...",
+      "validationError": "Title, content and category must be filled in."
     }
   },
   "departmentFilter": {
     "selectDepartments": "Select departments",
     "allDepartments": "All departments",
-    "departmentsSelected": "{{count}} departments selected"
+    "departmentsSelected": "{{count}} departments selected",
+    "selectedCount": "{count} selected"
+  },
+  "closurePeriodDialog": {
+    "title": "Closure Period",
+    "titleLabel": "Title",
+    "departmentsLabel": "Departments",
+    "closurePeriodLabel": "Closure Period",
+    "from": "From",
+    "to": "To",
+    "publishedNotification": "Published - Guardians notified",
+    "close": "Close"
+  },
+  "temporaryPeriodDialog": {
+    "title": "Temporary Schedule Period",
+    "titleLabel": "Title",
+    "departmentsLabel": "Departments",
+    "schedulePeriodFrom": "Schedule Period - From",
+    "schedulePeriodTo": "Schedule Period - To",
+    "activated": "Activated",
+    "deadline": "Deadline",
+    "submissionStatus": "Submitted",
+    "remainingSubmissions": "Remaining",
+    "limitedCapacityDays": "Limited Capacity Days",
+    "noDays": "No days",
+    "createdBy": "Created by",
+    "close": "Close"
+  },
+  "chat": {
+    "modal": {
+      "cancel": "Cancel",
+      "send": "Send",
+      "recipients": "Recipients",
+      "selectRecipients": "Select recipients",
+      "searchRecipients": "Search recipients...",
+      "selected": "selected",
+      "selectAll": "Select all"
+    }
+  },
+  "groups": {
+    "selectDepartmentToAdd": "Select department to add...",
+    "selectChildrenToAdd": "Select children to add...",
+    "filterGroupsByDepartment": "Filter groups by selected departments",
+    "noGroupsAvailable": "No groups available for selected departments"
+  },
+  "userSettings": {
+    "title": "User Settings",
+    "aiFeatures": "AI Features",
+    "showAiScheduleSuggestion": "Show AI schedule suggestions",
+    "aiScheduleDescription": "Enable AI assistant for automatic schedule suggestions"
   }
 }
