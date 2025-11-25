@@ -35,7 +35,7 @@ export function BlogPostList({ posts }: BlogPostListProps) {
   if (posts.length === 0) {
     return (
       <div className="text-center py-12">
-        <p className="text-muted-foreground">Inga inlägg att visa</p>
+        <p className="text-muted-foreground">{t("blog.noPosts")}</p>
       </div>
     );
   }

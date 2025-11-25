@@ -21,6 +21,8 @@
   },
   "schedule": {
     "title": "Schema",
+    "week": "Vecka",
+    "day": "Dag",
     "childrenPresent": "Children present",
     "staffPresent": "Staff present",
     "ratio": "Ratio",
@@ -45,54 +47,52 @@
         "custom": "Anpassade intervaller"
       },
       "addInterval": "Lägg till intervall"
+    },
+    "resolution": {
+      "label": "Visa:",
+      "standard": "Standard",
+      "hourly": "Timvis"
     }
   },
   "staffSchedule": {
     "addStaff": "Lägg till personal",
     "editStaff": "Redigera personal",
-    "deleteStaff": "Ta bort personal",
-    "importStaff": "Importera personal",
-    "substitute": "Vikarie",
-    "permanent": "Fast anställd",
-    "substitutePeriod": "Vikariatperiod",
-    "staffType": "Personaltyp",
+    "deleteStaff": "Radera personal",
+    "deleteConfirm": "Är du säker på att du vill radera denna personal?",
     "name": "Namn",
-    "namePlaceholder": "Ange namn",
-    "roleTitle": "Roll/Titel",
-    "rolePlaceholder": "T.ex. Teacher, Assistant",
+    "role": "Roll",
     "department": "Avdelning",
-    "selectDepartment": "Välj avdelning",
-    "startDate": "Startdatum",
-    "endDate": "Slutdatum",
-    "setDefaultSchedule": "Sätt standardschema för vardagar",
-    "defaultStart": "Starttid",
-    "defaultEnd": "Sluttid",
-    "error": "Fel",
-    "fillRequired": "Fyll i alla obligatoriska fält (namn, roll, avdelning)",
-    "fillSubstitutePeriod": "Fyll i vikarieperiod (start- och slutdatum)",
-    "endDateAfterStart": "Slutdatum måste vara efter startdatum",
-    "staffAdded": "Personal tillagd",
-    "staffAddedSuccess": "{{name}} har lagts till",
-    "staffUpdated": "Personal uppdaterad",
-    "staffUpdatedSuccess": "Personalinformationen har uppdaterats",
-    "staffDeleted": "Personal borttagen",
-    "staffDeletedSuccess": "{{name}} har tagits bort",
-    "confirmDelete": "Är du säker på att du vill ta bort {{name}}? Alla scheman för denna person kommer att försvinna.",
-    "deleteButton": "Ta bort",
-    "importInstructions": "Klistra in JSON-data med personalinformation",
-    "parseJson": "Läs in data",
-    "importErrorNotArray": "JSON-datan måste vara en lista",
-    "importErrorMissingFields": "Alla poster måste ha name, role och department",
-    "importErrorInvalidJson": "Ogiltig JSON-format",
-    "importParsed": "Data inläst",
-    "importParsedCount": "{{count}} person(er) hittades",
-    "importErrorNoSelection": "Välj minst en person att importera",
-    "importSuccess": "Import lyckades",
-    "importSuccessCount": "{{count}} person(er) importerades",
-    "importPreview": "Förhandsgranskning",
-    "selectAll": "Välj alla",
-    "deselectAll": "Avmarkera alla",
-    "importButton": "Importera valda"
+    "employmentType": "Anställningstyp",
+    "permanent": "Fast anställd",
+    "substitute": "Vikarie",
+    "substituteStart": "Vikariat startar",
+    "substituteEnd": "Vikariat slutar",
+    "save": "Spara",
+    "cancel": "Avbryt",
+    "import": "Importera personal",
+    "importDescription": "Importera personallista från JSON",
+    "pasteJson": "Klistra in JSON här...",
+    "upload": "Ladda upp fil",
+    "preview": "Förhandsgranska",
+    "importSelected": "Importera valda",
+    "validationErrors": {
+      "invalidJson": "Ogiltig JSON-format",
+      "missingName": "Namn saknas för personal #{index}",
+      "missingRole": "Roll saknas för personal #{index}",
+      "missingDepartment": "Avdelning saknas för personal #{index}",
+      "invalidSubstituteDate": "Ogiltigt vikariedatum för {name}"
+    },
+    "importSuccess": "{count} personal importerad",
+    "selectFile": "Välj fil",
+    "jsonFile": "JSON-fil",
+    "csvFile": "CSV-fil",
+    "aiSuggestion": "AI-förslag",
+    "today": "Idag",
+    "errors": {
+      "rateLimitExceeded": "Rate limit överskriden. Försök igen om en stund.",
+      "aiCreditsExhausted": "AI-krediter slut. Lägg till krediter i inställningar.",
+      "selectAtLeastOne": "Välj minst en personal att applicera schemat för"
+    }
   },
   "calendar": {
     "today": "IDAG",
@@ -203,7 +203,15 @@
     "lastUpdated": "Senast uppdaterad",
     "departments": "Avdelningar",
     "groups": "Grupper",
-    "participants": "deltagare"
+    "participants": "deltagare",
+    "selectDate": "Välj datum",
+    "selectFrequency": "Välj frekvens",
+    "conflicts": {
+      "closure": "Stängning",
+      "limitedCapacity": "Begränsad kapacitet",
+      "showFewer": "Visa färre",
+      "showAll": "Visa alla {count} konflikter"
+    }
   },
   "administration": {
     "title": "Administration",
@@ -270,6 +278,11 @@
     "title": "Blogg",
     "newPost": "NYTT INLÄGG",
     "filter": "FILTRERA",
+    "showMore": "Visa mer",
+    "showLess": "Visa mindre",
+    "noPosts": "Inga inlägg att visa",
+    "showInternalOnly": "Visa endast interna",
+    "showUnpublished": "Visa opublicerade",
     "categories": {
       "alla": "ALLA",
       "importantdates": "VIKTIGA DATUM",
@@ -310,12 +323,63 @@
       "autoDelete": "Ställ in datum för att radera inlägget",
       "policyNote": "Observera att detta blogginlägg kommer att raderas automatiskt i enlighet med kommunens policy.",
       "cancel": "AVBRYT",
-      "publish": "PUBLICERA"
+      "publish": "PUBLICERA",
+      "pressEnterToAdd": "Tryck Enter för att lägga till...",
+      "validationError": "Titel, innehåll och kategori måste fyllas i."
     }
   },
   "departmentFilter": {
     "selectDepartments": "Välj avdelningar",
     "allDepartments": "Alla avdelningar",
-    "departmentsSelected": "{{count}} avdelningar valda"
+    "departmentsSelected": "{{count}} avdelningar valda",
+    "selectedCount": "{count} valda"
+  },
+  "closurePeriodDialog": {
+    "title": "Stängningsperiod",
+    "titleLabel": "Titel",
+    "departmentsLabel": "Avdelningar",
+    "closurePeriodLabel": "Stängningsperiod",
+    "from": "Från",
+    "to": "Till",
+    "publishedNotification": "Publicerad - Vårdnadshavare notifierades",
+    "close": "Stäng"
+  },
+  "temporaryPeriodDialog": {
+    "title": "Temporär schemaperiod",
+    "titleLabel": "Titel",
+    "departmentsLabel": "Avdelningar",
+    "schedulePeriodFrom": "Schemaperiod - Från",
+    "schedulePeriodTo": "Schemaperiod - Till",
+    "activated": "Aktiverad",
+    "deadline": "Deadline",
+    "submissionStatus": "Inskickade",
+    "remainingSubmissions": "Kvar att skickas in",
+    "limitedCapacityDays": "Dagar med begränsad kapacitet",
+    "noDays": "Inga dagar",
+    "createdBy": "Skapad av",
+    "close": "Stäng"
+  },
+  "chat": {
+    "modal": {
+      "cancel": "Avbryt",
+      "send": "Skicka",
+      "recipients": "Mottagare",
+      "selectRecipients": "Välj mottagare",
+      "searchRecipients": "Sök mottagare...",
+      "selected": "valda",
+      "selectAll": "Välj alla"
+    }
+  },
+  "groups": {
+    "selectDepartmentToAdd": "Välj avdelning att lägga till...",
+    "selectChildrenToAdd": "Välj barn att lägga till...",
+    "filterGroupsByDepartment": "Filtrera grupper baserat på valda avdelningar",
+    "noGroupsAvailable": "Inga grupper tillgängliga för valda avdelningar"
+  },
+  "userSettings": {
+    "title": "Användarinställningar",
+    "aiFeatures": "AI-funktioner",
+    "showAiScheduleSuggestion": "Visa AI-schemaförslag",
+    "aiScheduleDescription": "Aktivera AI-assistent för automatiska schemaförslag"
   }
 }

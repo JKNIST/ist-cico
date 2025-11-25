@@ -22,20 +22,20 @@ export function UserSettings({ open, onOpenChange }: UserSettingsProps) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Användarinställningar</DialogTitle>
+          <DialogTitle>{t("userSettings.title")}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6 py-4">
           <div className="space-y-4">
-            <h3 className="font-medium text-sm">AI-funktioner</h3>
+            <h3 className="font-medium text-sm">{t("userSettings.aiFeatures")}</h3>
             
             <div className="flex items-center justify-between gap-4 p-4 border rounded-md">
               <div className="space-y-1">
                 <Label htmlFor="ai-schedule" className="cursor-pointer">
-                  Visa AI-schemaförslag
+                  {t("userSettings.showAiScheduleSuggestion")}
                 </Label>
                 <p className="text-sm text-muted-foreground">
-                  Aktivera AI-assistent för automatiska schemaförslag
+                  {t("userSettings.aiScheduleDescription")}
                 </p>
               </div>
               <Switch
