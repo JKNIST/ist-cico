@@ -78,16 +78,16 @@ export function AIScheduleSuggestionDialog({
       // Select all by default
       setSelectedStaff(new Set(data.recommendations.map((r: AIScheduleSuggestion) => r.staffId)));
       
-      toast.success("AI-förslag genererade!");
+      toast.success(t("staffSchedule.aiSuggestionGenerated"));
     } catch (error: any) {
       console.error("Error generating AI suggestions:", error);
       
       if (error.message?.includes('429') || error.message?.includes('Rate limit')) {
-        toast.error("Rate limit överskriden. Försök igen om en stund.");
+        toast.error(t("staffSchedule.errors.rateLimitExceeded"));
       } else if (error.message?.includes('402') || error.message?.includes('krediter')) {
-        toast.error("AI-krediter slut. Lägg till krediter i inställningar.");
+        toast.error(t("staffSchedule.errors.aiCreditsExhausted"));
       } else {
-        toast.error("Kunde inte generera förslag: " + (error.message || "Okänt fel"));
+        toast.error(t("staffSchedule.errors.generateFailed") + (error.message || t("staffSchedule.errors.unknownError")));
       }
     } finally {
       setIsLoading(false);

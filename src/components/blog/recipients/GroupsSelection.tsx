@@ -63,7 +63,7 @@ export function GroupsSelection({ selectedDepartments }: GroupsSelectionProps) {
       <div className="flex flex-wrap gap-2 p-3 bg-muted/30 rounded-md">
         {availableGroups.length === 0 ? (
           <span className="text-sm text-muted-foreground">
-            Inga grupper tillgängliga för valda avdelningar
+            {t("groups.noGroupsAvailable")}
           </span>
         ) : (
           availableGroups.map((group) => (

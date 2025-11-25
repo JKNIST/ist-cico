@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { format } from "date-fns";
-import { sv } from "date-fns/locale";
 import { AlertTriangle, ChevronDown, ChevronUp } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useTranslation } from "react-i18next";
+import { useLocale } from "@/hooks/useLocale";
 import type { ValidationResult } from "@/lib/eventConflictValidation";
 
 interface EventConflictWarningProps {
@@ -24,6 +25,8 @@ export const EventConflictWarning = ({
   onResolutionChange,
   onAcknowledgeChange,
 }: EventConflictWarningProps) => {
+  const { t } = useTranslation();
+  const locale = useLocale();
   const [showAll, setShowAll] = useState(false);
 
   if (!conflicts.hasConflicts) return null;
@@ -40,11 +43,14 @@ export const EventConflictWarning = ({
   return (
     <Alert variant="destructive" className="mb-4">
       <AlertTriangle className="h-4 w-4" />
-      <AlertTitle>Varning: Eventet krockar med administrativa perioder</AlertTitle>
+      <AlertTitle>{t("eventConflict.warning")}</AlertTitle>
       <AlertDescription>
         <div className="space-y-4 mt-3">
           <p className="font-medium">
-            {conflicts.conflictingInstances} av {conflicts.totalInstances} händelser påverkas
+            {t("eventConflict.affectedEvents", {
+              conflicting: conflicts.conflictingInstances,
+              total: conflicts.totalInstances,
+            })}
           </p>
 
           {/* List of conflicts */}
@@ -55,10 +61,10 @@ export const EventConflictWarning = ({
                   {conflict.type === "closure" ? "🔴" : "🟠"}
                 </span>
                 <span className="font-medium">
-                  {format(conflict.date, "d MMM yyyy", { locale: sv })}
+                  {format(conflict.date, "d MMM yyyy", { locale })}
                 </span>
                 <span className="text-muted-foreground">
-                  {conflict.type === "closure" ? "Stängning" : "Begränsad kapacitet"}
+                  {t(`eventDialog.conflicts.${conflict.type}`)}
                 </span>
                 <span className="text-muted-foreground">- {conflict.title}</span>
               </div>
@@ -73,12 +79,12 @@ export const EventConflictWarning = ({
                 {showAll ? (
                   <>
                     <ChevronUp className="h-3 w-3 mr-1" />
-                    Visa färre
+                    {t("eventDialog.conflicts.showFewer")}
                   </>
                 ) : (
                   <>
                     <ChevronDown className="h-3 w-3 mr-1" />
-                    Visa alla {conflicts.conflicts.length} konflikter
+                    {t("eventDialog.conflicts.showAll", { count: conflicts.conflicts.length })}
                   </>
                 )}
               </Button>
@@ -87,7 +93,7 @@ export const EventConflictWarning = ({
 
           {/* Resolution options */}
           <div className="border-t pt-3 space-y-3">
-            <p className="text-sm font-medium">Hur vill du hantera detta?</p>
+            <p className="text-sm font-medium">{t("eventConflict.howToHandle")}</p>
             <RadioGroup value={resolution} onValueChange={onResolutionChange}>
               <div className="space-y-3">
                 {/* Skip conflicts option */}
@@ -98,10 +104,10 @@ export const EventConflictWarning = ({
                       htmlFor="skip-conflicts"
                       className="text-sm font-normal cursor-pointer"
                     >
-                      Hoppa över dagar med konflikter (rekommenderat)
+                      {t("eventConflict.skipConflicts")}
                     </Label>
                     <p className="text-xs text-muted-foreground">
-                      {eventsToCreate} händelser kommer att skapas
+                      {t("eventConflict.eventsWillBeCreated", { count: eventsToCreate })}
                     </p>
                   </div>
                 </div>
@@ -114,10 +120,10 @@ export const EventConflictWarning = ({
                       htmlFor="include-all"
                       className="text-sm font-normal cursor-pointer"
                     >
-                      Skapa alla händelser (inklusive de som krockar)
+                      {t("eventConflict.createAll")}
                     </Label>
                     <p className="text-xs text-muted-foreground">
-                      Alla {conflicts.totalInstances} händelser kommer att skapas
+                      {t("eventConflict.allEventsWillBeCreated", { count: conflicts.totalInstances })}
                     </p>
                   </div>
                 </div>
@@ -136,8 +142,7 @@ export const EventConflictWarning = ({
                   htmlFor="acknowledge"
                   className="text-sm font-normal cursor-pointer leading-tight"
                 >
-                  Jag förstår att detta event krockar med administrativa perioder och vill ändå
-                  skapa det
+                  {t("eventConflict.acknowledge")}
                 </Label>
               </div>
             )}

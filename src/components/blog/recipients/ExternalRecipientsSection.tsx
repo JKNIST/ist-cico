@@ -49,7 +49,7 @@ export function ExternalRecipientsSection() {
         <Label>{t("blog.form.classesGroups")}</Label>
         <Select onValueChange={handleAddDepartment}>
           <SelectTrigger className="bg-background">
-            <SelectValue placeholder="Välj avdelning att lägga till..." />
+            <SelectValue placeholder={t("groups.selectDepartmentToAdd")} />
           </SelectTrigger>
           <SelectContent className="bg-background z-50">
             {availableDepartments
@@ -86,7 +86,7 @@ export function ExternalRecipientsSection() {
           }
         }}>
           <SelectTrigger className="bg-background">
-            <SelectValue placeholder="Välj barn att lägga till..." />
+            <SelectValue placeholder={t("groups.selectChildrenToAdd")} />
           </SelectTrigger>
           <SelectContent className="bg-background z-50">
             {mockDepartments

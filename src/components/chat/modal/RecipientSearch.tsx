@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { X, ChevronDown } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { StaffMember } from "@/components/staff/types";
 
 interface Recipient {
@@ -35,11 +36,12 @@ export const RecipientSearch = ({
   onRecipientSelect,
   onSelectAll,
 }: RecipientSearchProps) => {
+  const { t } = useTranslation();
   const allSelected = selectedRecipients.length === recipients.length && recipients.length > 0;
 
   return (
     <div className="space-y-2">
-      <label className="text-sm font-medium">Mottagare</label>
+      <label className="text-sm font-medium">{t("chat.modal.recipients")}</label>
       <Popover open={isPopoverOpen} onOpenChange={onPopoverOpenChange}>
         <PopoverTrigger asChild>
           <Button
@@ -48,8 +50,8 @@ export const RecipientSearch = ({
           >
             <span className="text-muted-foreground">
               {selectedRecipients.length === 0
-                ? "Välj mottagare"
-                : `${selectedRecipients.length} valda`}
+                ? t("chat.modal.selectRecipients")
+                : `${selectedRecipients.length} ${t("chat.modal.selected")}`}
             </span>
             <ChevronDown className="h-4 w-4 opacity-50" />
           </Button>
@@ -57,7 +59,7 @@ export const RecipientSearch = ({
         <PopoverContent className="w-[400px] p-0" align="start">
           <div className="p-3 border-b">
             <Input
-              placeholder="Sök mottagare..."
+              placeholder={t("chat.modal.searchRecipients")}
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
             />
@@ -70,7 +72,7 @@ export const RecipientSearch = ({
                 onCheckedChange={onSelectAll}
               />
               <label htmlFor="select-all" className="text-sm font-medium cursor-pointer">
-                Välj alla ({recipients.length})
+                {t("chat.modal.selectAll")} ({recipients.length})
               </label>
             </div>
           </div>

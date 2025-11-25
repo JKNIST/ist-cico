@@ -381,5 +381,27 @@
     "aiFeatures": "AI Features",
     "showAiScheduleSuggestion": "Show AI schedule suggestions",
     "aiScheduleDescription": "Enable AI assistant for automatic schedule suggestions"
+  },
+  "eventConflict": {
+    "warning": "Warning: Event conflicts with administrative periods",
+    "affectedEvents": "{{conflicting}} of {{total}} events affected",
+    "howToHandle": "How do you want to handle this?",
+    "skipConflicts": "Skip conflicting days (recommended)",
+    "createAll": "Create all events (including conflicts)",
+    "eventsWillBeCreated": "{{count}} events will be created",
+    "allEventsWillBeCreated": "All {{count}} events will be created",
+    "acknowledge": "I understand this event conflicts with administrative periods and still want to create it"
+  },
+  "staffSchedule": {
+    "aiSuggestionGenerated": "AI suggestions generated!",
+    "errors": {
+      "generateFailed": "Could not generate suggestions: ",
+      "unknownError": "Unknown error"
+    }
+  },
+  "chat": {
+    "modal": {
+      "recipients": "Recipients"
+    }
   }
 }

@@ -381,5 +381,27 @@
     "aiFeatures": "AI-funksjoner",
     "showAiScheduleSuggestion": "Vis AI-timeplanforslag",
     "aiScheduleDescription": "Aktiver AI-assistent for automatiske timeplanforslag"
+  },
+  "eventConflict": {
+    "warning": "Advarsel: Hendelsen er i konflikt med administrative perioder",
+    "affectedEvents": "{{conflicting}} av {{total}} hendelser påvirket",
+    "howToHandle": "Hvordan vil du håndtere dette?",
+    "skipConflicts": "Hopp over dager med konflikter (anbefalt)",
+    "createAll": "Opprett alle hendelser (inkludert konflikter)",
+    "eventsWillBeCreated": "{{count}} hendelser vil bli opprettet",
+    "allEventsWillBeCreated": "Alle {{count}} hendelser vil bli opprettet",
+    "acknowledge": "Jeg forstår at denne hendelsen er i konflikt med administrative perioder og vil likevel opprette den"
+  },
+  "staffSchedule": {
+    "aiSuggestionGenerated": "AI-forslag generert!",
+    "errors": {
+      "generateFailed": "Kunne ikke generere forslag: ",
+      "unknownError": "Ukjent feil"
+    }
+  },
+  "chat": {
+    "modal": {
+      "recipients": "Mottakere"
+    }
   }
 }
