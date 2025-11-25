@@ -63,7 +63,7 @@ export function ScheduleSettings() {
     
     // Dispatch event to notify Schedule page
     window.dispatchEvent(new CustomEvent("timeIntervalsUpdated"));
-    toast.success("Tidsintervall-inställningar uppdaterade");
+    toast.success(t("toast.timeIntervalsUpdated"));
   };
 
   const handleIntervalChange = (index: number, field: 'start' | 'end', value: string) => {
@@ -99,7 +99,7 @@ export function ScheduleSettings() {
     }
     setIntervalResolution(resolution);
     window.dispatchEvent(new CustomEvent("timeIntervalsUpdated"));
-    toast.success("Tidsintervall-inställningar sparade");
+    toast.success(t("toast.timeIntervalsSaved"));
   };
 
   return (

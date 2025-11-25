@@ -189,7 +189,7 @@ export function AddEventDialog({
   const handleSave = () => {
     // Validate conflict resolution
     if (conflicts?.hasConflicts && conflictResolution === "include-all" && !acknowledgeConflicts) {
-      toast.error("Du måste bekräfta att du förstår att eventet krockar innan du kan spara");
+      toast.error(t("toast.mustAcknowledgeConflicts"));
       return;
     }
 
@@ -227,10 +227,13 @@ export function AddEventDialog({
     if (conflicts?.hasConflicts && conflictResolution === "skip-conflicts") {
       const eventsCreated = conflicts.totalInstances - conflicts.conflictingInstances;
       toast.success(
-        `${eventsCreated} händelser skapade, ${conflicts.conflictingInstances} händelser hoppades över`
+        t("toast.eventsCreatedSkipped", {
+          created: eventsCreated,
+          skipped: conflicts.conflictingInstances
+        })
       );
     } else {
-      toast.success("Event sparat");
+      toast.success(t("toast.eventSaved"));
     }
 
     onOpenChange(false);

@@ -397,7 +397,22 @@
     "errors": {
       "generateFailed": "Could not generate suggestions: ",
       "unknownError": "Unknown error"
-    }
+    },
+    "scheduleApplied": "Schedule applied for {{count}} staff member",
+    "scheduleApplied_plural": "Schedule applied for {{count}} staff members",
+    "offDuty": "Off"
+  },
+  "toast": {
+    "eventSaved": "Event saved",
+    "eventsCreatedSkipped": "{{created}} events created, {{skipped}} events skipped",
+    "mustAcknowledgeConflicts": "You must acknowledge that you understand the event conflicts before saving",
+    "blogPostCreated": "Blog post created!",
+    "blogPostPublished": "Your post has been published.",
+    "fillRequiredFields": "Fill in all required fields",
+    "titleContentCategoryRequired": "Title, content and category must be filled in.",
+    "timeIntervalsUpdated": "Time interval settings updated",
+    "timeIntervalsSaved": "Time interval settings saved",
+    "staffingSettingsSaved": "Staffing settings saved"
   },
   "chat": {
     "modal": {
