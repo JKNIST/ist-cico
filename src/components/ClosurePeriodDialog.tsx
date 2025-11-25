@@ -81,14 +81,13 @@ export function ClosurePeriodDialog({
           </div>
 
           <div className="space-y-2">
-            <Label className="text-muted-foreground">Publicerad</Label>
+            <Label className="text-muted-foreground">
+              Publicerad - Vårdnadshavare notifierades
+            </Label>
             <div className="flex items-center gap-2">
               <Calendar className="h-4 w-4 text-muted-foreground" />
               <p className="font-medium">{format(period.publishDate, "dd MMM yyyy", { locale: sv })}</p>
             </div>
-            <p className="text-sm text-muted-foreground">
-              Vårdnadshavare notifierades om stängningen detta datum
-            </p>
           </div>
         </div>
 
