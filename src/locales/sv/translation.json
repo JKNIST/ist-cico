@@ -392,6 +392,16 @@
     "allEventsWillBeCreated": "Alla {{count}} händelser kommer att skapas",
     "acknowledge": "Jag förstår att detta event krockar med administrativa perioder och vill ändå skapa det"
   },
+  "periodConflict": {
+    "title": "Befintliga kalenderhändelser",
+    "warningMessage": "{{conflicting}} av {{total}} datum har redan kalenderhändelser",
+    "conflictingEvents": "Följande händelser kommer att överlappa med denna period:",
+    "confirmQuestion": "Vill du skapa perioden ändå?",
+    "abort": "Avbryt",
+    "createAnyway": "Skapa ändå",
+    "showFewer": "Visa färre",
+    "showAll": "Visa alla {{count}} konflikter"
+  },
   "staffSchedule": {
     "aiSuggestionGenerated": "AI-förslag genererade!",
     "errors": {
