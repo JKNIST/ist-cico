@@ -392,6 +392,16 @@
     "allEventsWillBeCreated": "All {{count}} events will be created",
     "acknowledge": "I understand this event conflicts with administrative periods and still want to create it"
   },
+  "periodConflict": {
+    "title": "Existing Calendar Events",
+    "warningMessage": "{{conflicting}} of {{total}} dates already have calendar events",
+    "conflictingEvents": "The following events will overlap with this period:",
+    "confirmQuestion": "Do you want to create the period anyway?",
+    "abort": "Abort",
+    "createAnyway": "Create anyway",
+    "showFewer": "Show fewer",
+    "showAll": "Show all {{count}} conflicts"
+  },
   "staffSchedule": {
     "aiSuggestionGenerated": "AI suggestions generated!",
     "errors": {
