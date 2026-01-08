@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -6,11 +7,19 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { format } from "date-fns";
-import { Badge } from "@/components/ui/badge";
-import { Calendar } from "lucide-react";
+import { Calendar as CalendarIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useLocale } from "@/hooks/useLocale";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Checkbox } from "@/components/ui/checkbox";
+import { cn } from "@/lib/utils";
 
 interface ClosurePeriod {
   id: string;
@@ -29,75 +38,206 @@ interface ClosurePeriodDialogProps {
   onSave: (period: ClosurePeriod) => void;
 }
 
+const AVAILABLE_DEPARTMENTS = ["Småbarnsavdelningen", "Mellanbarnsavdelningen", "Storbarnsavdelningen"];
+
 export function ClosurePeriodDialog({
   open,
   onOpenChange,
   period,
+  onSave,
 }: ClosurePeriodDialogProps) {
   const { t } = useTranslation();
   const locale = useLocale();
   
-  if (!period) return null;
+  const isEditing = period !== null;
+  
+  const [formData, setFormData] = useState<ClosurePeriod>({
+    id: "",
+    title: "",
+    startDate: new Date(),
+    endDate: new Date(),
+    departments: [],
+    publishDate: new Date(),
+    isArchived: false,
+  });
+
+  // Reset form when dialog opens/closes or period changes
+  useEffect(() => {
+    if (open) {
+      if (period) {
+        setFormData(period);
+      } else {
+        setFormData({
+          id: crypto.randomUUID(),
+          title: "",
+          startDate: new Date(),
+          endDate: new Date(),
+          departments: [],
+          publishDate: new Date(),
+          isArchived: false,
+        });
+      }
+    }
+  }, [open, period]);
+
+  const handleDepartmentToggle = (dept: string) => {
+    setFormData(prev => ({
+      ...prev,
+      departments: prev.departments.includes(dept)
+        ? prev.departments.filter(d => d !== dept)
+        : [...prev.departments, dept]
+    }));
+  };
+
+  const handleSave = () => {
+    if (!formData.title.trim() || formData.departments.length === 0) {
+      return;
+    }
+    onSave(formData);
+  };
+
+  const isValid = formData.title.trim() && formData.departments.length > 0;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-xl">
         <DialogHeader>
-          <DialogTitle>{t("closurePeriodDialog.title")}</DialogTitle>
+          <DialogTitle>
+            {isEditing 
+              ? t("closurePeriodDialog.editTitle") 
+              : t("closurePeriodDialog.createTitle")}
+          </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6 py-4">
+          {/* Title */}
           <div className="space-y-2">
-            <Label className="text-muted-foreground">{t("closurePeriodDialog.titleLabel")}</Label>
-            <p className="text-lg font-semibold">{period.title}</p>
+            <Label htmlFor="title">{t("closurePeriodDialog.titleLabel")} *</Label>
+            <Input
+              id="title"
+              value={formData.title}
+              onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+              placeholder={t("closurePeriodDialog.titlePlaceholder")}
+            />
           </div>
 
+          {/* Departments */}
           <div className="space-y-2">
-            <Label className="text-muted-foreground">{t("closurePeriodDialog.departmentsLabel")}</Label>
-            <div className="flex flex-wrap gap-2">
-              {period.departments.map((dept) => (
-                <Badge key={dept} variant="secondary">
-                  {dept}
-                </Badge>
+            <Label>{t("closurePeriodDialog.departmentsLabel")} *</Label>
+            <div className="flex flex-wrap gap-3">
+              {AVAILABLE_DEPARTMENTS.map((dept) => (
+                <div key={dept} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`dept-${dept}`}
+                    checked={formData.departments.includes(dept)}
+                    onCheckedChange={() => handleDepartmentToggle(dept)}
+                  />
+                  <label
+                    htmlFor={`dept-${dept}`}
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                  >
+                    {dept}
+                  </label>
+                </div>
               ))}
             </div>
           </div>
 
+          {/* Closure Period Dates */}
           <div className="space-y-2">
-            <Label className="text-muted-foreground">{t("closurePeriodDialog.closurePeriodLabel")}</Label>
+            <Label>{t("closurePeriodDialog.closurePeriodLabel")}</Label>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
                 <p className="text-xs text-muted-foreground">{t("closurePeriodDialog.from")}</p>
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
-                  <p className="font-medium">{format(period.startDate, "dd MMM yyyy", { locale })}</p>
-                </div>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !formData.startDate && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {formData.startDate ? format(formData.startDate, "dd MMM yyyy", { locale }) : t("closurePeriodDialog.selectDate")}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={formData.startDate}
+                      onSelect={(date) => date && setFormData(prev => ({ ...prev, startDate: date }))}
+                      initialFocus
+                      className="pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
 
               <div className="space-y-1">
                 <p className="text-xs text-muted-foreground">{t("closurePeriodDialog.to")}</p>
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
-                  <p className="font-medium">{format(period.endDate, "dd MMM yyyy", { locale })}</p>
-                </div>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !formData.endDate && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {formData.endDate ? format(formData.endDate, "dd MMM yyyy", { locale }) : t("closurePeriodDialog.selectDate")}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={formData.endDate}
+                      onSelect={(date) => date && setFormData(prev => ({ ...prev, endDate: date }))}
+                      initialFocus
+                      className="pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
             </div>
           </div>
 
+          {/* Publish Date */}
           <div className="space-y-2">
-            <Label className="text-muted-foreground">
-              {t("closurePeriodDialog.publishedNotification")}
-            </Label>
-            <div className="flex items-center gap-2">
-              <Calendar className="h-4 w-4 text-muted-foreground" />
-              <p className="font-medium">{format(period.publishDate, "dd MMM yyyy", { locale })}</p>
-            </div>
+            <Label>{t("closurePeriodDialog.publishDateLabel")}</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-full justify-start text-left font-normal",
+                    !formData.publishDate && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {formData.publishDate ? format(formData.publishDate, "dd MMM yyyy", { locale }) : t("closurePeriodDialog.selectDate")}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={formData.publishDate}
+                  onSelect={(date) => date && setFormData(prev => ({ ...prev, publishDate: date }))}
+                  initialFocus
+                  className="pointer-events-auto"
+                />
+              </PopoverContent>
+            </Popover>
           </div>
         </div>
 
         <div className="flex items-center gap-2 justify-end">
-          <Button onClick={() => onOpenChange(false)}>
-            {t("closurePeriodDialog.close")}
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            {t("closurePeriodDialog.cancel")}
+          </Button>
+          <Button onClick={handleSave} disabled={!isValid}>
+            {isEditing ? t("closurePeriodDialog.save") : t("closurePeriodDialog.create")}
           </Button>
         </div>
       </DialogContent>
