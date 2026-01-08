@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -6,11 +7,20 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { format } from "date-fns";
-import { Badge } from "@/components/ui/badge";
-import { Calendar } from "lucide-react";
+import { Calendar as CalendarIcon, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useLocale } from "@/hooks/useLocale";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 interface TemporarySchemaPeriod {
   id: string;
@@ -33,117 +43,325 @@ interface TemporarySchemaPeriodDialogProps {
   onSave: (period: TemporarySchemaPeriod) => void;
 }
 
+const AVAILABLE_DEPARTMENTS = ["Småbarnsavdelningen", "Mellanbarnsavdelningen", "Storbarnsavdelningen"];
+
 export function TemporarySchemaPeriodDialog({
   open,
   onOpenChange,
   period,
+  onSave,
 }: TemporarySchemaPeriodDialogProps) {
   const { t } = useTranslation();
   const locale = useLocale();
   
-  if (!period) return null;
+  const isEditing = period !== null;
+  
+  const [formData, setFormData] = useState<TemporarySchemaPeriod>({
+    id: "",
+    title: "",
+    createdBy: "Nuvarande användare",
+    startDate: new Date(),
+    endDate: new Date(),
+    departments: [],
+    activateDate: new Date(),
+    deadline: new Date(),
+    submitted: 0,
+    remaining: 0,
+    limitedCapacityDays: [],
+  });
+
+  // Reset form when dialog opens/closes or period changes
+  useEffect(() => {
+    if (open) {
+      if (period) {
+        setFormData(period);
+      } else {
+        setFormData({
+          id: crypto.randomUUID(),
+          title: "",
+          createdBy: "Nuvarande användare",
+          startDate: new Date(),
+          endDate: new Date(),
+          departments: [],
+          activateDate: new Date(),
+          deadline: new Date(),
+          submitted: 0,
+          remaining: 0,
+          limitedCapacityDays: [],
+        });
+      }
+    }
+  }, [open, period]);
+
+  const handleDepartmentToggle = (dept: string) => {
+    setFormData(prev => ({
+      ...prev,
+      departments: prev.departments.includes(dept)
+        ? prev.departments.filter(d => d !== dept)
+        : [...prev.departments, dept]
+    }));
+  };
+
+  const handleLimitedCapacityDaySelect = (date: Date | undefined) => {
+    if (!date) return;
+    
+    // Check if date is already selected
+    const isSelected = formData.limitedCapacityDays.some(
+      d => format(d, "yyyy-MM-dd") === format(date, "yyyy-MM-dd")
+    );
+    
+    if (isSelected) {
+      setFormData(prev => ({
+        ...prev,
+        limitedCapacityDays: prev.limitedCapacityDays.filter(
+          d => format(d, "yyyy-MM-dd") !== format(date, "yyyy-MM-dd")
+        )
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        limitedCapacityDays: [...prev.limitedCapacityDays, date].sort((a, b) => a.getTime() - b.getTime())
+      }));
+    }
+  };
+
+  const removeLimitedCapacityDay = (date: Date) => {
+    setFormData(prev => ({
+      ...prev,
+      limitedCapacityDays: prev.limitedCapacityDays.filter(
+        d => format(d, "yyyy-MM-dd") !== format(date, "yyyy-MM-dd")
+      )
+    }));
+  };
+
+  const handleSave = () => {
+    if (!formData.title.trim() || formData.departments.length === 0) {
+      return;
+    }
+    onSave(formData);
+  };
+
+  const isValid = formData.title.trim() && formData.departments.length > 0;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{t("temporaryPeriodDialog.title")}</DialogTitle>
+          <DialogTitle>
+            {isEditing 
+              ? t("temporaryPeriodDialog.editTitle") 
+              : t("temporaryPeriodDialog.createTitle")}
+          </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6 py-4">
+          {/* Title */}
           <div className="space-y-2">
-            <Label className="text-muted-foreground">{t("temporaryPeriodDialog.titleLabel")}</Label>
-            <p className="text-lg font-semibold">{period.title}</p>
+            <Label htmlFor="title">{t("temporaryPeriodDialog.titleLabel")} *</Label>
+            <Input
+              id="title"
+              value={formData.title}
+              onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+              placeholder={t("temporaryPeriodDialog.titlePlaceholder")}
+            />
           </div>
 
+          {/* Departments */}
           <div className="space-y-2">
-            <Label className="text-muted-foreground">{t("temporaryPeriodDialog.departmentsLabel")}</Label>
-            <div className="flex flex-wrap gap-2">
-              {period.departments.map((dept) => (
-                <Badge key={dept} variant="secondary">
-                  {dept}
-                </Badge>
+            <Label>{t("temporaryPeriodDialog.departmentsLabel")} *</Label>
+            <div className="flex flex-wrap gap-3">
+              {AVAILABLE_DEPARTMENTS.map((dept) => (
+                <div key={dept} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`dept-${dept}`}
+                    checked={formData.departments.includes(dept)}
+                    onCheckedChange={() => handleDepartmentToggle(dept)}
+                  />
+                  <label
+                    htmlFor={`dept-${dept}`}
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                  >
+                    {dept}
+                  </label>
+                </div>
               ))}
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label className="text-muted-foreground">{t("temporaryPeriodDialog.schedulePeriodFrom")}</Label>
-              <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4 text-muted-foreground" />
-                <p className="font-medium">{format(period.startDate, "PPP", { locale })}</p>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label className="text-muted-foreground">{t("temporaryPeriodDialog.schedulePeriodTo")}</Label>
-              <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4 text-muted-foreground" />
-                <p className="font-medium">{format(period.endDate, "PPP", { locale })}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label className="text-muted-foreground">{t("temporaryPeriodDialog.activated")}</Label>
-              <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4 text-muted-foreground" />
-                <p className="font-medium">{format(period.activateDate, "PPP", { locale })}</p>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label className="text-muted-foreground">{t("temporaryPeriodDialog.deadline")}</Label>
-              <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4 text-muted-foreground" />
-                <p className="font-medium">{format(period.deadline, "PPP", { locale })}</p>
-              </div>
-            </div>
-          </div>
-
+          {/* Schedule Period Dates */}
           <div className="space-y-2">
-            <Label className="text-muted-foreground">Status</Label>
+            <Label>{t("temporaryPeriodDialog.schedulePeriod")}</Label>
             <div className="grid grid-cols-2 gap-4">
-              <div className="border rounded-lg p-3">
-                <p className="text-sm text-muted-foreground">{t("temporaryPeriodDialog.submissionStatus")}</p>
-                <p className="text-2xl font-bold text-green-600">{period.submitted}</p>
+              <div className="space-y-1">
+                <p className="text-xs text-muted-foreground">{t("temporaryPeriodDialog.from")}</p>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !formData.startDate && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {formData.startDate ? format(formData.startDate, "dd MMM yyyy", { locale }) : t("temporaryPeriodDialog.selectDate")}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={formData.startDate}
+                      onSelect={(date) => date && setFormData(prev => ({ ...prev, startDate: date }))}
+                      initialFocus
+                      className="pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
-              <div className="border rounded-lg p-3">
-                <p className="text-sm text-muted-foreground">{t("temporaryPeriodDialog.remainingSubmissions")}</p>
-                <p className="text-2xl font-bold text-amber-600">{period.remaining}</p>
+
+              <div className="space-y-1">
+                <p className="text-xs text-muted-foreground">{t("temporaryPeriodDialog.to")}</p>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !formData.endDate && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {formData.endDate ? format(formData.endDate, "dd MMM yyyy", { locale }) : t("temporaryPeriodDialog.selectDate")}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={formData.endDate}
+                      onSelect={(date) => date && setFormData(prev => ({ ...prev, endDate: date }))}
+                      initialFocus
+                      className="pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
             </div>
           </div>
 
+          {/* Activation Date and Deadline */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>{t("temporaryPeriodDialog.activationDate")}</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !formData.activateDate && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {formData.activateDate ? format(formData.activateDate, "dd MMM yyyy", { locale }) : t("temporaryPeriodDialog.selectDate")}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={formData.activateDate}
+                    onSelect={(date) => date && setFormData(prev => ({ ...prev, activateDate: date }))}
+                    initialFocus
+                    className="pointer-events-auto"
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            <div className="space-y-2">
+              <Label>{t("temporaryPeriodDialog.deadline")}</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !formData.deadline && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {formData.deadline ? format(formData.deadline, "dd MMM yyyy", { locale }) : t("temporaryPeriodDialog.selectDate")}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={formData.deadline}
+                    onSelect={(date) => date && setFormData(prev => ({ ...prev, deadline: date }))}
+                    initialFocus
+                    className="pointer-events-auto"
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+          </div>
+
+          {/* Limited Capacity Days */}
           <div className="space-y-2">
-            <Label className="text-muted-foreground">{t("temporaryPeriodDialog.limitedCapacityDays")}</Label>
-            <p className="text-sm font-medium mb-2">
-              {period.limitedCapacityDays.length > 0 
-                ? `${period.limitedCapacityDays.length} ${t("temporaryPeriodDialog.limitedCapacityDays").toLowerCase()}`
-                : t("temporaryPeriodDialog.noDays")}
-            </p>
-            {period.limitedCapacityDays.length > 0 && (
-              <div className="border rounded-lg p-4 bg-amber-50 space-y-1">
-                {period.limitedCapacityDays.map((day, idx) => (
-                  <div key={idx} className="text-sm">
-                    {format(day, "EEEE, d MMMM yyyy", { locale })}
-                  </div>
+            <Label>{t("temporaryPeriodDialog.limitedCapacityDays")}</Label>
+            <p className="text-xs text-muted-foreground">{t("temporaryPeriodDialog.limitedCapacityDescription")}</p>
+            
+            {/* Selected days */}
+            {formData.limitedCapacityDays.length > 0 && (
+              <div className="flex flex-wrap gap-2 p-3 border rounded-lg bg-amber-50">
+                {formData.limitedCapacityDays.map((day, idx) => (
+                  <Badge 
+                    key={idx} 
+                    variant="secondary" 
+                    className="flex items-center gap-1 bg-amber-100"
+                  >
+                    {format(day, "d MMM", { locale })}
+                    <X 
+                      className="h-3 w-3 cursor-pointer hover:text-destructive" 
+                      onClick={() => removeLimitedCapacityDay(day)}
+                    />
+                  </Badge>
                 ))}
               </div>
             )}
-          </div>
-
-          <div className="space-y-2">
-            <Label className="text-muted-foreground">{t("temporaryPeriodDialog.createdBy")}</Label>
-            <p className="font-medium">{period.createdBy}</p>
+            
+            {/* Calendar for selecting days */}
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="w-full">
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {t("temporaryPeriodDialog.addLimitedDay")}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={undefined}
+                  onSelect={handleLimitedCapacityDaySelect}
+                  modifiers={{
+                    selected: formData.limitedCapacityDays
+                  }}
+                  modifiersStyles={{
+                    selected: { backgroundColor: 'hsl(var(--amber-100))', color: 'hsl(var(--amber-900))' }
+                  }}
+                  initialFocus
+                  className="pointer-events-auto"
+                />
+              </PopoverContent>
+            </Popover>
           </div>
         </div>
 
         <div className="flex items-center gap-2 justify-end">
-          <Button onClick={() => onOpenChange(false)}>
-            {t("temporaryPeriodDialog.close")}
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            {t("temporaryPeriodDialog.cancel")}
+          </Button>
+          <Button onClick={handleSave} disabled={!isValid}>
+            {isEditing ? t("temporaryPeriodDialog.save") : t("temporaryPeriodDialog.create")}
           </Button>
         </div>
       </DialogContent>
