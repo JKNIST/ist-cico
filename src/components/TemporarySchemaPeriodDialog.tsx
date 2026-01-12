@@ -21,6 +21,13 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+import { PeriodConflictWarning } from "@/components/administration/PeriodConflictWarning";
+import {
+  validateTemporaryPeriodConflicts,
+  PeriodValidationResult,
+} from "@/lib/periodConflictValidation";
+import type { CalendarEvent } from "@/types/administration";
 
 interface TemporarySchemaPeriod {
   id: string;
@@ -41,6 +48,7 @@ interface TemporarySchemaPeriodDialogProps {
   onOpenChange: (open: boolean) => void;
   period: TemporarySchemaPeriod | null;
   onSave: (period: TemporarySchemaPeriod) => void;
+  existingEvents?: CalendarEvent[];
 }
 
 const AVAILABLE_DEPARTMENTS = ["Småbarnsavdelningen", "Mellanbarnsavdelningen", "Storbarnsavdelningen"];
@@ -50,6 +58,7 @@ export function TemporarySchemaPeriodDialog({
   onOpenChange,
   period,
   onSave,
+  existingEvents = [],
 }: TemporarySchemaPeriodDialogProps) {
   const { t } = useTranslation();
   const locale = useLocale();
@@ -69,6 +78,11 @@ export function TemporarySchemaPeriodDialog({
     remaining: 0,
     limitedCapacityDays: [],
   });
+
+  // Conflict state
+  const [conflicts, setConflicts] = useState<PeriodValidationResult | null>(null);
+  const [conflictResolution, setConflictResolution] = useState<"include-all" | "skip-conflicts">("skip-conflicts");
+  const [acknowledgeConflicts, setAcknowledgeConflicts] = useState(false);
 
   // Reset form when dialog opens/closes or period changes
   useEffect(() => {
@@ -90,8 +104,32 @@ export function TemporarySchemaPeriodDialog({
           limitedCapacityDays: [],
         });
       }
+      // Reset conflict state
+      setConflicts(null);
+      setConflictResolution("skip-conflicts");
+      setAcknowledgeConflicts(false);
     }
   }, [open, period]);
+
+  // Real-time conflict validation with debounce for limited capacity days
+  useEffect(() => {
+    if (!open || formData.limitedCapacityDays.length === 0) {
+      setConflicts(null);
+      return;
+    }
+
+    const timeoutId = setTimeout(() => {
+      const result = validateTemporaryPeriodConflicts(
+        formData.limitedCapacityDays,
+        existingEvents
+      );
+      setConflicts(result);
+      // Reset acknowledgment when conflicts change
+      setAcknowledgeConflicts(false);
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [open, formData.limitedCapacityDays, existingEvents]);
 
   const handleDepartmentToggle = (dept: string) => {
     setFormData(prev => ({
@@ -138,7 +176,15 @@ export function TemporarySchemaPeriodDialog({
     if (!formData.title.trim() || formData.departments.length === 0) {
       return;
     }
+
+    // Validate conflict acknowledgment
+    if (conflicts?.hasConflicts && conflictResolution === "include-all" && !acknowledgeConflicts) {
+      toast.error(t("periodConflict.mustAcknowledge"));
+      return;
+    }
+
     onSave(formData);
+    onOpenChange(false);
   };
 
   const isValid = formData.title.trim() && formData.departments.length > 0;
@@ -354,6 +400,17 @@ export function TemporarySchemaPeriodDialog({
               </PopoverContent>
             </Popover>
           </div>
+
+          {/* Inline Conflict Warning */}
+          {conflicts?.hasConflicts && (
+            <PeriodConflictWarning
+              conflicts={conflicts}
+              resolution={conflictResolution}
+              acknowledgeConflicts={acknowledgeConflicts}
+              onResolutionChange={setConflictResolution}
+              onAcknowledgeChange={setAcknowledgeConflicts}
+            />
+          )}
         </div>
 
         <div className="flex items-center gap-2 justify-end">

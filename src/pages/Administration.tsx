@@ -8,14 +8,8 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { TemporarySchemaPeriodDialog } from "@/components/TemporarySchemaPeriodDialog";
 import { ClosurePeriodDialog } from "@/components/ClosurePeriodDialog";
 import { GroupsManagement } from "@/components/administration/GroupsManagement";
-import { PeriodConflictWarningDialog } from "@/components/administration/PeriodConflictWarningDialog";
 import { TemporarySchemaPeriod, ClosurePeriod } from "@/types/administration";
 import { mockEvents } from "@/data/calendar/mockEvents";
-import {
-  validateClosurePeriodConflicts,
-  validateTemporaryPeriodConflicts,
-  PeriodValidationResult,
-} from "@/lib/periodConflictValidation";
 
 const mockPeriods: TemporarySchemaPeriod[] = [
   {
@@ -60,12 +54,6 @@ export default function Administration() {
   const [activePeriodsOpen, setActivePeriodsOpen] = useState(true);
   const [archivedPeriodsOpen, setArchivedPeriodsOpen] = useState(false);
 
-  // Conflict warning state
-  const [conflictDialogOpen, setConflictDialogOpen] = useState(false);
-  const [conflictValidation, setConflictValidation] = useState<PeriodValidationResult | null>(null);
-  const [pendingPeriod, setPendingPeriod] = useState<TemporarySchemaPeriod | ClosurePeriod | null>(null);
-  const [pendingPeriodType, setPendingPeriodType] = useState<"closure" | "temporary">("temporary");
-
   const handleCreateNew = () => {
     setEditingPeriod(null);
     setDialogOpen(true);
@@ -81,26 +69,6 @@ export default function Administration() {
   };
 
   const handleSave = (period: TemporarySchemaPeriod) => {
-    // Validate for conflicts with limited capacity days
-    const validation = validateTemporaryPeriodConflicts(
-      period.limitedCapacityDays,
-      mockEvents
-    );
-
-    if (validation.hasConflicts) {
-      // Show warning dialog
-      setPendingPeriod(period);
-      setPendingPeriodType("temporary");
-      setConflictValidation(validation);
-      setConflictDialogOpen(true);
-      return;
-    }
-
-    // No conflicts, save directly
-    savePeriod(period);
-  };
-
-  const savePeriod = (period: TemporarySchemaPeriod) => {
     if (editingPeriod) {
       setPeriods(periods.map((p) => (p.id === period.id ? period : p)));
     } else {
@@ -124,51 +92,12 @@ export default function Administration() {
   };
 
   const handleSaveClosure = (period: ClosurePeriod) => {
-    // Validate for conflicts with closure period dates
-    const validation = validateClosurePeriodConflicts(
-      period.startDate,
-      period.endDate,
-      mockEvents
-    );
-
-    if (validation.hasConflicts) {
-      // Show warning dialog
-      setPendingPeriod(period);
-      setPendingPeriodType("closure");
-      setConflictValidation(validation);
-      setConflictDialogOpen(true);
-      return;
-    }
-
-    // No conflicts, save directly
-    saveClosurePeriod(period);
-  };
-
-  const saveClosurePeriod = (period: ClosurePeriod) => {
     if (editingClosurePeriod) {
       setClosurePeriods(closurePeriods.map((p) => (p.id === period.id ? period : p)));
     } else {
       setClosurePeriods([...closurePeriods, { ...period, id: Date.now().toString() }]);
     }
     setClosureDialogOpen(false);
-  };
-
-  const handleConflictAbort = () => {
-    setPendingPeriod(null);
-    setConflictValidation(null);
-  };
-
-  const handleConflictCreateAnyway = () => {
-    if (!pendingPeriod) return;
-
-    if (pendingPeriodType === "temporary") {
-      savePeriod(pendingPeriod as TemporarySchemaPeriod);
-    } else {
-      saveClosurePeriod(pendingPeriod as ClosurePeriod);
-    }
-
-    setPendingPeriod(null);
-    setConflictValidation(null);
   };
 
   const formatDate = (date: Date) => {
@@ -432,6 +361,7 @@ export default function Administration() {
           onOpenChange={setDialogOpen}
           period={editingPeriod}
           onSave={handleSave}
+          existingEvents={mockEvents}
         />
 
         <ClosurePeriodDialog
@@ -439,18 +369,8 @@ export default function Administration() {
           onOpenChange={setClosureDialogOpen}
           period={editingClosurePeriod}
           onSave={handleSaveClosure}
+          existingEvents={mockEvents}
         />
-
-        {conflictValidation && (
-          <PeriodConflictWarningDialog
-            open={conflictDialogOpen}
-            onOpenChange={setConflictDialogOpen}
-            conflicts={conflictValidation}
-            periodType={pendingPeriodType}
-            onAbort={handleConflictAbort}
-            onCreateAnyway={handleConflictCreateAnyway}
-          />
-        )}
       </div>
     </div>
   );

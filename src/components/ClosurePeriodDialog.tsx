@@ -20,6 +20,13 @@ import {
 } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+import { PeriodConflictWarning } from "@/components/administration/PeriodConflictWarning";
+import {
+  validateClosurePeriodConflicts,
+  PeriodValidationResult,
+} from "@/lib/periodConflictValidation";
+import type { CalendarEvent } from "@/types/administration";
 
 interface ClosurePeriod {
   id: string;
@@ -36,6 +43,7 @@ interface ClosurePeriodDialogProps {
   onOpenChange: (open: boolean) => void;
   period: ClosurePeriod | null;
   onSave: (period: ClosurePeriod) => void;
+  existingEvents?: CalendarEvent[];
 }
 
 const AVAILABLE_DEPARTMENTS = ["Småbarnsavdelningen", "Mellanbarnsavdelningen", "Storbarnsavdelningen"];
@@ -45,6 +53,7 @@ export function ClosurePeriodDialog({
   onOpenChange,
   period,
   onSave,
+  existingEvents = [],
 }: ClosurePeriodDialogProps) {
   const { t } = useTranslation();
   const locale = useLocale();
@@ -60,6 +69,11 @@ export function ClosurePeriodDialog({
     publishDate: new Date(),
     isArchived: false,
   });
+
+  // Conflict state
+  const [conflicts, setConflicts] = useState<PeriodValidationResult | null>(null);
+  const [conflictResolution, setConflictResolution] = useState<"include-all" | "skip-conflicts">("skip-conflicts");
+  const [acknowledgeConflicts, setAcknowledgeConflicts] = useState(false);
 
   // Reset form when dialog opens/closes or period changes
   useEffect(() => {
@@ -77,8 +91,33 @@ export function ClosurePeriodDialog({
           isArchived: false,
         });
       }
+      // Reset conflict state
+      setConflicts(null);
+      setConflictResolution("skip-conflicts");
+      setAcknowledgeConflicts(false);
     }
   }, [open, period]);
+
+  // Real-time conflict validation with debounce
+  useEffect(() => {
+    if (!open || !formData.startDate || !formData.endDate) {
+      setConflicts(null);
+      return;
+    }
+
+    const timeoutId = setTimeout(() => {
+      const result = validateClosurePeriodConflicts(
+        formData.startDate,
+        formData.endDate,
+        existingEvents
+      );
+      setConflicts(result);
+      // Reset acknowledgment when conflicts change
+      setAcknowledgeConflicts(false);
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [open, formData.startDate, formData.endDate, existingEvents]);
 
   const handleDepartmentToggle = (dept: string) => {
     setFormData(prev => ({
@@ -93,14 +132,22 @@ export function ClosurePeriodDialog({
     if (!formData.title.trim() || formData.departments.length === 0) {
       return;
     }
+
+    // Validate conflict acknowledgment
+    if (conflicts?.hasConflicts && conflictResolution === "include-all" && !acknowledgeConflicts) {
+      toast.error(t("periodConflict.mustAcknowledge"));
+      return;
+    }
+
     onSave(formData);
+    onOpenChange(false);
   };
 
   const isValid = formData.title.trim() && formData.departments.length > 0;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-xl">
+      <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             {isEditing 
@@ -202,6 +249,17 @@ export function ClosurePeriodDialog({
               </div>
             </div>
           </div>
+
+          {/* Inline Conflict Warning */}
+          {conflicts?.hasConflicts && (
+            <PeriodConflictWarning
+              conflicts={conflicts}
+              resolution={conflictResolution}
+              acknowledgeConflicts={acknowledgeConflicts}
+              onResolutionChange={setConflictResolution}
+              onAcknowledgeChange={setAcknowledgeConflicts}
+            />
+          )}
 
           {/* Publish Date */}
           <div className="space-y-2">
