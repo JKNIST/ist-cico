@@ -414,12 +414,15 @@
     "acknowledge": "I understand this event conflicts with administrative periods and still want to create it"
   },
   "periodConflict": {
-    "title": "Existing Calendar Events",
-    "warningMessage": "{{conflicting}} of {{total}} dates already have calendar events",
-    "conflictingEvents": "The following events will overlap with this period:",
-    "confirmQuestion": "Do you want to create the period anyway?",
-    "abort": "Abort",
-    "createAnyway": "Create anyway",
+    "warning": "Warning: Existing calendar events",
+    "affectedDates": "{{conflicting}} of {{total}} dates already have calendar events",
+    "howToHandle": "How do you want to handle this?",
+    "skipConflicts": "Skip dates with existing events (recommended)",
+    "createAll": "Create period for all dates anyway",
+    "datesWillBeCreated": "{{count}} dates will be included",
+    "allDatesWillBeCreated": "All {{count}} dates will be included",
+    "acknowledge": "I understand this period overlaps with existing events and still want to create it",
+    "mustAcknowledge": "Please confirm that you understand the overlap before saving",
     "showFewer": "Show fewer",
     "showAll": "Show all {{count}} conflicts"
   },

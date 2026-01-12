@@ -414,12 +414,15 @@
     "acknowledge": "Jeg forstår at denne hendelsen er i konflikt med administrative perioder og vil likevel opprette den"
   },
   "periodConflict": {
-    "title": "Eksisterende kalenderhendelser",
-    "warningMessage": "{{conflicting}} av {{total}} datoer har allerede kalenderhendelser",
-    "conflictingEvents": "Følgende hendelser vil overlappe med denne perioden:",
-    "confirmQuestion": "Vil du opprette perioden likevel?",
-    "abort": "Avbryt",
-    "createAnyway": "Opprett likevel",
+    "warning": "Advarsel: Eksisterende kalenderhendelser",
+    "affectedDates": "{{conflicting}} av {{total}} datoer har allerede kalenderhendelser",
+    "howToHandle": "Hvordan vil du håndtere dette?",
+    "skipConflicts": "Hopp over datoer med eksisterende hendelser (anbefalt)",
+    "createAll": "Opprett periode for alle datoer likevel",
+    "datesWillBeCreated": "{{count}} datoer vil bli inkludert",
+    "allDatesWillBeCreated": "Alle {{count}} datoer vil bli inkludert",
+    "acknowledge": "Jeg forstår at denne perioden overlapper med eksisterende hendelser og vil likevel opprette den",
+    "mustAcknowledge": "Vennligst bekreft at du forstår overlappingen før du lagrer",
     "showFewer": "Vis færre",
     "showAll": "Vis alle {{count}} konflikter"
   },
