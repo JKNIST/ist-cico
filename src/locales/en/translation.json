@@ -423,6 +423,12 @@
     "showFewer": "Show fewer",
     "showAll": "Show all {{count}} conflicts"
   },
+  "periodConflictBadge": {
+    "conflictCount": "{{count}} scheduled activities during this period",
+    "description": "The following events are scheduled during this period:",
+    "view": "View",
+    "andMore": "+{{count}} more"
+  },
   "staffSchedule": {
     "aiSuggestionGenerated": "AI suggestions generated!",
     "errors": {
