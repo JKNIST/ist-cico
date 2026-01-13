@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Dialog,
   DialogContent,
@@ -62,6 +63,7 @@ export function TemporarySchemaPeriodDialog({
 }: TemporarySchemaPeriodDialogProps) {
   const { t } = useTranslation();
   const locale = useLocale();
+  const navigate = useNavigate();
   
   const isEditing = period !== null;
   
@@ -81,7 +83,6 @@ export function TemporarySchemaPeriodDialog({
 
   // Conflict state
   const [conflicts, setConflicts] = useState<PeriodValidationResult | null>(null);
-  const [conflictResolution, setConflictResolution] = useState<"include-all" | "skip-conflicts">("skip-conflicts");
   const [acknowledgeConflicts, setAcknowledgeConflicts] = useState(false);
 
   // Reset form when dialog opens/closes or period changes
@@ -106,7 +107,6 @@ export function TemporarySchemaPeriodDialog({
       }
       // Reset conflict state
       setConflicts(null);
-      setConflictResolution("skip-conflicts");
       setAcknowledgeConflicts(false);
     }
   }, [open, period]);
@@ -172,13 +172,19 @@ export function TemporarySchemaPeriodDialog({
     }));
   };
 
+  const handleNavigateToEvent = (eventId: string, date: Date) => {
+    onOpenChange(false);
+    const dateStr = format(date, "yyyy-MM-dd");
+    navigate(`/calendar?date=${dateStr}&eventId=${eventId}&mode=edit`);
+  };
+
   const handleSave = () => {
     if (!formData.title.trim() || formData.departments.length === 0) {
       return;
     }
 
     // Validate conflict acknowledgment
-    if (conflicts?.hasConflicts && conflictResolution === "include-all" && !acknowledgeConflicts) {
+    if (conflicts?.hasConflicts && !acknowledgeConflicts) {
       toast.error(t("periodConflict.mustAcknowledge"));
       return;
     }
@@ -405,10 +411,9 @@ export function TemporarySchemaPeriodDialog({
           {conflicts?.hasConflicts && (
             <PeriodConflictWarning
               conflicts={conflicts}
-              resolution={conflictResolution}
               acknowledgeConflicts={acknowledgeConflicts}
-              onResolutionChange={setConflictResolution}
               onAcknowledgeChange={setAcknowledgeConflicts}
+              onNavigateToEvent={handleNavigateToEvent}
             />
           )}
         </div>

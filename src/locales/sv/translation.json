@@ -414,15 +414,12 @@
     "acknowledge": "Jag förstår att detta event krockar med administrativa perioder och vill ändå skapa det"
   },
   "periodConflict": {
-    "warning": "Varning: Befintliga kalenderhändelser",
-    "affectedDates": "{{conflicting}} av {{total}} datum har redan kalenderhändelser",
-    "howToHandle": "Hur vill du hantera detta?",
-    "skipConflicts": "Hoppa över datum med befintliga händelser (rekommenderat)",
-    "createAll": "Skapa period för alla datum ändå",
-    "datesWillBeCreated": "{{count}} datum kommer att inkluderas",
-    "allDatesWillBeCreated": "Alla {{count}} datum kommer att inkluderas",
-    "acknowledge": "Jag förstår att denna period överlappar med befintliga händelser och vill ändå skapa den",
-    "mustAcknowledge": "Du måste bekräfta att du förstår överlappningen innan du kan spara",
+    "warning": "OBS: Inplanerade aktiviteter under perioden",
+    "description": "Under vald period finns följande händelser som kan behöva omprövas:",
+    "tip": "Du kan skapa perioden nu och sedan hantera dessa händelser via länkarna ovan.",
+    "acknowledge": "Jag har tagit del av informationen och vill skapa perioden",
+    "mustAcknowledge": "Du måste bekräfta att du har tagit del av informationen innan du kan spara",
+    "viewEvent": "Visa",
     "showFewer": "Visa färre",
     "showAll": "Visa alla {{count}} konflikter"
   },
