@@ -423,6 +423,12 @@
     "showFewer": "Visa färre",
     "showAll": "Visa alla {{count}} konflikter"
   },
+  "periodConflictBadge": {
+    "conflictCount": "{{count}} inplanerade aktiviteter under perioden",
+    "description": "Följande händelser är inplanerade under denna period:",
+    "view": "Visa",
+    "andMore": "+{{count}} till"
+  },
   "staffSchedule": {
     "aiSuggestionGenerated": "AI-förslag genererade!",
     "errors": {

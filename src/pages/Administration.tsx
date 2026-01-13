@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Calendar, Plus, Pencil, Trash2, ChevronDown, ChevronUp } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -8,8 +8,10 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { TemporarySchemaPeriodDialog } from "@/components/TemporarySchemaPeriodDialog";
 import { ClosurePeriodDialog } from "@/components/ClosurePeriodDialog";
 import { GroupsManagement } from "@/components/administration/GroupsManagement";
+import { PeriodConflictBadge } from "@/components/administration/PeriodConflictBadge";
 import { TemporarySchemaPeriod, ClosurePeriod } from "@/types/administration";
 import { mockEvents } from "@/data/calendar/mockEvents";
+import { validateClosurePeriodConflicts, validateTemporaryPeriodConflicts } from "@/lib/periodConflictValidation";
 
 const mockPeriods: TemporarySchemaPeriod[] = [
   {
@@ -143,73 +145,82 @@ export default function Administration() {
             </div>
 
             <div className="space-y-4">
-              {periods.map((period) => (
-                <Card key={period.id} className="bg-card">
-                  <CardContent className="p-6">
-                    <div className="space-y-4">
-                      <div className="flex items-start justify-between">
-                        <div className="space-y-1">
-                          <h3 className="text-lg font-semibold">{period.title}</h3>
-                          <p className="text-sm text-muted-foreground">
-                            Skapad av: {period.createdBy}
-                          </p>
+              {periods.map((period) => {
+                const conflicts = validateTemporaryPeriodConflicts(
+                  period.limitedCapacityDays,
+                  mockEvents
+                );
+                return (
+                  <Card key={period.id} className="bg-card">
+                    <CardContent className="p-6">
+                      <div className="space-y-4">
+                        <div className="flex items-start justify-between">
+                          <div className="space-y-1">
+                            <h3 className="text-lg font-semibold">{period.title}</h3>
+                            <p className="text-sm text-muted-foreground">
+                              Skapad av: {period.createdBy}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 text-sm">
+                          <span className="font-medium">
+                            {formatDate(period.startDate)} - {formatDate(period.endDate)}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-1 text-sm text-muted-foreground border border-input rounded px-3 py-1">
+                            {period.departments.join(", ")}
+                            <ChevronDown className="h-3 w-3 ml-1" />
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-4 text-sm">
+                          <span className="text-muted-foreground">
+                            Aktiveras {formatDate(period.activateDate)}
+                          </span>
+                          <span className="text-destructive font-medium">
+                            Deadline: {formatDate(period.deadline)}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-6 text-sm">
+                          <span className="text-muted-foreground">
+                            {period.submitted} Inskickade
+                          </span>
+                          <span className="text-primary font-medium">
+                            {period.remaining} Kvar att skickas in
+                          </span>
+                        </div>
+
+                        {/* Conflict badge */}
+                        <PeriodConflictBadge conflicts={conflicts} />
+
+                        <div className="flex items-center gap-2 pt-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDelete(period.id)}
+                            className="gap-2"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                            Ta bort
+                          </Button>
+                          <Button
+                            size="sm"
+                            onClick={() => handleEdit(period)}
+                            className="bg-primary hover:bg-primary/90 gap-2"
+                          >
+                            <Pencil className="h-4 w-4" />
+                            Redigera
+                          </Button>
                         </div>
                       </div>
-
-                      <div className="flex items-center gap-2 text-sm">
-                        <span className="font-medium">
-                          {formatDate(period.startDate)} - {formatDate(period.endDate)}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        <div className="flex items-center gap-1 text-sm text-muted-foreground border border-input rounded px-3 py-1">
-                          {period.departments.join(", ")}
-                          <ChevronDown className="h-3 w-3 ml-1" />
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-4 text-sm">
-                        <span className="text-muted-foreground">
-                          Aktiveras {formatDate(period.activateDate)}
-                        </span>
-                        <span className="text-destructive font-medium">
-                          Deadline: {formatDate(period.deadline)}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-6 text-sm">
-                        <span className="text-muted-foreground">
-                          {period.submitted} Inskickade
-                        </span>
-                        <span className="text-primary font-medium">
-                          {period.remaining} Kvar att skickas in
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-2 pt-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleDelete(period.id)}
-                          className="gap-2"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                          Ta bort
-                        </Button>
-                        <Button
-                          size="sm"
-                          onClick={() => handleEdit(period)}
-                          className="bg-primary hover:bg-primary/90 gap-2"
-                        >
-                          <Pencil className="h-4 w-4" />
-                          Redigera
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
           </TabsContent>
 
@@ -246,46 +257,57 @@ export default function Administration() {
                   </CollapsibleTrigger>
                   <CollapsibleContent>
                     <div className="border-t">
-                      {closurePeriods
+                    {closurePeriods
                         .filter((p) => !p.isArchived)
-                        .map((period) => (
-                          <div key={period.id} className="p-6 space-y-3">
-                            <h3 className="font-semibold">{period.title}</h3>
-                            <p className="text-sm">
-                              {formatDate(period.startDate)}
-                              {period.endDate.getTime() !== period.startDate.getTime() &&
-                                ` - ${formatDate(period.endDate)}`}
-                            </p>
-                            <div className="flex items-center gap-2">
-                              <div className="flex items-center gap-1 text-sm text-muted-foreground border border-input rounded px-3 py-1">
-                                {period.departments.join(", ")}
-                                <ChevronDown className="h-3 w-3 ml-1" />
+                        .map((period) => {
+                          const conflicts = validateClosurePeriodConflicts(
+                            period.startDate,
+                            period.endDate,
+                            mockEvents
+                          );
+                          return (
+                            <div key={period.id} className="p-6 space-y-3">
+                              <h3 className="font-semibold">{period.title}</h3>
+                              <p className="text-sm">
+                                {formatDate(period.startDate)}
+                                {period.endDate.getTime() !== period.startDate.getTime() &&
+                                  ` - ${formatDate(period.endDate)}`}
+                              </p>
+                              <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-1 text-sm text-muted-foreground border border-input rounded px-3 py-1">
+                                  {period.departments.join(", ")}
+                                  <ChevronDown className="h-3 w-3 ml-1" />
+                                </div>
+                              </div>
+                              <p className="text-sm text-muted-foreground">
+                                Publicering: {formatDate(period.publishDate)}
+                              </p>
+                              
+                              {/* Conflict badge */}
+                              <PeriodConflictBadge conflicts={conflicts} />
+                              
+                              <div className="flex items-center gap-2 pt-2">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleDeleteClosure(period.id)}
+                                  className="gap-2"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                  Ta bort
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  onClick={() => handleEditClosure(period)}
+                                  className="bg-primary hover:bg-primary/90 gap-2"
+                                >
+                                  <Pencil className="h-4 w-4" />
+                                  Redigera
+                                </Button>
                               </div>
                             </div>
-                            <p className="text-sm text-muted-foreground">
-                              Publicering: {formatDate(period.publishDate)}
-                            </p>
-                            <div className="flex items-center gap-2 pt-2">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleDeleteClosure(period.id)}
-                                className="gap-2"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                                Ta bort
-                              </Button>
-                              <Button
-                                size="sm"
-                                onClick={() => handleEditClosure(period)}
-                                className="bg-primary hover:bg-primary/90 gap-2"
-                              >
-                                <Pencil className="h-4 w-4" />
-                                Redigera
-                              </Button>
-                            </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                     </div>
                   </CollapsibleContent>
                 </Card>
