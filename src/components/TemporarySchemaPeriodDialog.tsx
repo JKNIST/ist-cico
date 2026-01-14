@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import {
   Dialog,
   DialogContent,
@@ -63,7 +62,6 @@ export function TemporarySchemaPeriodDialog({
 }: TemporarySchemaPeriodDialogProps) {
   const { t } = useTranslation();
   const locale = useLocale();
-  const navigate = useNavigate();
   
   const isEditing = period !== null;
   
@@ -172,10 +170,17 @@ export function TemporarySchemaPeriodDialog({
     }));
   };
 
-  const handleNavigateToEvent = (eventId: string, date: Date) => {
-    onOpenChange(false);
-    const dateStr = format(date, "yyyy-MM-dd");
-    navigate(`/calendar?date=${dateStr}&eventId=${eventId}&mode=edit`);
+  const handleEditEvent = (event: CalendarEvent, date: Date, scope?: "single" | "future" | "all") => {
+    // For now, log the edit action - this can be expanded to open AddEventDialog
+    console.log("Edit event:", event.id, "at", date, "scope:", scope);
+    // TODO: Integrate with AddEventDialog for inline editing
+  };
+
+  const handleDeleteEvent = (event: CalendarEvent, date: Date, scope?: "single" | "future" | "all") => {
+    // For now, log the delete action - this can be expanded to actually delete
+    console.log("Delete event:", event.id, "at", date, "scope:", scope);
+    // TODO: Integrate with actual event deletion
+    // After deletion, re-validate conflicts
   };
 
   const handleSave = () => {
@@ -413,7 +418,8 @@ export function TemporarySchemaPeriodDialog({
               conflicts={conflicts}
               acknowledgeConflicts={acknowledgeConflicts}
               onAcknowledgeChange={setAcknowledgeConflicts}
-              onNavigateToEvent={handleNavigateToEvent}
+              onEditEvent={handleEditEvent}
+              onDeleteEvent={handleDeleteEvent}
             />
           )}
         </div>

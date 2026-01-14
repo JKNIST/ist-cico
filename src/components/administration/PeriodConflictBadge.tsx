@@ -1,30 +1,45 @@
 import { useState } from "react";
-import { format } from "date-fns";
-import { AlertTriangle, Calendar, ExternalLink, ChevronDown, ChevronUp } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { AlertTriangle, ChevronDown, ChevronUp } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { useLocale } from "@/hooks/useLocale";
 import type { PeriodValidationResult } from "@/lib/periodConflictValidation";
-import { getCategoryColor } from "@/lib/calendarUtils";
+import type { CalendarEvent } from "@/types/administration";
+import { ConflictEventItem } from "./ConflictEventItem";
+
+type RecurringScope = "single" | "future" | "all";
 
 interface PeriodConflictBadgeProps {
   conflicts: PeriodValidationResult;
+  onEditEvent?: (event: CalendarEvent, date: Date, scope?: RecurringScope) => void;
+  onDeleteEvent?: (event: CalendarEvent, date: Date, scope?: RecurringScope) => void;
 }
 
-export const PeriodConflictBadge = ({ conflicts }: PeriodConflictBadgeProps) => {
+export const PeriodConflictBadge = ({ 
+  conflicts, 
+  onEditEvent,
+  onDeleteEvent 
+}: PeriodConflictBadgeProps) => {
   const { t } = useTranslation();
-  const locale = useLocale();
-  const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
+  const [expandedEventId, setExpandedEventId] = useState<string | null>(null);
 
   if (!conflicts.hasConflicts) return null;
 
-  const handleNavigateToEvent = (eventId: string, date: Date) => {
-    const dateStr = format(date, "yyyy-MM-dd");
-    navigate(`/calendar?date=${dateStr}&eventId=${eventId}&mode=edit`);
+  const handleToggleExpand = (eventId: string, idx: number) => {
+    const uniqueId = `${eventId}-${idx}`;
+    setExpandedEventId(expandedEventId === uniqueId ? null : uniqueId);
+  };
+
+  const handleEdit = (event: CalendarEvent, date: Date, scope?: RecurringScope) => {
+    if (onEditEvent) {
+      onEditEvent(event, date, scope);
+    }
+  };
+
+  const handleDelete = (event: CalendarEvent, date: Date, scope?: RecurringScope) => {
+    if (onDeleteEvent) {
+      onDeleteEvent(event, date, scope);
+    }
   };
 
   const displayedConflicts = isOpen
@@ -52,48 +67,21 @@ export const PeriodConflictBadge = ({ conflicts }: PeriodConflictBadgeProps) => 
 
         <CollapsibleContent>
           <div className="border-t border-amber-200 dark:border-amber-900/50 p-3 space-y-2">
-            <p className="text-xs text-amber-700 dark:text-amber-300 mb-2">
+            <p className="text-xs text-amber-700 dark:text-amber-300 mb-3">
               {t("periodConflictBadge.description")}
             </p>
             
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               {displayedConflicts.map((conflict, idx) => (
-                <div
+                <ConflictEventItem
                   key={`${conflict.event.id}-${idx}`}
-                  className="flex items-center gap-2 py-1.5 px-2 rounded bg-white/50 dark:bg-black/20"
-                >
-                  <Calendar className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                  <div className="flex-1 min-w-0 flex items-center gap-2">
-                    <span className="font-medium text-xs whitespace-nowrap text-foreground">
-                      {format(conflict.date, "d MMM", { locale })}
-                    </span>
-                    <Badge
-                      variant="secondary"
-                      className="text-xs py-0 px-1.5 shrink-0"
-                      style={{
-                        backgroundColor: getCategoryColor(conflict.event.category),
-                        color: "white",
-                      }}
-                    >
-                      {t(`calendar.categories.${conflict.event.category}`)}
-                    </Badge>
-                    <span className="text-xs text-foreground truncate">
-                      {conflict.event.title}
-                    </span>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-6 px-2 text-xs shrink-0 text-amber-700 hover:text-amber-900 dark:text-amber-300 dark:hover:text-amber-100"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleNavigateToEvent(conflict.event.id, conflict.date);
-                    }}
-                  >
-                    {t("periodConflictBadge.view")}
-                    <ExternalLink className="h-3 w-3 ml-1" />
-                  </Button>
-                </div>
+                  event={conflict.event}
+                  date={conflict.date}
+                  isExpanded={expandedEventId === `${conflict.event.id}-${idx}`}
+                  onToggleExpand={() => handleToggleExpand(conflict.event.id, idx)}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                />
               ))}
             </div>
 

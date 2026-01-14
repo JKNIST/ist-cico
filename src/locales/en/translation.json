@@ -425,9 +425,21 @@
   },
   "periodConflictBadge": {
     "conflictCount": "{{count}} scheduled activities during this period",
-    "description": "The following events are scheduled during this period:",
-    "view": "View",
+    "description": "The following events are scheduled during this period. Click an event to view details and manage it:",
     "andMore": "+{{count}} more"
+  },
+  "conflictEvent": {
+    "recurring": "Recurring event",
+    "editEvent": "Edit",
+    "deleteEvent": "Delete",
+    "confirmDeleteTitle": "Delete event",
+    "confirmDeleteDescription": "Are you sure you want to delete \"{{title}}\"? This action cannot be undone.",
+    "editRecurringTitle": "Edit recurring event",
+    "deleteRecurringTitle": "Delete recurring event",
+    "recurringDescription": "This event is part of a recurring series. What would you like to do?",
+    "thisInstance": "Only this event",
+    "thisAndFuture": "This and future events",
+    "allInstances": "All events in series"
   },
   "staffSchedule": {
     "aiSuggestionGenerated": "AI suggestions generated!",

@@ -1,38 +1,57 @@
 import { useState } from "react";
-import { format } from "date-fns";
-import { AlertTriangle, ChevronDown, ChevronUp, Calendar, ExternalLink, Lightbulb } from "lucide-react";
+import { AlertTriangle, ChevronDown, ChevronUp, Lightbulb } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { useTranslation } from "react-i18next";
-import { useLocale } from "@/hooks/useLocale";
 import type { PeriodValidationResult } from "@/lib/periodConflictValidation";
-import { getCategoryColor } from "@/lib/calendarUtils";
+import type { CalendarEvent } from "@/types/administration";
+import { ConflictEventItem } from "./ConflictEventItem";
+
+type RecurringScope = "single" | "future" | "all";
 
 interface PeriodConflictWarningProps {
   conflicts: PeriodValidationResult;
   acknowledgeConflicts: boolean;
   onAcknowledgeChange: (checked: boolean) => void;
-  onNavigateToEvent?: (eventId: string, date: Date) => void;
+  onEditEvent?: (event: CalendarEvent, date: Date, scope?: RecurringScope) => void;
+  onDeleteEvent?: (event: CalendarEvent, date: Date, scope?: RecurringScope) => void;
 }
 
 export const PeriodConflictWarning = ({
   conflicts,
   acknowledgeConflicts,
   onAcknowledgeChange,
-  onNavigateToEvent,
+  onEditEvent,
+  onDeleteEvent,
 }: PeriodConflictWarningProps) => {
   const { t } = useTranslation();
-  const locale = useLocale();
   const [showAll, setShowAll] = useState(false);
+  const [expandedEventId, setExpandedEventId] = useState<string | null>(null);
 
   if (!conflicts.hasConflicts) return null;
 
   const displayedConflicts = showAll
     ? conflicts.conflicts
     : conflicts.conflicts.slice(0, 5);
+
+  const handleToggleExpand = (eventId: string, idx: number) => {
+    const uniqueId = `${eventId}-${idx}`;
+    setExpandedEventId(expandedEventId === uniqueId ? null : uniqueId);
+  };
+
+  const handleEdit = (event: CalendarEvent, date: Date, scope?: RecurringScope) => {
+    if (onEditEvent) {
+      onEditEvent(event, date, scope);
+    }
+  };
+
+  const handleDelete = (event: CalendarEvent, date: Date, scope?: RecurringScope) => {
+    if (onDeleteEvent) {
+      onDeleteEvent(event, date, scope);
+    }
+  };
 
   return (
     <Alert variant="destructive" className="mb-4">
@@ -44,44 +63,18 @@ export const PeriodConflictWarning = ({
             {t("periodConflict.description")}
           </p>
 
-          {/* List of conflicts with deep links */}
-          <div className="max-h-48 overflow-y-auto space-y-1 text-sm rounded-md border p-2 bg-muted/30">
+          {/* List of conflicts with inline expansion */}
+          <div className="max-h-64 overflow-y-auto space-y-2 rounded-md border p-2 bg-muted/30">
             {displayedConflicts.map((conflict, idx) => (
-              <div
-                key={idx}
-                className="flex items-center gap-2 py-1.5 border-b last:border-b-0"
-              >
-                <Calendar className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                <div className="flex-1 min-w-0 flex items-center gap-2">
-                  <span className="font-medium text-xs whitespace-nowrap">
-                    {format(conflict.date, "d MMM yyyy", { locale })}
-                  </span>
-                  <Badge
-                    variant="secondary"
-                    className="text-xs py-0 px-1.5 shrink-0"
-                    style={{
-                      backgroundColor: getCategoryColor(conflict.event.category),
-                      color: "white",
-                    }}
-                  >
-                    {t(`calendar.categories.${conflict.event.category}`)}
-                  </Badge>
-                  <span className="text-xs text-foreground truncate">
-                    {conflict.event.title}
-                  </span>
-                </div>
-                {onNavigateToEvent && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-6 px-2 text-xs shrink-0"
-                    onClick={() => onNavigateToEvent(conflict.event.id, conflict.date)}
-                  >
-                    {t("periodConflict.viewEvent")}
-                    <ExternalLink className="h-3 w-3 ml-1" />
-                  </Button>
-                )}
-              </div>
+              <ConflictEventItem
+                key={`${conflict.event.id}-${idx}`}
+                event={conflict.event}
+                date={conflict.date}
+                isExpanded={expandedEventId === `${conflict.event.id}-${idx}`}
+                onToggleExpand={() => handleToggleExpand(conflict.event.id, idx)}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+              />
             ))}
           </div>
 

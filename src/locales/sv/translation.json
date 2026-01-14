@@ -425,9 +425,21 @@
   },
   "periodConflictBadge": {
     "conflictCount": "{{count}} inplanerade aktiviteter under perioden",
-    "description": "Följande händelser är inplanerade under denna period:",
-    "view": "Visa",
+    "description": "Följande händelser är inplanerade under denna period. Klicka på en händelse för att visa detaljer och hantera den:",
     "andMore": "+{{count}} till"
+  },
+  "conflictEvent": {
+    "recurring": "Återkommande händelse",
+    "editEvent": "Redigera",
+    "deleteEvent": "Ta bort",
+    "confirmDeleteTitle": "Ta bort händelse",
+    "confirmDeleteDescription": "Är du säker på att du vill ta bort \"{{title}}\"? Denna åtgärd kan inte ångras.",
+    "editRecurringTitle": "Redigera återkommande händelse",
+    "deleteRecurringTitle": "Ta bort återkommande händelse",
+    "recurringDescription": "Denna händelse är en del av en återkommande serie. Vad vill du göra?",
+    "thisInstance": "Endast denna händelse",
+    "thisAndFuture": "Denna och framtida händelser",
+    "allInstances": "Alla händelser i serien"
   },
   "staffSchedule": {
     "aiSuggestionGenerated": "AI-förslag genererade!",
