@@ -9,9 +9,10 @@ import { TemporarySchemaPeriodDialog } from "@/components/TemporarySchemaPeriodD
 import { ClosurePeriodDialog } from "@/components/ClosurePeriodDialog";
 import { GroupsManagement } from "@/components/administration/GroupsManagement";
 import { PeriodConflictBadge } from "@/components/administration/PeriodConflictBadge";
-import { TemporarySchemaPeriod, ClosurePeriod } from "@/types/administration";
+import { TemporarySchemaPeriod, ClosurePeriod, CalendarEvent } from "@/types/administration";
 import { mockEvents } from "@/data/calendar/mockEvents";
 import { validateClosurePeriodConflicts, validateTemporaryPeriodConflicts } from "@/lib/periodConflictValidation";
+import { toast } from "sonner";
 
 const mockPeriods: TemporarySchemaPeriod[] = [
   {
@@ -100,6 +101,19 @@ export default function Administration() {
       setClosurePeriods([...closurePeriods, { ...period, id: Date.now().toString() }]);
     }
     setClosureDialogOpen(false);
+  };
+
+  // Inline event edit/delete handlers for PeriodConflictBadge
+  const handleEditConflictEvent = (event: CalendarEvent, date: Date, scope?: "single" | "future" | "all") => {
+    console.log("Edit event from Administration:", event.id, "at", date, "scope:", scope);
+    toast.info(`Redigera händelse: ${event.title}`);
+    // TODO: Open AddEventDialog for editing
+  };
+
+  const handleDeleteConflictEvent = (event: CalendarEvent, date: Date, scope?: "single" | "future" | "all") => {
+    console.log("Delete event from Administration:", event.id, "at", date, "scope:", scope);
+    toast.info(`Ta bort händelse: ${event.title}`);
+    // TODO: Actually delete the event and refresh conflicts
   };
 
   const formatDate = (date: Date) => {
@@ -195,7 +209,11 @@ export default function Administration() {
                         </div>
 
                         {/* Conflict badge */}
-                        <PeriodConflictBadge conflicts={conflicts} />
+                        <PeriodConflictBadge 
+                          conflicts={conflicts} 
+                          onEditEvent={handleEditConflictEvent}
+                          onDeleteEvent={handleDeleteConflictEvent}
+                        />
 
                         <div className="flex items-center gap-2 pt-2">
                           <Button
@@ -284,7 +302,11 @@ export default function Administration() {
                               </p>
                               
                               {/* Conflict badge */}
-                              <PeriodConflictBadge conflicts={conflicts} />
+                              <PeriodConflictBadge 
+                                conflicts={conflicts} 
+                                onEditEvent={handleEditConflictEvent}
+                                onDeleteEvent={handleDeleteConflictEvent}
+                              />
                               
                               <div className="flex items-center gap-2 pt-2">
                                 <Button
