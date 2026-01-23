@@ -89,10 +89,10 @@ export function BlogPostReaders({
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-medium text-foreground">{reader.name}</span>
                       
-                      {/* Group badge placeholder - in teal green */}
+                      {/* Group badge placeholder - in TEAL/BLUE */}
                       <Badge 
                         variant="secondary"
-                        className="bg-[#22A06B] text-white text-xs font-normal"
+                        className="bg-[#287E95] text-white text-xs font-normal"
                       >
                         Maries grundskola...
                       </Badge>
@@ -143,7 +143,7 @@ export function BlogPostReaders({
                       
                       <Badge 
                         variant="secondary"
-                        className="bg-[#22A06B] text-white text-xs font-normal"
+                        className="bg-[#287E95] text-white text-xs font-normal"
                       >
                         Personal
                       </Badge>

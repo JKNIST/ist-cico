@@ -47,12 +47,12 @@ export function BlogPostHeader({
         </div>
         
         <div className="flex items-center gap-2">
-          {/* Status Badge */}
+          {/* Status Badge - GREEN for published */}
           <Badge
             className={cn(
               "font-medium",
               post.status === "Publicerad"
-                ? "bg-[#287E95] text-white hover:bg-[#287E95]/90"
+                ? "bg-[#22A06B] text-white hover:bg-[#22A06B]/90"
                 : "bg-amber-100 text-amber-700 hover:bg-amber-100/90"
             )}
           >
@@ -69,21 +69,21 @@ export function BlogPostHeader({
       {/* Row 2: Groups/Classes badges + Attachment icon + Published date */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 flex-wrap">
-          {/* Group/Class badges in green */}
+          {/* Group/Class badges in TEAL/BLUE */}
           {post.groups?.map((groupName) => (
             <Badge 
               key={groupName} 
-              className="bg-[#22A06B] text-white hover:bg-[#22A06B]/90 font-normal"
+              className="bg-[#287E95] text-white hover:bg-[#287E95]/90 font-normal"
             >
               {groupName}
             </Badge>
           ))}
 
-          {/* Department badges if no groups */}
+          {/* Department badges if no groups - also TEAL/BLUE */}
           {!post.groups?.length && post.departments?.map((dept) => (
             <Badge 
               key={dept} 
-              className="bg-[#22A06B] text-white hover:bg-[#22A06B]/90 font-normal"
+              className="bg-[#287E95] text-white hover:bg-[#287E95]/90 font-normal"
             >
               {dept}
             </Badge>
@@ -108,13 +108,13 @@ export function BlogPostHeader({
         </p>
       )}
 
-      {/* Expand/Collapse button - centered */}
+      {/* Expand/Collapse button - centered with rounded corners */}
       <div className="flex justify-center pt-2">
         <Button
           variant="outline"
           size="sm"
           onClick={() => onExpandChange(!isExpanded)}
-          className="gap-1 text-muted-foreground border-gray-300 hover:bg-gray-50"
+          className="gap-1 text-muted-foreground border-gray-300 hover:bg-gray-50 rounded-full px-6"
         >
           {isExpanded ? (
             <>
