@@ -277,12 +277,17 @@
   "blog": {
     "title": "Blog",
     "newPost": "NEW POST",
+    "createPost": "CREATE A POST",
     "filter": "FILTER",
     "showMore": "Show more",
     "showLess": "Show less",
     "noPosts": "No posts to display",
     "showInternalOnly": "Show internal only",
     "showUnpublished": "Show unpublished",
+    "writtenBy": "Written by",
+    "publishedAgo": "Post published {{time}}",
+    "attachments": "Attachments",
+    "share": "Share",
     "categories": {
       "alla": "ALL",
       "importantdates": "IMPORTANT DATES",

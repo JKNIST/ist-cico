@@ -7,7 +7,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Filter } from "lucide-react";
+import { Filter, ChevronDown } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 interface FilterOptionsProps {
@@ -30,14 +30,15 @@ export function FilterOptions({
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="outline" className="gap-2">
+        <Button variant="outline" className="gap-2 border-gray-300 text-gray-700">
           <Filter className="h-4 w-4" />
           {t("blog.filter")}
           {activeFiltersCount > 0 && (
-            <Badge variant="secondary" className="ml-1 px-1.5 py-0">
+            <Badge variant="secondary" className="ml-1 px-1.5 py-0 bg-[#287E95] text-white">
               {activeFiltersCount}
             </Badge>
           )}
+          <ChevronDown className="h-4 w-4" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-80" align="end">
