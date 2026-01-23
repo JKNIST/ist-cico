@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { PenLine } from "lucide-react";
 import { BlogPostList } from "@/components/blog/BlogPostList";
 import { BlogCategoryFilter } from "@/components/blog/BlogCategoryFilter";
 import { FilterOptions } from "@/components/blog/FilterOptions";
@@ -83,9 +83,12 @@ export default function Blog() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold">{t("blog.title")}</h1>
-          <Button onClick={() => setShowNewPostForm(true)}>
-            <Plus className="h-4 w-4" />
-            {t("blog.newPost")}
+          <Button 
+            onClick={() => setShowNewPostForm(true)}
+            className="bg-[#287E95] hover:bg-[#287E95]/90 text-white gap-2"
+          >
+            <PenLine className="h-4 w-4" />
+            {t("blog.createPost") || "SKAPA ETT INLÄGG"}
           </Button>
         </div>
 

@@ -277,12 +277,17 @@
   "blog": {
     "title": "Blogg",
     "newPost": "NYTT INNLEGG",
+    "createPost": "OPPRETT ET INNLEGG",
     "filter": "FILTRER",
     "showMore": "Vis mer",
     "showLess": "Vis mindre",
     "noPosts": "Ingen innlegg å vise",
     "showInternalOnly": "Vis kun interne",
     "showUnpublished": "Vis upubliserte",
+    "writtenBy": "Skrevet av",
+    "publishedAgo": "Innlegget ble publisert {{time}}",
+    "attachments": "Vedlegg",
+    "share": "Del",
     "categories": {
       "alla": "ALLE",
       "importantdates": "VIKTIGE DATOER",

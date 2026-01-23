@@ -1,10 +1,12 @@
 import { BlogPost } from "@/types/blog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronUp, Lock, Calendar, Building2, Users } from "lucide-react";
+import { ChevronDown, ChevronUp, Paperclip } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
-import { mockGroups } from "@/data/groups/mockGroups";
+import { BlogPostActions } from "./BlogPostActions";
+import { formatDistanceToNow } from "date-fns";
+import { sv, enUS, nb } from "date-fns/locale";
 
 interface BlogPostHeaderProps {
   post: BlogPost;
@@ -19,121 +21,113 @@ export function BlogPostHeader({
   isRead,
   onExpandChange,
 }: BlogPostHeaderProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+
+  const getDateLocale = () => {
+    switch (i18n.language) {
+      case 'sv': return sv;
+      case 'no': return nb;
+      default: return enUS;
+    }
+  };
+
+  const publishedAgo = formatDistanceToNow(new Date(post.publishedDate), {
+    addSuffix: true,
+    locale: getDateLocale(),
+  });
+
+  const hasAttachments = post.attachments && post.attachments.length > 0;
 
   return (
     <div className="space-y-3">
-      {/* Title and Expand Button */}
+      {/* Row 1: Title + Status + Menu */}
       <div className="flex items-start justify-between gap-4">
-        <div className="flex-1 space-y-2">
-          <h2 className="text-xl font-semibold">{post.title}</h2>
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <span>{post.author}</span>
-            <span>•</span>
-            <span>{post.date}</span>
-          </div>
+        <div className="flex-1">
+          <h2 className="text-xl font-semibold text-foreground">{post.title}</h2>
         </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => onExpandChange(!isExpanded)}
-        >
-          {isExpanded ? (
-            <ChevronUp className="h-5 w-5" />
-          ) : (
-            <ChevronDown className="h-5 w-5" />
-          )}
-        </Button>
+        
+        <div className="flex items-center gap-2">
+          {/* Status Badge */}
+          <Badge
+            className={cn(
+              "font-medium",
+              post.status === "Publicerad"
+                ? "bg-[#287E95] text-white hover:bg-[#287E95]/90"
+                : "bg-amber-100 text-amber-700 hover:bg-amber-100/90"
+            )}
+          >
+            {post.status === "Publicerad" 
+              ? t("blog.status.published") 
+              : t("blog.status.scheduled")}
+          </Badge>
+
+          {/* Actions Menu */}
+          <BlogPostActions postId={post.id} />
+        </div>
       </div>
 
-      {/* Tags and Status Badges */}
-      <div className="flex flex-wrap gap-2 items-center">
-        {/* Category Badge */}
-        <Badge
-          variant="outline"
-          className={cn(
-            "border-2",
-            post.category === "VIKTIGA DATUM" && "bg-red-50 text-red-700 border-red-300",
-            post.category === "REGELBUNDNA UPPDATERINGAR" &&
-              "bg-blue-50 text-blue-700 border-blue-300",
-            post.category === "INFORMATION" && "bg-purple-50 text-purple-700 border-purple-300"
-          )}
-        >
-          {post.category}
-        </Badge>
-
-        {/* Department Badges */}
-        {post.departments?.map((dept) => (
-          <Badge 
-            key={dept} 
-            variant="secondary"
-            className="bg-teal-50 text-teal-700 border border-teal-200"
-          >
-            <Building2 className="h-3 w-3 mr-1" />
-            {dept}
-          </Badge>
-        ))}
-
-        {/* Group Badges */}
-        {post.groups?.map((groupFullName) => {
-          const group = mockGroups.find(g => g.fullName === groupFullName);
-          return (
+      {/* Row 2: Groups/Classes badges + Attachment icon + Published date */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2 flex-wrap">
+          {/* Group/Class badges in green */}
+          {post.groups?.map((groupName) => (
             <Badge 
-              key={groupFullName} 
-              variant="secondary"
-              className="border"
-              style={
-                group?.color
-                  ? {
-                      backgroundColor: `${group.color}20`,
-                      borderColor: group.color,
-                      color: group.color,
-                    }
-                  : {}
-              }
+              key={groupName} 
+              className="bg-[#22A06B] text-white hover:bg-[#22A06B]/90 font-normal"
             >
-              <Users className="h-3 w-3 mr-1" />
-              {groupFullName}
+              {groupName}
             </Badge>
-          );
-        })}
+          ))}
 
-        {/* Tags */}
-        {post.tags.map((tag) => (
-          <Badge key={tag} variant="secondary">
-            {tag}
-          </Badge>
-        ))}
+          {/* Department badges if no groups */}
+          {!post.groups?.length && post.departments?.map((dept) => (
+            <Badge 
+              key={dept} 
+              className="bg-[#22A06B] text-white hover:bg-[#22A06B]/90 font-normal"
+            >
+              {dept}
+            </Badge>
+          ))}
 
-        {/* Status Badges */}
-        {post.status === "Schemalagd" && (
-          <Badge
-            variant="outline"
-            className="bg-amber-50 text-amber-700 border-amber-300"
-          >
-            <Calendar className="h-3 w-3 mr-1" />
-            {t("blog.status.scheduled")}
-          </Badge>
-        )}
+          {/* Attachment indicator */}
+          {hasAttachments && (
+            <Paperclip className="h-4 w-4 text-muted-foreground ml-1" />
+          )}
+        </div>
 
-        {!isRead && post.status === "Publicerad" && (
-          <Badge
-            variant="outline"
-            className="bg-[#FEC6A1] text-amber-700 border-amber-300"
-          >
-            {t("blog.status.unread")}
-          </Badge>
-        )}
+        {/* Published date in teal */}
+        <span className="text-sm text-[#287E95]">
+          {t("blog.publishedAgo", { time: publishedAgo }) || `Inlägget publicerades ${publishedAgo}`}
+        </span>
+      </div>
 
-        {post.internalOnly && (
-          <Badge
-            variant="outline"
-            className="bg-purple-100 text-purple-700 border-purple-300"
-          >
-            <Lock className="h-3 w-3 mr-1" />
-            Internt
-          </Badge>
-        )}
+      {/* Content preview when collapsed */}
+      {!isExpanded && post.content && (
+        <p className="text-muted-foreground text-sm line-clamp-2 mt-2">
+          {post.content.slice(0, 150)}...
+        </p>
+      )}
+
+      {/* Expand/Collapse button - centered */}
+      <div className="flex justify-center pt-2">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => onExpandChange(!isExpanded)}
+          className="gap-1 text-muted-foreground border-gray-300 hover:bg-gray-50"
+        >
+          {isExpanded ? (
+            <>
+              {t("blog.showLess")}
+              <ChevronUp className="h-4 w-4" />
+            </>
+          ) : (
+            <>
+              {t("blog.showMore")}
+              <ChevronDown className="h-4 w-4" />
+            </>
+          )}
+        </Button>
       </div>
     </div>
   );

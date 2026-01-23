@@ -34,6 +34,22 @@ Pedagogteamet`,
     internalOnly: false,
     readers: generateReaders(false, 85),
     departments: ["Blåbär", "Lingon", "Odon", "Vildhallon"],
+    attachments: [
+      {
+        id: "att-1",
+        filename: "Vinterutflykt_info.docx",
+        fileType: "docx",
+        size: "14Kb",
+        url: "#"
+      },
+      {
+        id: "att-2",
+        filename: "Schema_januari.pdf",
+        fileType: "pdf",
+        size: "256Kb",
+        url: "#"
+      }
+    ]
   },
   {
     id: "important-2",

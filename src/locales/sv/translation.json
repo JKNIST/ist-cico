@@ -277,12 +277,17 @@
   "blog": {
     "title": "Blogg",
     "newPost": "NYTT INLÄGG",
+    "createPost": "SKAPA ETT INLÄGG",
     "filter": "FILTRERA",
     "showMore": "Visa mer",
     "showLess": "Visa mindre",
     "noPosts": "Inga inlägg att visa",
     "showInternalOnly": "Visa endast interna",
     "showUnpublished": "Visa opublicerade",
+    "writtenBy": "Skrivet av",
+    "publishedAgo": "Inlägget publicerades {{time}}",
+    "attachments": "Bilagor",
+    "share": "Dela",
     "categories": {
       "alla": "ALLA",
       "importantdates": "VIKTIGA DATUM",
