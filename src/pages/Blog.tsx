@@ -39,39 +39,39 @@ export default function Blog() {
     return true;
   });
 
-  // Apply department and group filtering
-  const departmentAndGroupFilteredPosts = filterByDepartmentsAndGroups(
-    filteredPosts,
-    selectedDepartments,
-    selectedGroups,
-    (post) => post.departments?.[0] ?? (post.internalOnly ? selectedDepartments[0] : undefined),
-    (post) => post.groups
-  );
+  // Derive parent departments from selected groups (e.g., "Lingon-Röd" → "Lingon")
+  const parentDepartmentsFromGroups = [...new Set(
+    selectedGroups.map(g => g.split("-")[0])
+  )];
 
-  // Final filter: internal posts without department/group targeting should still be visible
-  const finalFilteredPosts = (selectedDepartments.length === 0 && selectedGroups.length === 0) 
-    ? filteredPosts 
-    : departmentAndGroupFilteredPosts.filter(post => {
+  // Combine explicit department selections with implicit ones from groups
+  const effectiveDepartments = [...new Set([
+    ...selectedDepartments,
+    ...parentDepartmentsFromGroups,
+  ])];
+
+  // Final filter combining department, group, and internal logic
+  const finalFilteredPosts = (selectedDepartments.length === 0 && selectedGroups.length === 0)
+    ? filteredPosts
+    : filteredPosts.filter(post => {
         const postDepartments = post.departments || [];
         const postGroups = post.groups || [];
-        const isInternalGlobalPost = post.internalOnly && postDepartments.length === 0 && postGroups.length === 0;
 
-        if (isInternalGlobalPost) {
+        // Global internal posts (no dept/group targeting) always visible
+        if (post.internalOnly && postDepartments.length === 0 && postGroups.length === 0) {
           return true;
         }
-        
-        // If groups are selected, check if post has any matching group
-        if (selectedGroups.length > 0) {
-          const hasMatchingGroup = postGroups.some(group => selectedGroups.includes(group));
-          if (hasMatchingGroup) return true;
+
+        // If post targets specific groups, check group match
+        if (postGroups.length > 0 && selectedGroups.length > 0) {
+          if (postGroups.some(g => selectedGroups.includes(g))) return true;
         }
-        
-        // If departments are selected (and no matching groups), check departments
-        if (selectedDepartments.length > 0) {
-          const hasMatchingDepartment = postDepartments.some(dept => selectedDepartments.includes(dept));
-          return hasMatchingDepartment;
+
+        // Check if post targets a department that matches (either directly selected or parent of selected group)
+        if (postDepartments.length > 0 && effectiveDepartments.length > 0) {
+          if (postDepartments.some(d => effectiveDepartments.includes(d))) return true;
         }
-        
+
         return false;
       });
 
