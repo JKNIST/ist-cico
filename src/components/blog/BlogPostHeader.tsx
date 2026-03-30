@@ -47,6 +47,12 @@ export function BlogPostHeader({
         </div>
         
         <div className="flex items-center gap-2">
+          {/* Internal Badge */}
+          {post.internalOnly && (
+            <Badge className="bg-[#7C3AED] text-white hover:bg-[#7C3AED]/90 font-medium">
+              Intern
+            </Badge>
+          )}
           {/* Status Badge - GREEN for published */}
           <Badge
             className={cn(
