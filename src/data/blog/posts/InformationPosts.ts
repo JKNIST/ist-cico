@@ -84,7 +84,7 @@ Tack!
   },
   {
     id: "info-3",
-    title: "[INTERNT] Ny schema-mall från och med mars",
+    title: "Ny schema-mall från och med mars",
     tags: ["Personal", "Ledningsgrupp"],
     author: "Greta Thunberg",
     date: formatRelativeDate(date3),
@@ -118,7 +118,7 @@ Frågor? Kontakta mig eller HR.
   },
   {
     id: "info-4",
-    title: "[INTERNT] Viktig uppdatering om allergirutiner",
+    title: "Viktig uppdatering om allergirutiner",
     tags: ["Personal", "Viktigt"],
     author: "Ingrid Bergman",
     date: formatRelativeDate(date4),
@@ -151,7 +151,7 @@ Kontakta mig om ni har frågor.
   },
   {
     id: "info-5",
-    title: "[INTERNT] Personaldag 18 april – program och anmälan",
+    title: "Personaldag 18 april – program och anmälan",
     tags: ["Personal", "Planering"],
     author: "Alfred Nobel",
     date: formatRelativeDate(date5),
@@ -184,7 +184,7 @@ Anmäl eventuella matallergier till mig senast 10 april.
   },
   {
     id: "info-6",
-    title: "[INTERNT] Sommarschema – önskemål senast 15 maj",
+    title: "Sommarschema – önskemål senast 15 maj",
     tags: ["Personal", "Schema"],
     author: "Björn Borg",
     date: formatRelativeDate(date6),
@@ -219,7 +219,7 @@ Fyll i era önskemål i det nya schemasystemet senast 15 maj.
   },
   {
     id: "info-7",
-    title: "[INTERNT] Resultat från medarbetarenkäten",
+    title: "Resultat från medarbetarenkäten",
     tags: ["Personal", "Ledningsgrupp"],
     author: "Annika Sörenstam",
     date: formatRelativeDate(date7),
@@ -258,7 +258,7 @@ Hela rapporten finns i personalrummet.
   },
   {
     id: "info-8",
-    title: "[INTERNT] Ny vikarie på Lingon fr.o.m. måndag",
+    title: "Ny vikarie på Lingon fr.o.m. måndag",
     tags: ["Personal", "Lingon"],
     author: "Ingrid Bergman",
     date: formatRelativeDate(date8),
