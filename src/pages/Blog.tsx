@@ -44,16 +44,21 @@ export default function Blog() {
     filteredPosts,
     selectedDepartments,
     selectedGroups,
-    (post) => post.departments?.[0],
+    (post) => post.departments?.[0] ?? (post.internalOnly ? selectedDepartments[0] : undefined),
     (post) => post.groups
   );
 
-  // Final filter: if no department/group filters, include all posts
+  // Final filter: internal posts without department/group targeting should still be visible
   const finalFilteredPosts = (selectedDepartments.length === 0 && selectedGroups.length === 0) 
     ? filteredPosts 
     : departmentAndGroupFilteredPosts.filter(post => {
         const postDepartments = post.departments || [];
         const postGroups = post.groups || [];
+        const isInternalGlobalPost = post.internalOnly && postDepartments.length === 0 && postGroups.length === 0;
+
+        if (isInternalGlobalPost) {
+          return true;
+        }
         
         // If groups are selected, check if post has any matching group
         if (selectedGroups.length > 0) {
