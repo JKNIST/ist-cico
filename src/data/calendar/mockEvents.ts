@@ -993,4 +993,57 @@ export const mockEvents: CalendarEvent[] = [
     createdBy: "Maria Larsson",
     createdAt: new Date(2026, 2, 25, 9, 0),
   },
+  // ============================================================
+  // DECEMBER 2025 — extra events to demonstrate API limit (>50)
+  // Fördelat över hela månaden så "saknade dagar" syns tydligt
+  // när bara de första 50 (sorterat på datum) returneras.
+  // ============================================================
+  ...Array.from({ length: 30 }, (_, i) => {
+    const day = (i % 28) + 1; // dag 1–28 i december
+    const titles = [
+      "Sångstund", "Skapande verkstad", "Utomhuslek", "Bokläsning",
+      "Matlagning med barnen", "Rörelsestund", "Snöpyssel", "Påklädningsövning",
+      "Reflektionsmöte", "Föräldrasamtal", "Pedagogisk planering", "Materialgenomgång",
+      "Temaarbete vinter", "Sinnesstund", "Naturpromenad", "Bibliotekstid",
+      "Fika med vårdnadshavare", "APT", "Adventspyssel", "Julkortsverkstad",
+      "Pepparkaksbak", "Sångrepetition Lucia", "Studiebesök bondgård",
+      "Musikworkshop", "Ljusstöpning", "Måleri & form", "Yoga för barn",
+      "Drama & teater", "Vinterutflykt", "Avslutningsfika",
+    ];
+    const departments = [
+      ["Blåbär"], ["Lingon"], ["Odon"], ["Vildhallon"],
+      ["Blåbär", "Lingon"], ["Odon", "Vildhallon"],
+    ];
+    const categories = [
+      EventCategory.EXTERNAL,
+      EventCategory.INTERNAL,
+      EventCategory.WARNING,
+    ];
+    const types = [
+      EventType.SHARED_ACTIVITY,
+      EventType.PLANNING_TIME,
+      EventType.RECURRING_ROUTINE,
+      EventType.STAFF_MEETING,
+      EventType.INTERNAL_ACTIVITY,
+    ];
+    const startHour = 8 + (i % 8);
+    return {
+      id: `dec-extra-${i + 1}`,
+      title: titles[i % titles.length],
+      date: new Date(2025, 11, day),
+      category: categories[i % categories.length],
+      type: types[i % types.length],
+      description: `Demo-händelse #${i + 1} för att överskrida API-gränsen`,
+      startTime: `${String(startHour).padStart(2, "0")}:00`,
+      endTime: `${String(startHour + 1).padStart(2, "0")}:00`,
+      allDay: false,
+      isSharedWithGuardians: i % 3 === 0,
+      isRecurring: false,
+      departments: departments[i % departments.length],
+      participants: String(15 + (i % 30)),
+      source: 'manual' as const,
+      createdBy: "Demo Generator",
+      createdAt: new Date(2025, 10, 1, 8, 0),
+    };
+  }),
 ];
