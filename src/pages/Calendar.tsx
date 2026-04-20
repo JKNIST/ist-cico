@@ -950,6 +950,15 @@ export default function Calendar() {
           <ColorLegend />
         </div>
         
+        {viewMode === 'month' && simulateApiLimit && (
+          <EventLimitBanner
+            displayedCount={displayedMonthEvents}
+            totalCount={totalMonthEvents}
+            batchSize={EVENT_LIMIT}
+            onLoadMore={() => setLoadedBatches(b => b + 1)}
+          />
+        )}
+        
         {viewMode === 'month' && renderMonthView()}
         {viewMode === 'week' && renderWeekView()}
         {viewMode === 'day' && renderDayView()}
