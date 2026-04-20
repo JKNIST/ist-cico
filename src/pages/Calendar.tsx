@@ -258,6 +258,30 @@ export default function Calendar() {
   const calendarEnd = endOfWeek(monthEnd, { weekStartsOn: 1 });
   const calendarDays = eachDayOfInterval({ start: calendarStart, end: calendarEnd });
 
+  // === DEMO: applicera 50-events-gränsen på månadsvyns events ===
+  // Hämta alla events som faller inom månadsvyns synliga period (hela veckor),
+  // sortera på datum, och returnera bara de första (loadedBatches * 50).
+  // Detta simulerar exakt vad backend gör i prod.
+  const monthEventsAll = useMemo(() => {
+    return filteredEvents
+      .filter(event =>
+        !isBefore(event.date, calendarStart) && !isAfter(event.date, calendarEnd)
+      )
+      .sort((a, b) => a.date.getTime() - b.date.getTime());
+  }, [filteredEvents, calendarStart, calendarEnd]);
+
+  const monthEventsLimited = useMemo(() => {
+    if (!simulateApiLimit) return monthEventsAll;
+    return monthEventsAll.slice(0, loadedBatches * EVENT_LIMIT);
+  }, [monthEventsAll, simulateApiLimit, loadedBatches]);
+
+  const totalMonthEvents = monthEventsAll.length;
+  const displayedMonthEvents = monthEventsLimited.length;
+  const limitedEventIds = useMemo(
+    () => new Set(monthEventsLimited.map(e => e.id)),
+    [monthEventsLimited]
+  );
+
   const weekDays = ["MÅN", "TIS", "ONS", "TORS", "FRE", "LÖR", "SÖN"];
 
   const goToPrevious = () => {
