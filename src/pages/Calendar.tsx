@@ -897,31 +897,48 @@ export default function Calendar() {
             </h2>
           </div>
 
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setViewMode("day")}
-              className={viewMode === "day" ? "bg-gray-200" : ""}
-            >
-              DAG ☰
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setViewMode("week")}
-              className={viewMode === "week" ? "bg-gray-200" : ""}
-            >
-              VECKA ⚏
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setViewMode("month")}
-              className={viewMode === "month" ? "bg-[#2a9d8f] text-white border-0" : ""}
-            >
-              MÅNAD ⚏
-            </Button>
+          <div className="flex items-center gap-4">
+            {/* DEMO-toggle: simulera produktions-API:ets 50-events-gräns */}
+            <div className="flex items-center gap-2 border-r pr-4">
+              <Switch
+                id="simulate-api-limit"
+                checked={simulateApiLimit}
+                onCheckedChange={setSimulateApiLimit}
+              />
+              <Label
+                htmlFor="simulate-api-limit"
+                className="text-xs text-gray-600 cursor-pointer whitespace-nowrap"
+              >
+                Simulera API-gräns ({EVENT_LIMIT})
+              </Label>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setViewMode("day")}
+                className={viewMode === "day" ? "bg-gray-200" : ""}
+              >
+                DAG ☰
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setViewMode("week")}
+                className={viewMode === "week" ? "bg-gray-200" : ""}
+              >
+                VECKA ⚏
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setViewMode("month")}
+                className={viewMode === "month" ? "bg-[#2a9d8f] text-white border-0" : ""}
+              >
+                MÅNAD ⚏
+              </Button>
+            </div>
           </div>
         </div>
       </div>
