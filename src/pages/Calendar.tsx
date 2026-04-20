@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { ChevronLeft, ChevronRight, AlertTriangle, XCircle, Share2, Lock, Repeat, Calendar as CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, addMonths, subMonths, startOfWeek, endOfWeek, isToday, addDays, isBefore, isAfter } from "date-fns";
 import { sv } from "date-fns/locale";
@@ -12,12 +14,16 @@ import { TemporarySchemaPeriodDialog } from "@/components/TemporarySchemaPeriodD
 import { ClosurePeriodDialog } from "@/components/ClosurePeriodDialog";
 import { FilterChip } from "@/components/FilterChip";
 import { ColorLegend } from "@/components/ColorLegend";
+import { EventLimitBanner } from "@/components/calendar/EventLimitBanner";
 import { AdministrativeEvent, TemporarySchemaPeriod, ClosurePeriod, CalendarEvent, EventCategory, EventType } from "@/types/administration";
 import { getCategoryColor, getCategoryBgClass } from "@/lib/calendarUtils";
 import { cn } from "@/lib/utils";
 import { useDepartmentFilter } from "@/contexts/DepartmentFilterContext";
 import { filterByDepartmentsAndGroups } from "@/lib/groupFilterUtils";
 import { mockEvents } from "@/data/calendar/mockEvents";
+
+// Simulera produktions-API:ets gräns på 50 events per månadsanrop
+const EVENT_LIMIT = 50;
 
 // Generate recurring event instances
 
@@ -199,6 +205,15 @@ export default function Calendar() {
   const [selectedTemporaryPeriod, setSelectedTemporaryPeriod] = useState<TemporarySchemaPeriod | null>(null);
   const [selectedClosurePeriod, setSelectedClosurePeriod] = useState<ClosurePeriod | null>(null);
 
+  // === DEMO: Simulera produktions-API:ets gräns på 50 events per månad ===
+  const [simulateApiLimit, setSimulateApiLimit] = useState(true);
+  const [loadedBatches, setLoadedBatches] = useState(1);
+
+  // Återställ batch-räknaren när användaren byter månad (simulerar nytt API-anrop)
+  useEffect(() => {
+    setLoadedBatches(1);
+  }, [currentDate.getFullYear(), currentDate.getMonth()]);
+
   // Helper function to filter by department and groups
   const filterByDepartmentAndGroups = (departments?: string[], groups?: string[]) => {
     if (selectedDepartments.length === 0 && selectedGroups.length === 0) return true;
@@ -242,6 +257,30 @@ export default function Calendar() {
   const calendarStart = startOfWeek(monthStart, { weekStartsOn: 1 });
   const calendarEnd = endOfWeek(monthEnd, { weekStartsOn: 1 });
   const calendarDays = eachDayOfInterval({ start: calendarStart, end: calendarEnd });
+
+  // === DEMO: applicera 50-events-gränsen på månadsvyns events ===
+  // Hämta alla events som faller inom månadsvyns synliga period (hela veckor),
+  // sortera på datum, och returnera bara de första (loadedBatches * 50).
+  // Detta simulerar exakt vad backend gör i prod.
+  const monthEventsAll = useMemo(() => {
+    return filteredEvents
+      .filter(event =>
+        !isBefore(event.date, calendarStart) && !isAfter(event.date, calendarEnd)
+      )
+      .sort((a, b) => a.date.getTime() - b.date.getTime());
+  }, [filteredEvents, calendarStart, calendarEnd]);
+
+  const monthEventsLimited = useMemo(() => {
+    if (!simulateApiLimit) return monthEventsAll;
+    return monthEventsAll.slice(0, loadedBatches * EVENT_LIMIT);
+  }, [monthEventsAll, simulateApiLimit, loadedBatches]);
+
+  const totalMonthEvents = monthEventsAll.length;
+  const displayedMonthEvents = monthEventsLimited.length;
+  const limitedEventIds = useMemo(
+    () => new Set(monthEventsLimited.map(e => e.id)),
+    [monthEventsLimited]
+  );
 
   const weekDays = ["MÅN", "TIS", "ONS", "TORS", "FRE", "LÖR", "SÖN"];
 
@@ -297,8 +336,16 @@ export default function Calendar() {
   const MAX_EVENTS_IN_MONTH_VIEW = 3;
 
   const getEventsForDay = (day: Date) => {
-    const filteredEvents = filterEvents(allEvents);
-    const regularEvents = filteredEvents.filter(event => isSameDay(event.date, day));
+    const filtered = filterEvents(allEvents);
+    let regularEvents = filtered.filter(event => isSameDay(event.date, day));
+
+    // I månadsvyn: applicera API-gränsen så endast events som "kom med"
+    // i de laddade batcharna visas. Detta speglar prod-beteendet där
+    // events kan saknas på olika dagar när månaden har >50 events totalt.
+    if (viewMode === 'month' && simulateApiLimit) {
+      regularEvents = regularEvents.filter(e => limitedEventIds.has(e.id));
+    }
+
     const adminEvents = administrativeEvents.filter(event => isSameDay(event.date, day));
     
     // Combine and sort: first by priority (admin events first), then by time
@@ -850,31 +897,48 @@ export default function Calendar() {
             </h2>
           </div>
 
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setViewMode("day")}
-              className={viewMode === "day" ? "bg-gray-200" : ""}
-            >
-              DAG ☰
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setViewMode("week")}
-              className={viewMode === "week" ? "bg-gray-200" : ""}
-            >
-              VECKA ⚏
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setViewMode("month")}
-              className={viewMode === "month" ? "bg-[#2a9d8f] text-white border-0" : ""}
-            >
-              MÅNAD ⚏
-            </Button>
+          <div className="flex items-center gap-4">
+            {/* DEMO-toggle: simulera produktions-API:ets 50-events-gräns */}
+            <div className="flex items-center gap-2 border-r pr-4">
+              <Switch
+                id="simulate-api-limit"
+                checked={simulateApiLimit}
+                onCheckedChange={setSimulateApiLimit}
+              />
+              <Label
+                htmlFor="simulate-api-limit"
+                className="text-xs text-gray-600 cursor-pointer whitespace-nowrap"
+              >
+                Simulera API-gräns ({EVENT_LIMIT})
+              </Label>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setViewMode("day")}
+                className={viewMode === "day" ? "bg-gray-200" : ""}
+              >
+                DAG ☰
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setViewMode("week")}
+                className={viewMode === "week" ? "bg-gray-200" : ""}
+              >
+                VECKA ⚏
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setViewMode("month")}
+                className={viewMode === "month" ? "bg-[#2a9d8f] text-white border-0" : ""}
+              >
+                MÅNAD ⚏
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -885,6 +949,15 @@ export default function Calendar() {
         <div className="flex justify-end mb-4">
           <ColorLegend />
         </div>
+        
+        {viewMode === 'month' && simulateApiLimit && (
+          <EventLimitBanner
+            displayedCount={displayedMonthEvents}
+            totalCount={totalMonthEvents}
+            batchSize={EVENT_LIMIT}
+            onLoadMore={() => setLoadedBatches(b => b + 1)}
+          />
+        )}
         
         {viewMode === 'month' && renderMonthView()}
         {viewMode === 'week' && renderWeekView()}
