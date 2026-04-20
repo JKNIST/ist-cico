@@ -998,8 +998,8 @@ export const mockEvents: CalendarEvent[] = [
   // Fördelat över hela månaden så "saknade dagar" syns tydligt
   // när bara de första 50 (sorterat på datum) returneras.
   // ============================================================
-  ...Array.from({ length: 30 }, (_, i) => {
-    const day = (i % 28) + 1; // dag 1–28 i december
+  ...Array.from({ length: 60 }, (_, i) => {
+    const day = (i % 30) + 1; // dag 1–30 i december
     const titles = [
       "Sångstund", "Skapande verkstad", "Utomhuslek", "Bokläsning",
       "Matlagning med barnen", "Rörelsestund", "Snöpyssel", "Påklädningsövning",
