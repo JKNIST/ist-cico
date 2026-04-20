@@ -336,8 +336,16 @@ export default function Calendar() {
   const MAX_EVENTS_IN_MONTH_VIEW = 3;
 
   const getEventsForDay = (day: Date) => {
-    const filteredEvents = filterEvents(allEvents);
-    const regularEvents = filteredEvents.filter(event => isSameDay(event.date, day));
+    const filtered = filterEvents(allEvents);
+    let regularEvents = filtered.filter(event => isSameDay(event.date, day));
+
+    // I månadsvyn: applicera API-gränsen så endast events som "kom med"
+    // i de laddade batcharna visas. Detta speglar prod-beteendet där
+    // events kan saknas på olika dagar när månaden har >50 events totalt.
+    if (viewMode === 'month' && simulateApiLimit) {
+      regularEvents = regularEvents.filter(e => limitedEventIds.has(e.id));
+    }
+
     const adminEvents = administrativeEvents.filter(event => isSameDay(event.date, day));
     
     // Combine and sort: first by priority (admin events first), then by time
