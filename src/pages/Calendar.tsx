@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { ChevronLeft, ChevronRight, AlertTriangle, XCircle, Share2, Lock, Repeat, Calendar as CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, addMonths, subMonths, startOfWeek, endOfWeek, isToday, addDays, isBefore, isAfter } from "date-fns";
 import { sv } from "date-fns/locale";
@@ -12,12 +14,16 @@ import { TemporarySchemaPeriodDialog } from "@/components/TemporarySchemaPeriodD
 import { ClosurePeriodDialog } from "@/components/ClosurePeriodDialog";
 import { FilterChip } from "@/components/FilterChip";
 import { ColorLegend } from "@/components/ColorLegend";
+import { EventLimitBanner } from "@/components/calendar/EventLimitBanner";
 import { AdministrativeEvent, TemporarySchemaPeriod, ClosurePeriod, CalendarEvent, EventCategory, EventType } from "@/types/administration";
 import { getCategoryColor, getCategoryBgClass } from "@/lib/calendarUtils";
 import { cn } from "@/lib/utils";
 import { useDepartmentFilter } from "@/contexts/DepartmentFilterContext";
 import { filterByDepartmentsAndGroups } from "@/lib/groupFilterUtils";
 import { mockEvents } from "@/data/calendar/mockEvents";
+
+// Simulera produktions-API:ets gräns på 50 events per månadsanrop
+const EVENT_LIMIT = 50;
 
 // Generate recurring event instances
 
