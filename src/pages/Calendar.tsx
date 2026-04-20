@@ -955,7 +955,7 @@ export default function Calendar() {
             displayedCount={displayedMonthEvents}
             totalCount={totalMonthEvents}
             batchSize={EVENT_LIMIT}
-            onLoadMore={() => setLoadedBatches(b => b + 1)}
+            onLoadAll={() => setLoadedBatches(999)}
           />
         )}
         
