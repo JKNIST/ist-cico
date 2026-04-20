@@ -205,6 +205,15 @@ export default function Calendar() {
   const [selectedTemporaryPeriod, setSelectedTemporaryPeriod] = useState<TemporarySchemaPeriod | null>(null);
   const [selectedClosurePeriod, setSelectedClosurePeriod] = useState<ClosurePeriod | null>(null);
 
+  // === DEMO: Simulera produktions-API:ets gräns på 50 events per månad ===
+  const [simulateApiLimit, setSimulateApiLimit] = useState(true);
+  const [loadedBatches, setLoadedBatches] = useState(1);
+
+  // Återställ batch-räknaren när användaren byter månad (simulerar nytt API-anrop)
+  useEffect(() => {
+    setLoadedBatches(1);
+  }, [currentDate.getFullYear(), currentDate.getMonth()]);
+
   // Helper function to filter by department and groups
   const filterByDepartmentAndGroups = (departments?: string[], groups?: string[]) => {
     if (selectedDepartments.length === 0 && selectedGroups.length === 0) return true;
