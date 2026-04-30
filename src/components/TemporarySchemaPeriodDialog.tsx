@@ -373,8 +373,7 @@ export function TemporarySchemaPeriodDialog({
                 {formData.limitedCapacityDays.map((day, idx) => (
                   <Badge 
                     key={idx} 
-                    variant="secondary" 
-                    className="flex items-center gap-1 bg-amber-100"
+                    className="flex items-center gap-1 bg-amber-200 text-amber-900 border border-amber-300 hover:bg-amber-300"
                   >
                     {format(day, "d MMM", { locale })}
                     <X 
