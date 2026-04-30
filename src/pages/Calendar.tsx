@@ -415,17 +415,11 @@ export default function Calendar() {
         }
       }
     } else {
-      // Regular event — öppna direkt i edit-dialogen (matchar prototyp).
+      // Regular event — öppna view-dialogen först (info-läge).
+      // Användaren får sedan välja Avbryt eller Redigera för att gå till edit.
       const calEvent = event as CalendarEvent;
       setSelectedEvent(calEvent);
-      if (calEvent.isRecurring) {
-        // Återkommande: fråga via RecurringActionDialog innan edit
-        setRecurringActionType("edit");
-        setIsRecurringActionOpen(true);
-      } else {
-        setEditEventData(calEvent);
-        setIsAddEventOpen(true);
-      }
+      setIsViewEventOpen(true);
     }
   };
 
