@@ -415,9 +415,17 @@ export default function Calendar() {
         }
       }
     } else {
-      // Regular event
-      setSelectedEvent(event as CalendarEvent);
-      setIsViewEventOpen(true);
+      // Regular event — öppna direkt i edit-dialogen (matchar prototyp).
+      const calEvent = event as CalendarEvent;
+      setSelectedEvent(calEvent);
+      if (calEvent.isRecurring) {
+        // Återkommande: fråga via RecurringActionDialog innan edit
+        setRecurringActionType("edit");
+        setIsRecurringActionOpen(true);
+      } else {
+        setEditEventData(calEvent);
+        setIsAddEventOpen(true);
+      }
     }
   };
 
