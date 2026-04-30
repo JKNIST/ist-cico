@@ -206,7 +206,7 @@ export default function Calendar() {
   const [selectedClosurePeriod, setSelectedClosurePeriod] = useState<ClosurePeriod | null>(null);
 
   // === DEMO: Simulera produktions-API:ets gräns på 50 events per månad ===
-  const [simulateApiLimit, setSimulateApiLimit] = useState(true);
+  const [simulateApiLimit, setSimulateApiLimit] = useState(false);
   const [loadedBatches, setLoadedBatches] = useState(1);
 
   // Återställ batch-räknaren när användaren byter månad (simulerar nytt API-anrop)
