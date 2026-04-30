@@ -239,233 +239,201 @@ export function AddEventDialog({
     onOpenChange(false);
   };
 
+  // === Material-style helper-klasser ===
+  // Outlined input med floating label
+  const floatField =
+    "peer w-full border border-gray-300 rounded-sm px-3 pt-4 pb-1.5 text-sm bg-transparent " +
+    "focus:outline-none focus:border-[#2a9d8f] focus:border-2 placeholder-transparent";
+  const floatLabel =
+    "absolute left-2 -top-2 px-1 bg-white text-xs text-gray-600 " +
+    "peer-focus:text-[#2a9d8f] peer-placeholder-shown:top-2.5 peer-placeholder-shown:text-sm " +
+    "peer-placeholder-shown:text-gray-500 transition-all";
+
+  // Underline-style för datum/tid
+  const underlineRow =
+    "flex items-center gap-2 border-b border-gray-300 py-1 focus-within:border-[#2a9d8f]";
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto p-6">
         <DialogHeader>
-          <DialogTitle className="text-xl font-semibold">
-            {mode === "edit" ? t('eventDialog.editEvent') : t('eventDialog.addEvent')}
+          <DialogTitle className="text-xl font-medium text-gray-800">
+            {mode === "edit" ? "Redigera händelse" : "Lägg till händelse"}
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6 py-4">
-          {/* Category Selection */}
-          <div className="space-y-3">
-            <Label className="text-sm font-semibold">{t('eventDialog.category')}</Label>
-            <RadioGroup value={category} onValueChange={(value) => setCategory(value as EventCategory)}>
-              <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-50 transition-colors">
-                <RadioGroupItem value={EventCategory.EXTERNAL} id="external" />
-                <Label htmlFor="external" className="flex items-center gap-2 cursor-pointer flex-1">
-                  <div className="w-3 h-3 rounded bg-green-500 flex-shrink-0" />
-                  <div>
-                    <div className="font-medium">{t('eventDialog.externalActivity')}</div>
-                    <div className="text-xs text-muted-foreground">{t('eventDialog.sharedWithGuardians')}</div>
-                  </div>
-                </Label>
-              </div>
-              <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-50 transition-colors">
-                <RadioGroupItem value={EventCategory.INTERNAL} id="internal" />
-                <Label htmlFor="internal" className="flex items-center gap-2 cursor-pointer flex-1">
-                  <div className="w-3 h-3 rounded bg-blue-500 flex-shrink-0" />
-                  <div>
-                    <div className="font-medium">{t('eventDialog.internalActivity')}</div>
-                    <div className="text-xs text-muted-foreground">{t('eventDialog.staffOnly')}</div>
-                  </div>
-                </Label>
-              </div>
-            </RadioGroup>
-          </div>
-
-          {/* Title */}
-          <div className="space-y-2">
-            <Input
-              placeholder={t('eventDialog.title')}
+        <div className="space-y-5 py-4">
+          {/* Titel */}
+          <div className="relative pt-2">
+            <input
+              id="event-title"
+              type="text"
+              placeholder="Titel"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full"
+              className={floatField}
             />
+            <label htmlFor="event-title" className={floatLabel}>
+              Titel <span className="text-red-500">*</span>
+            </label>
           </div>
 
-          {/* Description */}
-          <div className="space-y-2">
-            <Textarea
-              placeholder={t('eventDialog.description')}
+          {/* Beskrivning */}
+          <div className="relative pt-2">
+            <textarea
+              id="event-description"
+              placeholder="Beskrivning"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full min-h-[100px]"
+              rows={2}
+              className={cn(floatField, "min-h-[60px] resize-y")}
             />
+            <label htmlFor="event-description" className={floatLabel}>
+              Beskrivning <span className="text-red-500">*</span>
+            </label>
           </div>
 
-          {/* Info about sharing (read-only based on category) */}
-          <div className="bg-gray-50 border rounded-lg p-3">
-            <p className="text-sm text-gray-700">
-              {isSharedWithGuardians ? (
-                <span className="flex items-center gap-2">
-                  <span className="text-green-600 font-medium">✓</span>
-                  Denna aktivitet kommer att delas med vårdnadshavare
-                </span>
-              ) : (
-                <span className="flex items-center gap-2">
-                  <span className="text-blue-600 font-medium">🔒</span>
-                  Denna aktivitet är endast synlig för personal
-                </span>
-              )}
+          {/* Dela med vårdnadshavare */}
+          <div className="space-y-1">
+            <div className="flex items-center gap-3">
+              <Switch
+                checked={isSharedWithGuardians}
+                onCheckedChange={(checked) =>
+                  setCategory(checked ? EventCategory.EXTERNAL : EventCategory.INTERNAL)
+                }
+                className="data-[state=checked]:bg-[#2a9d8f]"
+              />
+              <Label className="text-sm text-gray-800 font-normal">Dela med vårdnadshavare</Label>
+            </div>
+            <p className="text-[11px] text-gray-500 pl-12">
+              När denna händelse är aktiverad kommer den vara synlig för vårdnadshavare du måste välja barn
             </p>
           </div>
 
-          {/* Select Departments */}
-          <div className="space-y-2">
-            <Label className="text-sm">Välj avdelningar</Label>
-            <div className="border rounded-md p-2 min-h-[48px]">
-              <div className="flex flex-wrap gap-2">
-                {selectedDepartments.map((dept) => (
+          {/* Välj avdelningar */}
+          <div className="relative pt-2">
+            <div className="border border-gray-300 rounded-sm px-2 pt-3 pb-1.5 min-h-[44px] flex flex-wrap items-center gap-1.5 focus-within:border-[#2a9d8f]">
+              {selectedDepartments.map((dept) => (
+                <span
+                  key={dept}
+                  className="inline-flex items-center gap-1 border border-gray-300 rounded-full px-2.5 py-0.5 text-xs text-gray-700 bg-white"
+                >
+                  {dept}
+                  <button
+                    type="button"
+                    onClick={() => removeDepartment(dept)}
+                    className="rounded-full bg-gray-300 text-white hover:bg-gray-400 w-3.5 h-3.5 flex items-center justify-center"
+                    aria-label={`Ta bort ${dept}`}
+                  >
+                    <X className="h-2.5 w-2.5" />
+                  </button>
+                </span>
+              ))}
+              <button
+                type="button"
+                onClick={() => setShowDepartmentDropdown(!showDepartmentDropdown)}
+                className="ml-auto text-gray-400 hover:text-gray-600 px-1"
+                aria-label="Öppna avdelningsväljare"
+              >
+                ▾
+              </button>
+            </div>
+            <label className="absolute left-2 -top-0 px-1 bg-white text-xs text-gray-600">
+              Välj avdelningar <span className="text-red-500">*</span>
+            </label>
+            {showDepartmentDropdown && (
+              <div className="absolute z-50 mt-1 bg-white border rounded-md shadow-lg p-2 w-64">
+                {departments.map((dept) => (
                   <div
                     key={dept}
-                    className="bg-[#2a9d8f] text-white px-3 py-1 rounded-full text-sm flex items-center gap-2"
+                    onClick={() => toggleDepartment(dept)}
+                    className={cn(
+                      "px-3 py-2 cursor-pointer hover:bg-gray-100 rounded text-sm",
+                      selectedDepartments.includes(dept) && "bg-gray-100"
+                    )}
                   >
                     {dept}
-                    <button
-                      onClick={() => removeDepartment(dept)}
-                      className="hover:bg-white/20 rounded-full p-0.5"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
                   </div>
                 ))}
               </div>
-            </div>
-            <div className="relative">
-              <button
-                onClick={() => setShowDepartmentDropdown(!showDepartmentDropdown)}
-                className="text-sm text-[#2a9d8f] hover:underline"
-              >
-                Lägg till avdelning
-              </button>
-              {showDepartmentDropdown && (
-                <div className="absolute z-50 mt-1 bg-white border rounded-md shadow-lg p-2 w-64">
-                  {departments.map((dept) => (
-                    <div
-                      key={dept}
-                      onClick={() => toggleDepartment(dept)}
-                      className={cn(
-                        "px-3 py-2 cursor-pointer hover:bg-gray-100 rounded",
-                        selectedDepartments.includes(dept) && "bg-gray-100"
-                      )}
-                    >
-                      {dept}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+            )}
           </div>
 
-          {/* Select Groups */}
-          <CalendarGroupSelector
-            selectedDepartments={selectedDepartments}
-            selectedGroups={selectedGroups}
-            onGroupsChange={setSelectedGroups}
-          />
-
-          {/* Select Participants */}
-          <div className="space-y-2">
-            <Label className="text-sm">Välj deltagare</Label>
-            <div className="border rounded-md p-3 flex items-center gap-2">
-              <Users className="h-4 w-4 text-[#2a9d8f]" />
-              <span className="text-sm">{participants} personer</span>
+          {/* Välj deltagare */}
+          <div className="relative pt-2">
+            <div className="border border-gray-300 rounded-sm px-2 pt-3 pb-1.5 min-h-[44px] flex items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 border border-gray-300 rounded-full px-2.5 py-0.5 text-xs text-gray-700 bg-white">
+                <Users className="h-3 w-3 text-[#2a9d8f]" />
+                {participants} personer
+              </span>
+              <span className="ml-auto text-gray-400">▾</span>
             </div>
+            <label className="absolute left-2 -top-0 px-1 bg-white text-xs text-gray-600">
+              Välj deltagare <span className="text-red-500">*</span>
+            </label>
           </div>
 
-          {/* All Day */}
+          {/* Heldag */}
           <div className="flex items-center gap-3">
-            <Switch checked={allDay} onCheckedChange={setAllDay} />
-            <Label>Heldag</Label>
+            <Switch
+              checked={allDay}
+              onCheckedChange={setAllDay}
+              className="data-[state=checked]:bg-[#2a9d8f]"
+            />
+            <Label className="text-sm text-gray-800 font-normal">Heldag</Label>
           </div>
 
-          {/* Date and Time */}
-          <div className="grid grid-cols-2 gap-4">
-            {/* Start Date */}
-            <div className="space-y-2">
-              <Label className="text-sm">Startdatum</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start text-left font-normal"
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {format(startDate, "yyyy-MM-dd", { locale })}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={startDate}
-                    onSelect={(date) => date && setStartDate(date)}
-                    initialFocus
-                    className="pointer-events-auto"
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
+          {/* Händelsedatum (underline-stil) */}
+          <div>
+            <p className="text-[11px] text-gray-500 mb-0.5">Händelsedatum <span className="text-red-500">*</span></p>
+            <Popover>
+              <PopoverTrigger asChild>
+                <button type="button" className={cn(underlineRow, "w-full text-left text-sm text-gray-800")}>
+                  <CalendarIcon className="h-4 w-4 text-gray-500" />
+                  <span>{format(startDate, "d MMM yyyy", { locale })}</span>
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={startDate}
+                  onSelect={(date) => date && setStartDate(date)}
+                  initialFocus
+                  className="pointer-events-auto"
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
 
-            {/* End Date */}
-            <div className="space-y-2">
-              <Label className="text-sm">Slutdatum</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start text-left font-normal"
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {format(endDate, "yyyy-MM-dd", { locale })}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={endDate}
-                    onSelect={(date) => date && setEndDate(date)}
-                    initialFocus
-                    className="pointer-events-auto"
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-
-            {/* Start Time */}
-            {!allDay && (
-              <div className="space-y-2">
-                <Label className="text-sm">Starttid</Label>
-                <div className="relative">
-                  <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <Input
+          {/* Tid (side-by-side, underline) */}
+          {!allDay && (
+            <div className="grid grid-cols-2 gap-6">
+              <div>
+                <p className="text-[11px] text-gray-500 mb-0.5">Starttid <span className="text-red-500">*</span></p>
+                <div className={underlineRow}>
+                  <Clock className="h-4 w-4 text-gray-500" />
+                  <input
                     type="time"
                     value={startTime}
                     onChange={(e) => setStartTime(e.target.value)}
-                    className="pl-10"
+                    className="w-full bg-transparent text-sm text-gray-800 focus:outline-none"
                   />
                 </div>
               </div>
-            )}
-
-            {/* End Time */}
-            {!allDay && (
-              <div className="space-y-2">
-                <Label className="text-sm">Sluttid</Label>
-                <div className="relative">
-                  <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <Input
+              <div>
+                <p className="text-[11px] text-gray-500 mb-0.5">Sluttid <span className="text-red-500">*</span></p>
+                <div className={underlineRow}>
+                  <Clock className="h-4 w-4 text-gray-500" />
+                  <input
                     type="time"
                     value={endTime}
                     onChange={(e) => setEndTime(e.target.value)}
-                    className="pl-10"
+                    className="w-full bg-transparent text-sm text-gray-800 focus:outline-none"
                   />
                 </div>
               </div>
-            )}
-          </div>
+            </div>
+          )}
 
           {/* Conflict Warning */}
           {conflicts?.hasConflicts && (
@@ -478,27 +446,27 @@ export function AddEventDialog({
             />
           )}
 
-          {/* Recurring Event */}
-          <div className="space-y-4">
+          {/* Återkommande */}
+          <div className="space-y-3">
             <div className="flex items-center gap-3">
-              <Switch 
-                checked={isRecurring} 
+              <Switch
+                checked={isRecurring}
                 onCheckedChange={setIsRecurring}
                 disabled={mode === "edit" && editScope === "single"}
+                className="data-[state=checked]:bg-[#2a9d8f]"
               />
-              <Label className={mode === "edit" && editScope === "single" ? "text-muted-foreground" : ""}>
+              <Label className={cn("text-sm font-normal", mode === "edit" && editScope === "single" ? "text-muted-foreground" : "text-gray-800")}>
                 Är händelsen återkommande?
               </Label>
             </div>
 
-            {/* Recurring Event Options */}
             {isRecurring && (
-              <div className="space-y-4 pl-11">
+              <div className="space-y-3">
                 {/* Upprepa */}
-                <div className="space-y-2">
-                  <Label className="text-sm">Upprepa</Label>
+                <div className="grid grid-cols-[80px_1fr] items-center gap-2">
+                  <Label className="text-sm text-gray-600">Upprepa <span className="text-red-500">*</span></Label>
                   <Select value={recurrenceFrequency} onValueChange={setRecurrenceFrequency}>
-                    <SelectTrigger className="w-full">
+                    <SelectTrigger className="w-full border-0 border-b border-gray-300 rounded-none focus:ring-0 focus:border-[#2a9d8f] h-8 px-0 text-sm">
                       <SelectValue placeholder="Välj frekvens" />
                     </SelectTrigger>
                     <SelectContent>
@@ -511,38 +479,40 @@ export function AddEventDialog({
                 </div>
 
                 {/* Varje */}
-                <div className="space-y-2">
-                  <Label className="text-sm">{t('eventDialog.every')}</Label>
-                  <Input
-                    type="number"
-                    min="1"
-                    value={recurrenceInterval}
-                    onChange={(e) => setRecurrenceInterval(e.target.value)}
-                    className="w-32"
-                  />
+                <div className="grid grid-cols-[80px_1fr] items-center gap-2">
+                  <Label className="text-sm text-gray-600">Varje <span className="text-red-500">*</span></Label>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="number"
+                      min="1"
+                      value={recurrenceInterval}
+                      onChange={(e) => setRecurrenceInterval(e.target.value)}
+                      className="w-20 h-8 border-0 border-b border-gray-300 rounded-none px-0 focus-visible:ring-0 focus-visible:border-[#2a9d8f]"
+                    />
+                    <span className="text-sm text-gray-700">dag(ar)</span>
+                  </div>
                 </div>
 
-                {/* Week Days Selection for Weekly */}
+                {/* Veckodagar (om weekly) */}
                 {recurrenceFrequency === "weekly" && (
-                  <div className="space-y-2">
-                    <Label className="text-sm">{t('eventDialog.days')}</Label>
+                  <div className="grid grid-cols-[80px_1fr] items-center gap-2">
+                    <Label className="text-sm text-gray-600">Dagar</Label>
                     <div className="flex gap-2">
                       {[
-                        { value: "mon", label: t('eventDialog.shortWeekdays.mon') },
-                        { value: "tue", label: t('eventDialog.shortWeekdays.tue') },
-                        { value: "wed", label: t('eventDialog.shortWeekdays.wed') },
-                        { value: "thu", label: t('eventDialog.shortWeekdays.thu') },
-                        { value: "fri", label: t('eventDialog.shortWeekdays.fri') },
+                        { value: "mon", label: "M" },
+                        { value: "tue", label: "T" },
+                        { value: "wed", label: "O" },
+                        { value: "thu", label: "T" },
+                        { value: "fri", label: "F" },
                       ].map((day) => (
                         <Button
                           key={day.value}
                           type="button"
-                          variant={selectedWeekDays.includes(day.value) ? "default" : "outline"}
-                          className={`w-10 h-10 p-0 ${
-                            selectedWeekDays.includes(day.value) 
-                              ? "bg-[#2a9d8f] hover:bg-[#238276]" 
-                              : ""
-                          }`}
+                          variant="outline"
+                          className={cn(
+                            "w-8 h-8 p-0 rounded-full text-xs",
+                            selectedWeekDays.includes(day.value) && "bg-[#2a9d8f] text-white border-0 hover:bg-[#238276]"
+                          )}
                           onClick={() => toggleWeekDay(day.value)}
                         >
                           {day.label}
@@ -553,71 +523,73 @@ export function AddEventDialog({
                 )}
 
                 {/* Till */}
-                <div className="space-y-2">
-                  <Label className="text-sm">Till</Label>
-                  <div className="flex items-center gap-2">
-                    <Checkbox
-                      checked={hasRecurrenceEndDate}
-                      onCheckedChange={(checked) => setHasRecurrenceEndDate(checked as boolean)}
-                    />
-                    <Label className="font-normal cursor-pointer">
-                      Slutdatum för återkommande händelse
-                    </Label>
-                  </div>
-                  {hasRecurrenceEndDate && (
+                <div className="grid grid-cols-[80px_1fr] items-start gap-2">
+                  <Label className="text-sm text-gray-600 pt-1">Till <span className="text-red-500">*</span></Label>
+                  <div>
+                    <p className="text-[11px] text-gray-500 mb-0.5">Slutdatum för återkommande händelse <span className="text-red-500">*</span></p>
                     <Popover>
                       <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className="w-full justify-start text-left font-normal mt-2"
-                        >
-                          <CalendarIcon className="mr-2 h-4 w-4" />
-                          {recurrenceEndDate ? format(recurrenceEndDate, "yyyy-MM-dd", { locale }) : t('eventDialog.onDate')}
-                        </Button>
+                        <button type="button" className={cn(underlineRow, "w-full text-left text-sm text-gray-800")}>
+                          <CalendarIcon className="h-4 w-4 text-gray-500" />
+                          <span>{recurrenceEndDate ? format(recurrenceEndDate, "d MMM yyyy", { locale }) : "Välj datum"}</span>
+                        </button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
                         <Calendar
                           mode="single"
                           selected={recurrenceEndDate}
-                          onSelect={(date) => date && setRecurrenceEndDate(date)}
+                          onSelect={(date) => {
+                            if (date) {
+                              setRecurrenceEndDate(date);
+                              setHasRecurrenceEndDate(true);
+                            }
+                          }}
                           initialFocus
                           className="pointer-events-auto"
                         />
                       </PopoverContent>
                     </Popover>
-                  )}
+                  </div>
                 </div>
               </div>
             )}
           </div>
 
-          {/* Metadata for Edit Mode */}
+          {/* Footer-metadata */}
           {mode === "edit" && eventData?.createdBy && eventData?.createdAt && (
-            <div className="pt-4 border-t space-y-1 text-xs text-muted-foreground">
-              <p>{t('eventDialog.createdBy')}: {eventData.createdBy} {t('eventDialog.at')} {format(eventData.createdAt, "yyyy-MM-dd HH:mm", { locale })}</p>
-              {eventData.updatedAt && (
-                <p>{t('eventDialog.lastUpdated')}: {format(eventData.updatedAt, "yyyy-MM-dd HH:mm", { locale })}</p>
-              )}
+            <div className="pt-2 text-xs text-gray-500 flex items-center gap-1.5">
+              <Users className="h-3.5 w-3.5" />
+              <span>Skapad av : {eventData.createdBy} vid {format(eventData.createdAt, "yyyy-MM-dd HH:mm", { locale })}</span>
             </div>
           )}
         </div>
 
-        {/* Actions */}
-        <div className="flex justify-end gap-3 pt-4 border-t">
-          <Button
-            variant="ghost"
+        {/* Action-knappar — text-only, uppercase */}
+        <div className="flex justify-end items-center gap-6 pt-2">
+          {mode === "edit" && (
+            <button
+              type="button"
+              onClick={() => onOpenChange(false)}
+              className="text-sm font-medium uppercase tracking-wide text-red-500 hover:text-red-600"
+            >
+              Ta bort
+            </button>
+          )}
+          <button
+            type="button"
             onClick={() => onOpenChange(false)}
-            className="text-[#2a9d8f] hover:bg-[#2a9d8f]/10"
+            className="text-sm font-medium uppercase tracking-wide text-[#2a9d8f] hover:text-[#238276]"
           >
-            {t('eventDialog.cancel')}
-          </Button>
-          <Button
+            Avbryt
+          </button>
+          <button
+            type="button"
             onClick={handleSave}
-            className="bg-[#2a9d8f] hover:bg-[#238276] text-white"
             disabled={conflicts?.hasConflicts && conflictResolution === "include-all" && !acknowledgeConflicts}
+            className="text-sm font-medium uppercase tracking-wide text-gray-400 hover:text-[#2a9d8f] disabled:text-gray-300 disabled:cursor-not-allowed"
           >
-            {t('eventDialog.save')}
-          </Button>
+            {mode === "edit" ? "Uppdatera" : "Spara"}
+          </button>
         </div>
       </DialogContent>
     </Dialog>
