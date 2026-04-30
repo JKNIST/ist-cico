@@ -5,7 +5,7 @@ import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, addMonths, subMonths, startOfWeek, endOfWeek, isToday, addDays, isBefore, isAfter } from "date-fns";
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, addMonths, subMonths, startOfWeek, endOfWeek, isToday, addDays, isBefore, isAfter, getISOWeek } from "date-fns";
 import { sv } from "date-fns/locale";
 import { AddEventDialog } from "@/components/AddEventDialog";
 import { ViewEventDialog } from "@/components/ViewEventDialog";
@@ -184,7 +184,7 @@ const isPublished = (adminEvent: AdministrativeEvent): boolean => {
 
 export default function Calendar() {
   const { selectedDepartments, selectedGroups } = useDepartmentFilter();
-  const [currentDate, setCurrentDate] = useState(new Date(2025, 10, 3)); // November 2025
+  const [currentDate, setCurrentDate] = useState(new Date(2026, 3, 30)); // April 2026 — matchar designprototyp
   const [viewMode, setViewMode] = useState<"day" | "week" | "month">("month");
   const [isAddEventOpen, setIsAddEventOpen] = useState(false);
   const [isViewEventOpen, setIsViewEventOpen] = useState(false);
