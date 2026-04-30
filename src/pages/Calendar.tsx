@@ -806,105 +806,35 @@ export default function Calendar() {
   return (
     <TooltipProvider>
       <div className="min-h-screen bg-gray-50">
-        {/* Calendar Controls */}
-      <div className="bg-white border-b px-6 py-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
+        {/* Calendar Grid */}
+        <div className="px-6 py-4 relative min-h-[calc(100vh-2rem)]">
+          {/* Liten månadsnav-strip ovanför griden — matchar prototyp */}
+          <div className="flex items-center gap-2 mb-3">
+            <Button variant="ghost" size="icon" onClick={goToPrevious} className="h-8 w-8 text-[#2a9d8f]">
+              <ChevronLeft className="h-5 w-5" />
+            </Button>
+            <Button variant="ghost" size="icon" onClick={goToNext} className="h-8 w-8 text-[#2a9d8f]">
+              <ChevronRight className="h-5 w-5" />
+            </Button>
+            <span className="ml-2 text-sm text-gray-700 lowercase">
+              {format(currentDate, 'MMM yyyy', { locale: sv })}
+            </span>
+          </div>
+
+          {viewMode === 'month' && renderMonthView()}
+          {viewMode === 'week' && renderWeekView()}
+          {viewMode === 'day' && renderDayView()}
+
+          {/* Add Event Button — bottom-right, matchar prototyp */}
+          <div className="mt-6 flex justify-end">
             <Button
-              variant="outline"
-              size="sm"
-              onClick={goToToday}
-              className="bg-[#2a9d8f] text-white hover:bg-[#238276] border-0"
+              onClick={() => setIsAddEventOpen(true)}
+              className="bg-[#2a9d8f] hover:bg-[#238276] text-white uppercase tracking-wide font-medium"
             >
-              IDAG
+              LÄGG TILL HÄNDELSE
             </Button>
-            <Button variant="ghost" size="sm" onClick={goToPrevious}>
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <Button variant="ghost" size="sm" onClick={goToNext}>
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-            <h2 className="text-lg font-semibold text-gray-900 ml-2">
-              {getDisplayDate()}
-            </h2>
-          </div>
-
-          <div className="flex items-center gap-4">
-            {/* DEMO-toggle: simulera produktions-API:ets 50-events-gräns */}
-            <div className="flex items-center gap-2 border-r pr-4">
-              <Switch
-                id="simulate-api-limit"
-                checked={simulateApiLimit}
-                onCheckedChange={setSimulateApiLimit}
-              />
-              <Label
-                htmlFor="simulate-api-limit"
-                className="text-xs text-gray-600 cursor-pointer whitespace-nowrap"
-              >
-                Simulera API-gräns ({EVENT_LIMIT})
-              </Label>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setViewMode("day")}
-                className={viewMode === "day" ? "bg-gray-200" : ""}
-              >
-                DAG ☰
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setViewMode("week")}
-                className={viewMode === "week" ? "bg-gray-200" : ""}
-              >
-                VECKA ⚏
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setViewMode("month")}
-                className={viewMode === "month" ? "bg-[#2a9d8f] text-white border-0" : ""}
-              >
-                MÅNAD ⚏
-              </Button>
-            </div>
           </div>
         </div>
-      </div>
-
-
-      {/* Calendar Grid */}
-      <div className="px-6 py-4">
-        <div className="flex justify-end mb-4">
-          <ColorLegend />
-        </div>
-        
-        {viewMode === 'month' && simulateApiLimit && (
-          <EventLimitBanner
-            displayedCount={displayedMonthEvents}
-            totalCount={totalMonthEvents}
-            batchSize={EVENT_LIMIT}
-            onLoadAll={() => setLoadedBatches(999)}
-          />
-        )}
-        
-        {viewMode === 'month' && renderMonthView()}
-        {viewMode === 'week' && renderWeekView()}
-        {viewMode === 'day' && renderDayView()}
-
-        {/* Add Event Button */}
-        <div className="mt-6 flex justify-end">
-          <Button 
-            onClick={() => setIsAddEventOpen(true)}
-            className="bg-[#2a9d8f] hover:bg-[#238276] text-white"
-          >
-            LÄGG TILL HÄNDELSE
-          </Button>
-        </div>
-      </div>
 
       {/* Add/Edit Event Dialog */}
       <AddEventDialog 
