@@ -5,7 +5,7 @@ import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, addMonths, subMonths, startOfWeek, endOfWeek, isToday, addDays, isBefore, isAfter } from "date-fns";
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, addMonths, subMonths, startOfWeek, endOfWeek, isToday, addDays, isBefore, isAfter, getISOWeek } from "date-fns";
 import { sv } from "date-fns/locale";
 import { AddEventDialog } from "@/components/AddEventDialog";
 import { ViewEventDialog } from "@/components/ViewEventDialog";
@@ -184,7 +184,7 @@ const isPublished = (adminEvent: AdministrativeEvent): boolean => {
 
 export default function Calendar() {
   const { selectedDepartments, selectedGroups } = useDepartmentFilter();
-  const [currentDate, setCurrentDate] = useState(new Date(2025, 10, 3)); // November 2025
+  const [currentDate, setCurrentDate] = useState(new Date(2026, 3, 30)); // April 2026 — matchar designprototyp
   const [viewMode, setViewMode] = useState<"day" | "week" | "month">("month");
   const [isAddEventOpen, setIsAddEventOpen] = useState(false);
   const [isViewEventOpen, setIsViewEventOpen] = useState(false);
@@ -206,7 +206,7 @@ export default function Calendar() {
   const [selectedClosurePeriod, setSelectedClosurePeriod] = useState<ClosurePeriod | null>(null);
 
   // === DEMO: Simulera produktions-API:ets gräns på 50 events per månad ===
-  const [simulateApiLimit, setSimulateApiLimit] = useState(true);
+  const [simulateApiLimit, setSimulateApiLimit] = useState(false);
   const [loadedBatches, setLoadedBatches] = useState(1);
 
   // Återställ batch-räknaren när användaren byter månad (simulerar nytt API-anrop)
@@ -415,9 +415,17 @@ export default function Calendar() {
         }
       }
     } else {
-      // Regular event
-      setSelectedEvent(event as CalendarEvent);
-      setIsViewEventOpen(true);
+      // Regular event — öppna direkt i edit-dialogen (matchar prototyp).
+      const calEvent = event as CalendarEvent;
+      setSelectedEvent(calEvent);
+      if (calEvent.isRecurring) {
+        // Återkommande: fråga via RecurringActionDialog innan edit
+        setRecurringActionType("edit");
+        setIsRecurringActionOpen(true);
+      } else {
+        setEditEventData(calEvent);
+        setIsAddEventOpen(true);
+      }
     }
   };
 
@@ -482,232 +490,164 @@ export default function Calendar() {
   };
 
   const renderMonthView = () => {
+    // Bygg veckorader (en rad = 7 dagar) så vi kan visa veckonummer i en vänsterkolumn.
+    const weeks: Date[][] = [];
+    for (let i = 0; i < calendarDays.length; i += 7) {
+      weeks.push(calendarDays.slice(i, i + 7));
+    }
+
     return (
-      <div className="bg-white rounded-lg border overflow-hidden">
-        {/* Week days header */}
-        <div className="grid grid-cols-7 border-b bg-gray-50">
+      <div className="bg-white border border-gray-200 overflow-hidden">
+        {/* Veckodagar header — vänsterkolumn lämnas tom för veckonummer */}
+        <div className="grid grid-cols-[40px_repeat(7,1fr)] border-b border-gray-200">
+          <div className="border-r border-gray-200" />
           {weekDays.map((day) => (
-            <div key={day} className="p-2 text-center text-xs font-semibold text-gray-700 border-r last:border-r-0">
+            <div
+              key={day}
+              className="p-2 text-center text-[11px] font-medium tracking-wider text-gray-500 border-r border-gray-200 last:border-r-0"
+            >
               {day}
             </div>
           ))}
         </div>
 
-        {/* Calendar days grid */}
-        <div className="grid grid-cols-7">
-          {calendarDays.map((day, idx) => {
-            const events = getEventsForDay(day);
-            const { visible, hidden } = getVisibleAndHiddenEvents(events);
-            const isCurrentMonth = day.getMonth() === currentDate.getMonth();
-            const isTodayDate = isToday(day);
+        {/* Rader */}
+        {weeks.map((week, weekIdx) => (
+          <div
+            key={weekIdx}
+            className="grid grid-cols-[40px_repeat(7,1fr)] border-b border-gray-200 last:border-b-0"
+          >
+            {/* Veckonummer */}
+            <div className="flex items-start justify-center pt-2 text-[11px] font-medium text-gray-400 border-r border-gray-200 bg-white">
+              {getISOWeek(week[0])}
+            </div>
 
-            return (
-              <div
-                key={idx}
-                className={`min-h-[120px] p-2 border-r border-b last:border-r-0 ${
-                  !isCurrentMonth ? "bg-gray-50" : "bg-white"
-                }`}
-              >
-                <div className="flex justify-center mb-2">
-                  {isTodayDate ? (
-                    <div className="w-8 h-8 rounded-full bg-[#2a9d8f] text-white flex items-center justify-center text-sm font-medium">
-                      {format(day, "d")}
-                    </div>
-                  ) : (
-                    <div className={`text-sm ${!isCurrentMonth ? "text-gray-400" : "text-gray-700"}`}>
-                      {format(day, "d")}
-                    </div>
+            {week.map((day, idx) => {
+              const events = getEventsForDay(day);
+              const { visible, hidden } = getVisibleAndHiddenEvents(events);
+              const isCurrentMonth = day.getMonth() === currentDate.getMonth();
+              const isTodayDate = isToday(day);
+
+              return (
+                <div
+                  key={idx}
+                  className={cn(
+                    "min-h-[120px] p-1.5 border-r border-gray-200 last:border-r-0",
+                    !isCurrentMonth ? "bg-gray-50" : "bg-white"
                   )}
-                </div>
+                >
+                  {/* Dagnummer — vänsterställt */}
+                  <div className="mb-1 px-1">
+                    {isTodayDate ? (
+                      <div className="inline-flex w-7 h-7 rounded-full bg-[#2a9d8f] text-white items-center justify-center text-sm font-medium">
+                        {format(day, "d")}
+                      </div>
+                    ) : (
+                      <span
+                        className={cn(
+                          "text-sm",
+                          !isCurrentMonth ? "text-gray-400" : "text-gray-600"
+                        )}
+                      >
+                        {format(day, "d")}
+                      </span>
+                    )}
+                  </div>
 
-                <div className="space-y-1">
-                  {visible.map((event) => {
-                    const isAdmin = 'type' in event && 'sourceId' in event;
-                    const calEvent = !isAdmin ? event as CalendarEvent : null;
-                    const adminEvent = isAdmin ? event as AdministrativeEvent : null;
-                    
-                    const published = adminEvent ? isPublished(adminEvent) : true;
-                    
-                    return (
-                      <Tooltip key={isAdmin ? adminEvent!.sourceId : calEvent!.id}>
-                        <TooltipTrigger asChild>
-                          <div
-                            onClick={() => handleEventClick(event)}
-                            className={cn(
-                              "text-xs p-1.5 rounded cursor-pointer transition-colors relative overflow-hidden",
-                              isAdmin 
-                                ? "font-medium" 
-                                : getCategoryBgClass(calEvent!.category),
-                              !published && "opacity-60"
-                            )}
-                            style={isAdmin ? { 
-                              backgroundColor: adminEvent!.color,
-                              color: '#1f2937'
-                            } : undefined}
-                          >
-                            <div className="flex items-start gap-1">
-                              <div className="flex-shrink-0 mt-0.5">
-                                {isAdmin ? (
-                                  adminEvent!.type === 'closure' ? (
-                                    <XCircle className="w-3 h-3" />
-                                  ) : (
-                                    <AlertTriangle className="w-3 h-3" />
-                                  )
-                                ) : (
-                                  <>
-                                    {calEvent!.isSharedWithGuardians && (
-                                      <Share2 className="w-3 h-3" />
-                                    )}
-                                    {!calEvent!.isSharedWithGuardians && (
-                                      <Lock className="w-3 h-3" />
-                                    )}
-                                    {calEvent!.isRecurring && (
-                                      <Repeat className="w-3 h-3" />
-                                    )}
-                                  </>
-                                )}
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <div className="truncate font-semibold">{event.title}</div>
-                                {!isAdmin && calEvent!.startTime && (
-                                  <div className="text-[10px] opacity-90">{calEvent!.startTime}</div>
-                                )}
-                              </div>
+                  {/* Event-chips */}
+                  <div className="space-y-0.5">
+                    {visible.map((event) => {
+                      const isAdmin = 'type' in event && 'sourceId' in event;
+                      const calEvent = !isAdmin ? event as CalendarEvent : null;
+                      const adminEvent = isAdmin ? event as AdministrativeEvent : null;
+                      const published = adminEvent ? isPublished(adminEvent) : true;
+
+                      // Pink-stil: closure & limited-capacity för "calendar events" eller admin-events
+                      const isPinkChip =
+                        isAdmin ||
+                        calEvent!.category === EventCategory.CLOSURE ||
+                        calEvent!.category === EventCategory.WARNING;
+
+                      const showXIcon =
+                        (adminEvent && adminEvent.type === 'closure') ||
+                        (calEvent && calEvent.category === EventCategory.CLOSURE) ||
+                        (calEvent && calEvent.category === EventCategory.WARNING);
+
+                      return (
+                        <Tooltip key={isAdmin ? `${adminEvent!.sourceId}-${format(day, 'yyyy-MM-dd')}` : calEvent!.id}>
+                          <TooltipTrigger asChild>
+                            <div
+                              onClick={() => handleEventClick(event)}
+                              className={cn(
+                                "text-[11px] px-1.5 py-0.5 rounded cursor-pointer transition-colors flex items-center gap-1 overflow-hidden",
+                                isPinkChip
+                                  ? "bg-[#fadcdc] text-gray-800 hover:bg-[#f5cccc]"
+                                  : "bg-[#287E95] text-white hover:bg-[#236b80]",
+                                !published && "opacity-60"
+                              )}
+                            >
+                              {showXIcon && (
+                                <XCircle className="w-3 h-3 flex-shrink-0" strokeWidth={2} />
+                              )}
+                              <span className="truncate">{event.title}</span>
                             </div>
-                          </div>
-                        </TooltipTrigger>
-                        <TooltipContent side="right" className="max-w-xs">
-                          <div className="space-y-1">
-                            <p className="font-semibold">{event.title}</p>
-                            {isAdmin ? (
-                              <>
+                          </TooltipTrigger>
+                          <TooltipContent side="right" className="max-w-xs">
+                            <div className="space-y-1">
+                              <p className="font-semibold">{event.title}</p>
+                              {isAdmin ? (
                                 <p className="text-xs text-muted-foreground">
                                   {adminEvent!.type === 'closure' ? 'Stängningsperiod' : 'Begränsad kapacitet'}
                                 </p>
-                                {!published && (
-                                  <p className="text-xs text-amber-600">
-                                    {adminEvent!.type === 'closure' 
-                                      ? `Publiceras ${format(adminEvent!.publishDate!, 'd MMM', { locale: sv })}`
-                                      : `Aktiveras ${format(adminEvent!.activateDate!, 'd MMM', { locale: sv })}`
-                                    }
-                                  </p>
-                                )}
-                              </>
-                            ) : (
-                              <>
-                                {calEvent!.description && (
-                                  <p className="text-xs">{calEvent!.description}</p>
-                                )}
-                                {calEvent!.startTime && (
-                                  <p className="text-xs text-muted-foreground">
-                                    {calEvent!.startTime} - {calEvent!.endTime}
-                                  </p>
-                                 )}
-                                 <p className="text-xs text-muted-foreground">
-                                   {getCategoryLabel(calEvent!.category)}
-                                 </p>
-                                 
-                                 {/* Avdelningar */}
-                                 {calEvent!.departments && calEvent!.departments.length > 0 && (
-                                   <div className="pt-1">
-                                     <p className="text-xs font-medium text-muted-foreground mb-1">Avdelningar:</p>
-                                     <div className="flex flex-wrap gap-1">
-                                       {calEvent!.departments.map((dept) => (
-                                         <span key={dept} className="text-xs bg-teal-50 text-teal-700 px-2 py-0.5 rounded border border-teal-200">
-                                           {dept}
-                                         </span>
-                                       ))}
-                                     </div>
-                                   </div>
-                                 )}
-                                 
-                                 {/* Grupper */}
-                                 {calEvent!.groups && calEvent!.groups.length > 0 && (
-                                   <div className="pt-1">
-                                     <p className="text-xs font-medium text-muted-foreground mb-1">Grupper:</p>
-                                     <div className="flex flex-wrap gap-1">
-                                       {calEvent!.groups.map((groupFullName) => {
-                                         // Försök hitta gruppens färg från mock data
-                                         const groupColor = groupFullName.includes('Blå') ? '#3b82f6' :
-                                                          groupFullName.includes('Grön') ? '#10b981' :
-                                                          groupFullName.includes('Röd') ? '#ef4444' :
-                                                          groupFullName.includes('Gul') ? '#eab308' :
-                                                          groupFullName.includes('Lila') ? '#a855f7' :
-                                                          groupFullName.includes('Orange') ? '#f97316' :
-                                                          groupFullName.includes('Rosa') ? '#ec4899' :
-                                                          groupFullName.includes('Turkos') ? '#06b6d4' :
-                                                          '#6b7280';
-                                         return (
-                                           <span 
-                                             key={groupFullName} 
-                                             className="text-xs px-2 py-0.5 rounded border"
-                                             style={{
-                                               backgroundColor: `${groupColor}20`,
-                                               borderColor: groupColor,
-                                               color: groupColor
-                                             }}
-                                           >
-                                             {groupFullName}
-                                           </span>
-                                         );
-                                       })}
-                                     </div>
-                                   </div>
-                                 )}
-                                 
-                                 <div className="flex gap-2 pt-1">
-                                  {calEvent!.isSharedWithGuardians && (
-                                    <span className="text-xs text-green-600">Delat med vårdnadshavare</span>
+                              ) : (
+                                <>
+                                  {calEvent!.description && (
+                                    <p className="text-xs">{calEvent!.description}</p>
                                   )}
-                                  {!calEvent!.isSharedWithGuardians && (
-                                    <span className="text-xs text-gray-600">Intern (ej delad)</span>
+                                  {calEvent!.startTime && (
+                                    <p className="text-xs text-muted-foreground">
+                                      {calEvent!.startTime} - {calEvent!.endTime}
+                                    </p>
                                   )}
-                                  {calEvent!.isRecurring && (
-                                    <span className="text-xs text-blue-600">Återkommande</span>
-                                  )}
+                                </>
+                              )}
+                            </div>
+                          </TooltipContent>
+                        </Tooltip>
+                      );
+                    })}
+
+                    {hidden.length > 0 && (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="text-[11px] px-1.5 py-0.5 cursor-pointer text-gray-500 hover:text-gray-700">
+                            +{hidden.length} mer
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent side="right" className="max-w-xs">
+                          <div className="space-y-1.5">
+                            <p className="font-semibold text-sm mb-2">
+                              {hidden.length} dolda händelser:
+                            </p>
+                            {hidden.map((event, idx) => {
+                              const time = 'startTime' in event && event.startTime ? event.startTime : 'Heldag';
+                              return (
+                                <div key={idx} className="flex items-start gap-2 text-xs">
+                                  <span className="text-muted-foreground">{time}</span>
+                                  <span className="flex-1">{event.title}</span>
                                 </div>
-                              </>
-                            )}
+                              );
+                            })}
                           </div>
                         </TooltipContent>
                       </Tooltip>
-                    );
-                  })}
-                  
-                  {hidden.length > 0 && (
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <div className="text-xs p-1.5 rounded cursor-pointer bg-gray-100 hover:bg-gray-200 transition-colors text-gray-700 text-center font-medium">
-                          +{hidden.length} mer
-                        </div>
-                      </TooltipTrigger>
-                      <TooltipContent side="right" className="max-w-xs">
-                        <div className="space-y-1.5">
-                          <p className="font-semibold text-sm mb-2">
-                            {hidden.length} dolda händelser:
-                          </p>
-                          {hidden.map((event, idx) => {
-                            const isAdmin = 'type' in event && 'sourceId' in event;
-                            const time = 'startTime' in event && event.startTime 
-                              ? `${event.startTime}` 
-                              : 'Heldag';
-                            
-                            return (
-                              <div key={idx} className="flex items-start gap-2 text-xs">
-                                <span className="text-muted-foreground">{time}</span>
-                                <span className="flex-1">{event.title}</span>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </TooltipContent>
-                    </Tooltip>
-                  )}
+                    )}
+                  </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        ))}
       </div>
     );
   };
@@ -874,105 +814,35 @@ export default function Calendar() {
   return (
     <TooltipProvider>
       <div className="min-h-screen bg-gray-50">
-        {/* Calendar Controls */}
-      <div className="bg-white border-b px-6 py-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
+        {/* Calendar Grid */}
+        <div className="px-6 py-4 relative min-h-[calc(100vh-2rem)]">
+          {/* Liten månadsnav-strip ovanför griden — matchar prototyp */}
+          <div className="flex items-center gap-2 mb-3">
+            <Button variant="ghost" size="icon" onClick={goToPrevious} className="h-8 w-8 text-[#2a9d8f]">
+              <ChevronLeft className="h-5 w-5" />
+            </Button>
+            <Button variant="ghost" size="icon" onClick={goToNext} className="h-8 w-8 text-[#2a9d8f]">
+              <ChevronRight className="h-5 w-5" />
+            </Button>
+            <span className="ml-2 text-sm text-gray-700 lowercase">
+              {format(currentDate, 'MMM yyyy', { locale: sv })}
+            </span>
+          </div>
+
+          {viewMode === 'month' && renderMonthView()}
+          {viewMode === 'week' && renderWeekView()}
+          {viewMode === 'day' && renderDayView()}
+
+          {/* Add Event Button — bottom-right, matchar prototyp */}
+          <div className="mt-6 flex justify-end">
             <Button
-              variant="outline"
-              size="sm"
-              onClick={goToToday}
-              className="bg-[#2a9d8f] text-white hover:bg-[#238276] border-0"
+              onClick={() => setIsAddEventOpen(true)}
+              className="bg-[#2a9d8f] hover:bg-[#238276] text-white uppercase tracking-wide font-medium"
             >
-              IDAG
+              LÄGG TILL HÄNDELSE
             </Button>
-            <Button variant="ghost" size="sm" onClick={goToPrevious}>
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <Button variant="ghost" size="sm" onClick={goToNext}>
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-            <h2 className="text-lg font-semibold text-gray-900 ml-2">
-              {getDisplayDate()}
-            </h2>
-          </div>
-
-          <div className="flex items-center gap-4">
-            {/* DEMO-toggle: simulera produktions-API:ets 50-events-gräns */}
-            <div className="flex items-center gap-2 border-r pr-4">
-              <Switch
-                id="simulate-api-limit"
-                checked={simulateApiLimit}
-                onCheckedChange={setSimulateApiLimit}
-              />
-              <Label
-                htmlFor="simulate-api-limit"
-                className="text-xs text-gray-600 cursor-pointer whitespace-nowrap"
-              >
-                Simulera API-gräns ({EVENT_LIMIT})
-              </Label>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setViewMode("day")}
-                className={viewMode === "day" ? "bg-gray-200" : ""}
-              >
-                DAG ☰
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setViewMode("week")}
-                className={viewMode === "week" ? "bg-gray-200" : ""}
-              >
-                VECKA ⚏
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setViewMode("month")}
-                className={viewMode === "month" ? "bg-[#2a9d8f] text-white border-0" : ""}
-              >
-                MÅNAD ⚏
-              </Button>
-            </div>
           </div>
         </div>
-      </div>
-
-
-      {/* Calendar Grid */}
-      <div className="px-6 py-4">
-        <div className="flex justify-end mb-4">
-          <ColorLegend />
-        </div>
-        
-        {viewMode === 'month' && simulateApiLimit && (
-          <EventLimitBanner
-            displayedCount={displayedMonthEvents}
-            totalCount={totalMonthEvents}
-            batchSize={EVENT_LIMIT}
-            onLoadAll={() => setLoadedBatches(999)}
-          />
-        )}
-        
-        {viewMode === 'month' && renderMonthView()}
-        {viewMode === 'week' && renderWeekView()}
-        {viewMode === 'day' && renderDayView()}
-
-        {/* Add Event Button */}
-        <div className="mt-6 flex justify-end">
-          <Button 
-            onClick={() => setIsAddEventOpen(true)}
-            className="bg-[#2a9d8f] hover:bg-[#238276] text-white"
-          >
-            LÄGG TILL HÄNDELSE
-          </Button>
-        </div>
-      </div>
 
       {/* Add/Edit Event Dialog */}
       <AddEventDialog 
