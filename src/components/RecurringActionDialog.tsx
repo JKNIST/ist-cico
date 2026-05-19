@@ -43,7 +43,7 @@ export function RecurringActionDialog({ open, onOpenChange, actionType, onConfir
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="future" id="future" />
               <Label htmlFor="future" className="font-normal cursor-pointer">
-                {t('recurringDialog.allInstances')}
+                {t('recurringDialog.futureInstances')}
               </Label>
             </div>
             <div className="flex items-center space-x-2">
