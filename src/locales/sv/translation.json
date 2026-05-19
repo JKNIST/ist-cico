@@ -271,7 +271,8 @@
     "title": "Redigera återkommande händelse",
     "description": "Vill du redigera endast denna instans eller alla framtida instanser av händelsen?",
     "thisInstance": "Endast denna instans",
-    "allInstances": "Alla framtida instanser",
+    "futureInstances": "Denna och framtida instanser",
+    "allInstances": "Alla instanser i serien",
     "cancel": "Avbryt"
   },
   "blog": {

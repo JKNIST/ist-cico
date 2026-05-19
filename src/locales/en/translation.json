@@ -271,7 +271,8 @@
     "title": "Edit Recurring Event",
     "description": "Do you want to edit only this instance or all future instances of the event?",
     "thisInstance": "Only this instance",
-    "allInstances": "All future instances",
+    "futureInstances": "This and future instances",
+    "allInstances": "All instances in the series",
     "cancel": "Cancel"
   },
   "blog": {

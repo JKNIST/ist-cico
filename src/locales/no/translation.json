@@ -271,7 +271,8 @@
     "title": "Rediger gjentakende hendelse",
     "description": "Vil du redigere kun denne forekomsten eller alle fremtidige forekomster av hendelsen?",
     "thisInstance": "Kun denne forekomsten",
-    "allInstances": "Alle fremtidige forekomster",
+    "futureInstances": "Denne og fremtidige forekomster",
+    "allInstances": "Alle forekomster i serien",
     "cancel": "Avbryt"
   },
   "blog": {
